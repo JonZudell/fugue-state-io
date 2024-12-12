@@ -28,3 +28,15 @@
   right: -10px; /* Adjust as needed */
   z-index: -1; /* Ensure it doesn't cover the content */
 }
+
+.active {
+  border-left: 2px solid #0056b3;
+  padding-left: -2px;
+}
+
+.offset-margin {
+  margin-left: 14px;
+  margin-right: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
