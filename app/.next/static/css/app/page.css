@@ -1,0 +1,94 @@
+/*!***************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!./src/components/CommandBar.css ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************/
+.command-bar {
+  height: 4vh;
+}
+
+.command-bar__input {
+  width: 40em;
+  padding-left: 1em;
+}
+.command-bar__input::placeholder {
+  color: var(--color-gray-700);
+}
+/*!*************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!./src/components/LeftMenu.css ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************/
+.menu-height {
+  height: 94vh;
+}
+.drawer {
+  height: 94vh;
+}
+.menu .button:hover {
+  background-color: #0056b3;
+}
+
+.drawer {
+  overflow: hidden;
+}
+
+.drawer-drag {
+  border: 2px solid var(--color-gray-600);
+}
+
+.drawer-drag-mouse-down {
+  border: 2px solid var(--color-blue-600);
+}
+.undraggable {
+  user-select: none; /* Prevent text selection */
+  -webkit-user-drag: none; /* Prevent dragging on WebKit browsers */
+}
+.clickable-area {
+  position: relative;
+}
+
+.clickable-area::before {
+  content: '';
+  position: absolute;
+  left: -10px; /* Adjust as needed */
+  right: -10px; /* Adjust as needed */
+  z-index: -1; /* Ensure it doesn't cover the content */
+}
+
+.active {
+  border-left: 2px solid #0056b3;
+  padding-left: -2px;
+}
+
+.offset-margin {
+  margin-left: 14px;
+  margin-right: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.icon-button {
+  color: var(--color-gray-100); 
+}
+
+.icon-button:hover {
+  color: #0056b3;
+}
+/*!*********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!./src/components/PlaybackControls.css ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************/
+.playback-controls {
+  width: 512px;
+  margin-top: -96px;
+}
+/*!*****************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!./src/components/PlaybackArea.css ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************/
+.playbackarea {
+  height: 94vh;
+}
+
+.playbackarea-1_2 {
+  height: 47vh;
+}
+/*!**************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[10].use[3]!./src/components/Workspace.css ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************/
+
