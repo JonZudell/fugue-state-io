@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import filesReducer from './filesSlice';
+import filesReducer from './fileSlice';
 import playbackReducer from './playbackSlice';
 const RootState = configureStore({
   reducer: {

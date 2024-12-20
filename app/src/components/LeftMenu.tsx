@@ -11,11 +11,11 @@ interface LeftMenuProps {
 }
 
 const LeftMenu: React.FC<LeftMenuProps> = ({ smallestSize = 128, initialState = [
-    { id: 1, icon: faMusic, style: { transform: 'rotate(0)' }, tabContent: <AssetManager /> },
-    { id: 2, icon: faPen, style: { transform: 'rotate(0)' }, tabContent: <div>pen</div>  },
-    { id: 3, icon: faCode, style: { transform: 'rotate(0)' }, tabContent: <div>code</div>  },
-    { id: 4, icon: faSliders, style: { transform: 'rotate(0)' }, tabContent: <div>sliders</div>  },
-  ]
+  { id: 1, icon: faMusic, style: { transform: 'rotate(0)' }, tabContent: <AssetManager /> },
+  { id: 2, icon: faPen, style: { transform: 'rotate(0)' }, tabContent: <div>pen</div> },
+  { id: 3, icon: faCode, style: { transform: 'rotate(0)' }, tabContent: <div>code</div> },
+  { id: 4, icon: faSliders, style: { transform: 'rotate(0)' }, tabContent: <div>sliders</div> },
+]
 }) => {
   const [width, setWidth] = useState(256);
   const [activeTab, setActiveTab] = useState(1);
@@ -38,7 +38,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ smallestSize = 128, initialState = 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   };
-  
+
   const handleTabClick = (id: number) => {
     setActiveTab(id);
   };
