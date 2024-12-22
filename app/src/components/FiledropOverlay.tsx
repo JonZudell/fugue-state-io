@@ -1,8 +1,7 @@
 "use client";
-import { addFile } from '@/store/fileSlice';
-import { fileToBase64 } from '../utils/fileUtils';
-import React, { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { addFile } from "../store/filesSlice";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 interface FiledropOverlay {
   focused?: false;
 }
@@ -20,31 +19,41 @@ const FiledropOverlay: React.FC = () => {
     setIsDragging(false);
   };
 
-
   useEffect(() => {
-    const handleDrop = (e: DragEvent) => {
-      e.preventDefault();
+    const handleDrop = (event: DragEvent) => {
+      event.preventDefault();
       setIsDragging(false);
-      const files = e.dataTransfer?.files;
+      const files = event.dataTransfer?.files;
       if (files) {
         Array.from(files).forEach(async (file) => {
-          try {
-            const base64 = await fileToBase64(file);
-            dispatch(addFile({ name: file.name, fileType: file.type, encoding: base64 }));
-          } catch (error) {
-            console.error('Error dispatching file:', error);
-          }
+          console.log(file);
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            if (e && e.target && e.target.result) {
+              const base64String = (e.target.result as string).split(",")[1];
+              const dataUrl = `data:${file.type};base64,${base64String}`;
+              dispatch(
+                addFile({
+                  name: file.name,
+                  fileType: file.type,
+                  encoding: base64String,
+                  url: dataUrl,
+                }),
+              );
+            }
+          };
+          reader.readAsDataURL(file);
         });
       }
     };
-    window.addEventListener('dragover', handleDragOver);
-    window.addEventListener('dragleave', handleDragLeave);
-    window.addEventListener('drop', handleDrop);
+    window.addEventListener("dragover", handleDragOver);
+    window.addEventListener("dragleave", handleDragLeave);
+    window.addEventListener("drop", handleDrop);
 
     return () => {
-      window.removeEventListener('dragover', handleDragOver);
-      window.removeEventListener('dragleave', handleDragLeave);
-      window.removeEventListener('drop', handleDrop);
+      window.removeEventListener("dragover", handleDragOver);
+      window.removeEventListener("dragleave", handleDragLeave);
+      window.removeEventListener("drop", handleDrop);
     };
   }, [dispatch]);
 
@@ -56,26 +65,28 @@ const FiledropOverlay: React.FC = () => {
     <div
       className="scrim flex"
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
+        width: "100%",
+        height: "100%",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
       onClick={(e) => e.stopPropagation()}
     >
-
       <div className="modal">
         <div
           className="upload-placeholder"
           style={{
-            border: '2px dashed #ccc', borderRadius: '8px', padding: '20px', textAlign: 'center'
-          }}>
-        </div>
+            border: "2px dashed #ccc",
+            borderRadius: "8px",
+            padding: "20px",
+            textAlign: "center",
+          }}
+        ></div>
       </div>
     </div>
   );

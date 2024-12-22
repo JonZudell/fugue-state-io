@@ -1,14 +1,14 @@
 "use client";
-import CommandBar from './CommandBar';
-import FiledropOverlay from './FiledropOverlay';
-import LeftMenu from './LeftMenu';
-import PlaybackArea from './PlaybackArea';
-import './Workspace.css';
+import CommandBar from "./CommandBar";
+import FiledropOverlay from "./FiledropOverlay";
+import LeftMenu from "./LeftMenu";
+import PlaybackArea from "./PlaybackArea";
+import "./Workspace.css";
 interface WorkspaceProps {
   focused?: false;
 }
 
-const Workspace: React.FC<WorkspaceProps> = ({ }) => {
+const Workspace: React.FC<WorkspaceProps> = ({}) => {
   return (
     <div className={`w-full h-full`}>
       <CommandBar />
@@ -17,5 +17,5 @@ const Workspace: React.FC<WorkspaceProps> = ({ }) => {
       <FiledropOverlay />
     </div>
   );
-}
+};
 export default Workspace;

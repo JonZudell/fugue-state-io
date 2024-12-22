@@ -28,7 +28,7 @@
 }
 
 .clickable-area::before {
-  content: '';
+  content: "";
   position: absolute;
   left: -10px; /* Adjust as needed */
   right: -10px; /* Adjust as needed */
@@ -48,7 +48,7 @@
 }
 
 .icon-button {
-  color: var(--color-gray-100); 
+  color: var(--color-gray-100);
 }
 
 .icon-button:hover {

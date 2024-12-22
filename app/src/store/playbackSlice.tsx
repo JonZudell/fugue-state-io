@@ -1,7 +1,7 @@
-import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { FileState } from "../store/filesSlice";
 interface PlaybackState {
-  media: string;
+  media: FileState | null;
   playing: boolean;
   timeElapsed: number;
   speed: number;
@@ -9,37 +9,25 @@ interface PlaybackState {
 }
 
 const initialState: PlaybackState = {
-  media: "",
+  media: null,
   playing: true,
   timeElapsed: 0,
   speed: 1,
   volume: 1,
 };
-// Define a basic selector to get the files state
-const selectMediaState = (state: { media: string; }) => state.media;
-const selectVolumeState = (state: { volume: number; }) => state.volume;
-const selectPlayingState = (state: { playing: boolean }) => state.playing;
 // Define a memoized selector to get the list of files
-export const selectMedia = createSelector(
-  selectMediaState,
-  (mediaState: string) => mediaState
-);
-
-export const selectVolume = createSelector(
-  selectVolumeState,
-  (volumeState: number) => volumeState
-)
-
-export const selectPlaying = createSelector(
-  selectPlayingState,
-  (playingState: boolean) => playingState
-)
+export const selectMedia = (state: { playback: { media: FileState } }) =>
+  state.playback.media;
+export const selectVolume = (state: { playback: { volume: number } }) =>
+  state.playback.volume;
+export const selectPlaying = (state: { playback: { playing: boolean } }) =>
+  state.playback.playing;
 
 const playbackSlice = createSlice({
-  name: 'playback',
+  name: "playback",
   initialState,
   reducers: {
-    setMedia: (state: PlaybackState, action: PayloadAction<string>) => {
+    setMedia: (state: PlaybackState, action: PayloadAction<FileState>) => {
       state.media = action.payload;
     },
     setVolume: (state: PlaybackState, action: PayloadAction<number>) => {
@@ -57,5 +45,6 @@ const playbackSlice = createSlice({
   },
 });
 
-export const { setMedia, setVolume, setSpeed, setPlaying } = playbackSlice.actions;
+export const { setMedia, setVolume, setSpeed, setPlaying } =
+  playbackSlice.actions;
 export default playbackSlice.reducer;

@@ -1,6 +1,6 @@
 import type { Preview } from "@storybook/react";
-import '../src/app/globals.css';
-import { withCssResources } from '@storybook/addon-cssresources';
+import "../src/app/globals.css";
+import { withCssResources } from "@storybook/addon-cssresources";
 export const decorators = [withCssResources];
 
 export const parameters = {

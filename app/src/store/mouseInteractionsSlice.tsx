@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 interface MouseInteractionsState {
   isDragging: boolean;
@@ -9,12 +9,12 @@ const initialState: MouseInteractionsState = {
 };
 
 const mouseInteractionsSlice = createSlice({
-  name: 'playback',
+  name: "playback",
   initialState,
   reducers: {
     setIsDragging(state, action) {
       state.isDragging = action.payload;
-    }
+    },
   },
 });
 

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Provider } from 'react-redux';
-import store from '../store'; // Adjust the import path as necessary
+import React from "react";
+import { Provider } from "react-redux";
+import store from "../store"; // Adjust the import path as necessary
 
 interface ReduxProviderProps {
   children: React.ReactNode;
