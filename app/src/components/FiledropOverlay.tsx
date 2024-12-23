@@ -1,5 +1,7 @@
 "use client";
+import { addFileAndSetMedia } from "@/store/playbackSlice";
 import { addFile } from "../store/filesSlice";
+import { AppDispatch } from "../store";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 interface FiledropOverlay {
@@ -8,7 +10,7 @@ interface FiledropOverlay {
 
 const FiledropOverlay: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleDragOver = (e: DragEvent) => {
     e.preventDefault();
@@ -32,14 +34,19 @@ const FiledropOverlay: React.FC = () => {
             if (e && e.target && e.target.result) {
               const base64String = (e.target.result as string).split(",")[1];
               const dataUrl = `data:${file.type};base64,${base64String}`;
-              dispatch(
-                addFile({
-                  name: file.name,
-                  fileType: file.type,
-                  encoding: base64String,
-                  url: dataUrl,
-                }),
-              );
+              const audio = new Audio(dataUrl);
+              audio.onloadedmetadata = function () {
+                const duration = audio.duration;
+                dispatch(
+                  addFileAndSetMedia({
+                    name: file.name,
+                    fileType: file.type,
+                    encoding: base64String,
+                    url: dataUrl,
+                    duration: duration,
+                  }),
+                );
+              };
             }
           };
           reader.readAsDataURL(file);
