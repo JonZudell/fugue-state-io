@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { FileState } from "../store/filesSlice";
+import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
+import { addFile, FileState } from "../store/filesSlice";
 interface PlaybackState {
   media: FileState | null;
   playing: boolean;
@@ -10,7 +10,7 @@ interface PlaybackState {
 
 const initialState: PlaybackState = {
   media: null,
-  playing: true,
+  playing: false,
   timeElapsed: 0,
   speed: 1,
   volume: 1,
@@ -22,6 +22,15 @@ export const selectVolume = (state: { playback: { volume: number } }) =>
   state.playback.volume;
 export const selectPlaying = (state: { playback: { playing: boolean } }) =>
   state.playback.playing;
+export const selectTimeElapsed = (state: { playback: { timeElapsed: number } }) =>
+  state.playback.timeElapsed;
+export const addFileAndSetMedia = createAsyncThunk(
+  "playback/addFileAndSetMedia",
+  async (file: FileState, { dispatch }) => {
+    dispatch(addFile(file));
+    dispatch(setMedia(file));
+  }
+);
 
 const playbackSlice = createSlice({
   name: "playback",
@@ -43,8 +52,13 @@ const playbackSlice = createSlice({
       state.playing = action.payload;
     },
   },
+  // extraReducers: (builder) => {
+  //   builder.addCase(addFileAndSetMedia.fulfilled, (state, action) => {
+  //     // Handle fulfilled state if needed
+  //   });
+  // },
 });
 
-export const { setMedia, setVolume, setSpeed, setPlaying } =
+export const { setMedia, setVolume, setSpeed, setPlaying, setTimeElapsed } =
   playbackSlice.actions;
 export default playbackSlice.reducer;

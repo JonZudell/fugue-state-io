@@ -8,4 +8,5 @@ const RootState = configureStore({
   },
 });
 
+export type AppDispatch = typeof RootState.dispatch;
 export default RootState;

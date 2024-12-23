@@ -1,8 +1,10 @@
 "use client";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addFile, selectFiles } from "../store/filesSlice"; // Ensure you have the correct path to your filesSlice
+import { selectFiles } from "../store/filesSlice";
+import { addFileAndSetMedia } from "../store/playbackSlice";
 import { Key } from "react";
+import { AppDispatch } from "../store";
 import "./AssetManager.tsx";
 import CollapseMenu from "./CollapseMenu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,7 +14,7 @@ interface AssetManagerProps {
 }
 
 const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   //const assets = useSelector(selectActiveFiles);
   const files = useSelector(selectFiles);
@@ -25,14 +27,19 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
           if (e && e.target && e.target.result) {
             const base64String = (e.target.result as string).split(",")[1];
             const dataUrl = `data:${file.type};base64,${base64String}`;
-            dispatch(
-              addFile({
+            const audio = new Audio(dataUrl);
+            audio.onloadedmetadata = function () {
+              const duration = audio.duration;
+              dispatch(
+              addFileAndSetMedia({
                 name: file.name,
                 fileType: file.type,
                 encoding: base64String,
                 url: dataUrl,
+                duration: duration,
               }),
-            );
+              );
+            };
           }
         };
         reader.readAsDataURL(file);

@@ -4,6 +4,7 @@ export interface FileState {
   fileType: string;
   encoding: string;
   url: string;
+  duration: number;
 }
 interface FilesState {
   files: FileState[];
