@@ -14,7 +14,7 @@
   width: 10px;
   height: 10px;
   background-color: #ffffff;
-  cursor: hand;
+  cursor: ew-resize;
   border-radius: 0%;
   border: none;
   z-index: 2;
@@ -24,17 +24,19 @@
   width: 10px;
   height: 10px;
   background-color: #ffffff;
-  cursor: hand;
+  cursor: ew-resize;
   border-radius: 0%;
   border: none;
   z-index: 1;
 }
+
 
 .span-slider__between {
   height: 10px;
   background-color: var(--tw-ring-color);
   border-radius: 5px;
   z-index: 0;
+  cursor: grab;
 }
 
 .span-slider__before {

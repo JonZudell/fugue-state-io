@@ -21,12 +21,12 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
   const dispatch = useDispatch();
   const playing = useSelector(selectPlaying);
   const media = useSelector(selectMedia);
+  const timeElapsed = useSelector(selectTimeElapsed);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const isDraggingRef = useRef(false);
-  const [videoWidth, setVideoWidth] = useState<number | null>(null);
-  const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [videoWidth, setVideoWidth] = useState(0);
 
   useEffect(() => {
     const handleResize = () => {
@@ -44,52 +44,6 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-  const handleTimeElapsedChange = (time: number) => {
-    if (!isDraggingRef.current) {
-      dispatch(setTimeElapsed(time));
-      if (videoRef.current) {
-        videoRef.current.currentTime = time;
-      }
-    }
-  };
-
-  const handleMouseDown = () => {
-    isDraggingRef.current = true;
-  };
-
-  const handleMouseUp = () => {
-    isDraggingRef.current = false;
-  };
-
-  useEffect(() => {
-    if (videoRef.current) {
-      if (playing) {
-        videoRef.current.play();
-      } else {
-        videoRef.current.pause();
-      }
-    }
-  }, [playing, files]);
-
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    const handleTimeUpdate = () => {
-      console.log("time update");
-      if (videoElement) {
-        dispatch(setTimeElapsed(videoElement.currentTime));
-      }
-    };
-
-    if (videoElement) {
-      videoElement.addEventListener("timeupdate", handleTimeUpdate);
-    }
-
-    return () => {
-      if (videoElement) {
-        videoElement.removeEventListener("timeupdate", handleTimeUpdate);
-      }
-    };
-  });
 
   useEffect(() => {
     if (videoRef.current) {
@@ -122,13 +76,10 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
           {media && (
             <div
               className="playback-controls absolute bottom-0"
-              style={{ width: containerWidth || "100%" }}
+              style={{ width: videoWidth || "100%" }}
             >
               <PlaybackControls
                 enabled={media ? true : false}
-                onTimeElapsedChange={handleTimeElapsedChange}
-                onMouseDown={handleMouseDown}
-                onMouseUp={handleMouseUp}
               />
             </div>
           )}
