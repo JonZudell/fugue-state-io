@@ -35,6 +35,23 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
     }
   };
 
+  const handleSliderDrag = (e: MouseEvent) => {
+    if (spanSliderRef.current) {
+      const rect = spanSliderRef.current.getBoundingClientRect();
+      const newValue = e.clientX - rect.left;
+      const thumb1 = thumb1Value;
+      const thumb2 = thumb2Value;
+      const delta = newValue - (thumb1 + (thumb2 - thumb1) / 2);
+      const newThumb1Value = Math.min(Math.max(thumb1 + delta, 0), spanSliderWidth - 10);
+      const newThumb2Value = Math.min(Math.max(thumb2 + delta, 0), spanSliderWidth - 10);
+      if (newThumb1Value <= 0 || newThumb2Value >= spanSliderWidth - 10 || newThumb1Value >= spanSliderWidth - 10 || newThumb2Value <= 0) {
+        return;
+      }
+      setThumb1Value(Math.min(newThumb1Value, newThumb2Value));
+      setThumb2Value(Math.max(newThumb1Value, newThumb2Value));
+    }
+  };
+
   return (
     <div className={`span-slider ${className}`} ref={spanSliderRef}>
       <div className="span-slider__track">
@@ -53,14 +70,21 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
             }, { once: true });
           }}
         ></div>
-        {/* <div
+        <div
           className="span-slider__between"
           style={{
             position: "absolute",
-            left: `${thumb1Value}px`,
-            width: `${(thumb2Value - thumb1Value)}px`,
+            left: `${Math.min(thumb1Value, thumb2Value)}px`,
+            width: `${(Math.max(thumb2Value, thumb1Value) - Math.min(thumb1Value, thumb2Value))}px`,
           }}
-        ></div> */}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            document.addEventListener("mousemove", handleSliderDrag);
+            document.addEventListener("mouseup", () => {
+              document.removeEventListener("mousemove", handleSliderDrag);
+            }, { once: true });
+          }}
+        ></div>
         <div
           className="span-slider__thumb_2"
           style={{ position: "absolute", left: `${(thumb2Value)}px` }}
