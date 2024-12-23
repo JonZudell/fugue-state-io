@@ -1,53 +1,57 @@
 .elapsed-bar {
-    background-color: #000000;
-    position: relative;
-    height: 10px;
-    width: 100%;
-    border-radius: 5px;
-    overflow: hidden;
-    box-sizing: border-box;
+  background-color: #0f0f0f;
+  position: relative;
+  height: 10px;
+  width: 100%;
+  border-radius: 5px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 .elapsed-bar::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 10px;
-    height: 10px;
-    background-color: #ffffff;
-    cursor: hand;
-    border-radius: 0%;
-    border: none;
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  background-color: #ffffff;
+  cursor: hand;
+  border-radius: 0%;
+  border: none;
 }
 .elapsed-bar::-moz-range-thumb {
-    width: 10px;
-    height: 10px;
-    background-color: #ffffff;
-    cursor: hand;
-    border-radius: 0%;
-    border: none;
+  width: 10px;
+  height: 10px;
+  background-color: #ffffff;
+  cursor: hand;
+  border-radius: 0%;
+  border: none;
 }
 .elapsed-bar::-ms-thumb {
-    width: 10px;
-    height: 10px;
-    background-color: #ffffff;
-    cursor: hand;
-    border-radius: 0%;
-    border: none;
-    
+  width: 10px;
+  height: 10px;
+  background-color: #ffffff;
+  cursor: hand;
+  border-radius: 0%;
+  border: none;
 }
 .elapsed-bar::-webkit-slider-runnable-track {
-    width: 100%;
-    height: 100%;
-    background-color: #000000;
-    border-radius: 5px;
+  width: 100%;
+  height: 100%;
+  background-color: var(--tw-ring-color);
+  border-radius: 5px;
 }
 .elapsed-bar::-moz-range-track {
-    width: 100%;
-    height: 100%;
-    background-color: #000000;
-    border-radius: 5px;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  border-radius: 5px;
+}
+.elapsed-bar::-moz-range-progress {
+  background-color: var(--tw-ring-color);
+  height: 100%;
+  border-radius: 5px;
 }
 .elapsed-bar::-ms-track {
-    width: 100%;
-    height: 100%;
-    background-color: #000000;
-    border-radius: 5px;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  border-radius: 5px;
 }

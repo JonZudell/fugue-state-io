@@ -21,6 +21,7 @@ interface LeftMenuProps {
     style: React.CSSProperties;
     tabContent: JSX.Element;
   }>;
+  onWidthChange?: (width: number) => void;
 }
 
 const LeftMenu: React.FC<LeftMenuProps> = ({
@@ -51,6 +52,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
       tabContent: <div>sliders</div>,
     },
   ],
+  onWidthChange,
 }) => {
   const [width, setWidth] = useState(256);
   const [activeTab, setActiveTab] = useState(1);
@@ -58,7 +60,11 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
 
   const handleMouseMove = (e: MouseEvent) => {
     const newWidth = e.clientX - 84;
-    setWidth(newWidth > smallestSize ? newWidth : 0);
+    const adjustedWidth = newWidth > smallestSize ? newWidth : 0;
+    setWidth(adjustedWidth);
+    if (onWidthChange) {
+      onWidthChange(adjustedWidth);
+    }
   };
 
   const handleMouseUp = () => {

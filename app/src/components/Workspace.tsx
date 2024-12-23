@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import CommandBar from "./CommandBar";
 import FiledropOverlay from "./FiledropOverlay";
 import LeftMenu from "./LeftMenu";
@@ -9,11 +10,13 @@ interface WorkspaceProps {
 }
 
 const Workspace: React.FC<WorkspaceProps> = ({}) => {
+  const [leftMenuWidth, setLeftMenuWidth] = useState(256);
+
   return (
     <div className={`w-full h-full`}>
       <CommandBar />
-      <LeftMenu />
-      <PlaybackArea />
+      <LeftMenu onWidthChange={setLeftMenuWidth} />
+      <PlaybackArea leftMenuWidth={leftMenuWidth} />
       <FiledropOverlay />
     </div>
   );

@@ -7,7 +7,7 @@ import type {
 
 type TEntry = typeof import("../../../src/app/page.js");
 
-type SegmentParams<T extends Object = any> =
+type SegmentParams<T extends object = any> =
   T extends Record<string, any>
     ? {
         [K in keyof T]: T[K] extends string

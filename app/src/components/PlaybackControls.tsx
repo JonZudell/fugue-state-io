@@ -8,21 +8,56 @@ import {
   faPlay,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSelector, useDispatch } from "react-redux";
-import { setPlaying, selectPlaying, selectTimeElapsed, selectMedia, setTimeElapsed } from "../store/playbackSlice";
+import {
+  setPlaying,
+  selectPlaying,
+  selectTimeElapsed,
+  selectMedia,
+  setTimeElapsed,
+} from "../store/playbackSlice";
+import { useEffect, useState } from "react";
 interface PlaybackControlsProps {
   focused?: boolean;
   enabled?: boolean;
+  onTimeElapsedChange?: (time: number) => void;
+  onMouseDown?: () => void;
+  onMouseUp?: () => void;
 }
 
 const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   enabled = true,
+  onTimeElapsedChange,
 }) => {
   const dispatch = useDispatch();
   const isPlaying = useSelector(selectPlaying);
   const media = useSelector(selectMedia);
   const timeElapsed = useSelector(selectTimeElapsed);
+  const [isDragging, setIsDragging] = useState(false);
+
   const togglePlay = () => {
     dispatch(setPlaying(!isPlaying));
+  };
+
+  const handleMouseDown = () => {
+    setIsDragging(true);
+    if (isPlaying) {
+      dispatch(setPlaying(false));
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (isPlaying) {
+      dispatch(setPlaying(true));
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTimeElapsed = (Number(e.target.value) / 100) * media.duration;
+    dispatch(setTimeElapsed(newTimeElapsed));
+    if (onTimeElapsedChange) {
+      onTimeElapsedChange(newTimeElapsed);
+    }
   };
 
   return (
@@ -32,17 +67,26 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       <div className="w-full px-4">
         {media && (
           <div className="text-white text-center mb-2 w-full">
-            <span className="float-left">{new Date(timeElapsed * 1000).toISOString().substr(11, 8)}</span>
-            <span className="float-right"> - {new Date((media.duration - timeElapsed) * 1000).toISOString().substr(11, 8)}</span>
+            <span className="float-left">
+              {new Date(timeElapsed * 1000).toISOString().substr(11, 8)}
+            </span>
+            <span className="float-right">
+              {" "}
+              -{" "}
+              {new Date((media.duration - timeElapsed) * 1000)
+                .toISOString()
+                .substr(11, 8)}
+            </span>
             <input
               className="elapsed-bar"
               type="range"
               min="0"
+              step={0.01}
               max="100"
               value={(timeElapsed / media.duration) * 100}
-              onChange={(e) =>
-              dispatch(setTimeElapsed((Number(e.target.value) / 100) * media.duration))
-              }
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onChange={handleChange}
             />
           </div>
         )}

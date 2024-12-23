@@ -22,14 +22,15 @@ export const selectVolume = (state: { playback: { volume: number } }) =>
   state.playback.volume;
 export const selectPlaying = (state: { playback: { playing: boolean } }) =>
   state.playback.playing;
-export const selectTimeElapsed = (state: { playback: { timeElapsed: number } }) =>
-  state.playback.timeElapsed;
+export const selectTimeElapsed = (state: {
+  playback: { timeElapsed: number };
+}) => state.playback.timeElapsed;
 export const addFileAndSetMedia = createAsyncThunk(
   "playback/addFileAndSetMedia",
   async (file: FileState, { dispatch }) => {
     dispatch(addFile(file));
     dispatch(setMedia(file));
-  }
+  },
 );
 
 const playbackSlice = createSlice({

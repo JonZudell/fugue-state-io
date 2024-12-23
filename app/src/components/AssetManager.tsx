@@ -31,13 +31,13 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
             audio.onloadedmetadata = function () {
               const duration = audio.duration;
               dispatch(
-              addFileAndSetMedia({
-                name: file.name,
-                fileType: file.type,
-                encoding: base64String,
-                url: dataUrl,
-                duration: duration,
-              }),
+                addFileAndSetMedia({
+                  name: file.name,
+                  fileType: file.type,
+                  encoding: base64String,
+                  url: dataUrl,
+                  duration: duration,
+                }),
               );
             };
           }
