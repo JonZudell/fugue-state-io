@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useLayoutEffect, useEffect, useRef } from "react";
 import "./SpanSlider.css";
 interface SpanSliderProps {
   className?: string;
@@ -9,19 +9,20 @@ interface SpanSliderProps {
 const SpanSlider: React.FC<SpanSliderProps> = ({ className, callback }) => {
   const spanSliderRef = useRef<HTMLDivElement>(null);
   const [spanSliderWidth, setSpanSliderWidth] = useState(0);
-  useEffect(() => {
-    if (spanSliderRef.current) {
-      const width = spanSliderRef.current.clientWidth;
-      setSpanSliderWidth(width);
-      setThumb2Value(width - 10);
-    }
-  }, []);
   const [thumb1Value, setThumb1Value] = useState(0);
   const [thumb2Value, setThumb2Value] = useState(0);
 
+  useLayoutEffect(() => {
+    if (spanSliderRef.current) {
+      const rect = spanSliderRef.current.getBoundingClientRect();
+      setSpanSliderWidth(rect.width);
+      setThumb2Value(rect.width - 10);
+    }
+  }, []);
+
   useEffect(() => {
     if (callback && spanSliderRef.current) {
-      callback(thumb1Value / (spanSliderRef.current.clientWidth) , thumb2Value / (spanSliderRef.current.clientWidth));
+      callback(thumb1Value / (spanSliderRef.current.clientWidth - 10) , thumb2Value / (spanSliderRef.current.clientWidth - 10));
     }
   }, [thumb1Value, thumb2Value, callback]);
 

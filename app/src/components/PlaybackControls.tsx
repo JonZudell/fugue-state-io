@@ -27,8 +27,7 @@ interface PlaybackControlsProps {
 }
 
 const PlaybackControls: React.FC<PlaybackControlsProps> = ({
-  enabled = true,
-  onTimeElapsedChange,
+  enabled = true
 }) => {
   const dispatch = useDispatch();
   const media = useSelector(selectMedia);
@@ -38,40 +37,10 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const isDraggingRef = useRef(false);
   const isPlayingBeforeDragRef = useRef(false);
   const playing = useSelector(selectPlaying);
-
-  useEffect(() => {
-    if (media) {
-      setLoopEnd(media.duration);
-    }
-  }, [media]);
-
-  const togglePlay = () => {
-    dispatch(setPlaying(!playing));
-  };
-
-  const handleMouseDown = () => {
-    isDraggingRef.current = true;
-    isPlayingBeforeDragRef.current = playing;
-    dispatch(setPlaying(false));
-  };
-
-  const handleMouseUp = () => {
-    isDraggingRef.current = false;
-    dispatch(setPlaying(isPlayingBeforeDragRef.current));
-  };
-
-  const handleSpanSliderChange = (start: number, finish: number) => {
-    setLoopStart(start * media.duration);
-    setLoopEnd(finish * media.duration);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = (parseFloat(e.target.value) / 100) * media.duration;
-    dispatch(setTimeElapsed(newTime));
-    if (onTimeElapsedChange) {
-      onTimeElapsedChange(newTime);
-    }
+  function handleSpanSliderChange(start: number, finish: number): void {
+    console.log(start, finish);
   }
+
   return (
     <div
       className={`playback-controls h-full bg-gray-600 items-center border rounded mx-auto`}
@@ -79,7 +48,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       <div className="px-4" style={{ height: "80%" }}>
         {media && (
           <div className="text-white text-center mb-2">
-            <span className="float-left">
+            {/* <span className="float-left">
               {new Date((loopStart * 1000))
                 .toISOString()
                 .substr(11, 8)}
@@ -88,7 +57,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               {new Date((loopEnd * 1000))
                 .toISOString()
                 .substr(11, 8)}
-            </span>
+            </span> */}
             <SpanSlider callback={handleSpanSliderChange} />
             <input
               className="elapsed-bar"
@@ -97,11 +66,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               step={0.01}
               max="100"
               value={(timeElapsed / media.duration) * 100}
-              onMouseDown={handleMouseDown}
-              onMouseUp={handleMouseUp}
-              onChange={handleChange}
             />
-            <span className="float-left">
+            {/* <span className="float-left">
               {new Date(timeElapsed * 1000).toISOString().substr(11, 8)}
             </span>
             <span className="float-right">
@@ -110,7 +76,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               {new Date((media.duration - timeElapsed) * 1000)
                 .toISOString()
                 .substr(11, 8)}
-            </span>
+            </span> */}
           </div>
         )}
       </div>
@@ -121,7 +87,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         <button disabled={!enabled}>
           <FontAwesomeIcon className="h-8 w-8" icon={faChevronLeft} />
         </button>
-        <button className="mx-2" onClick={togglePlay} disabled={!enabled}>
+        <button className="mx-2" disabled={!enabled}>
           <FontAwesomeIcon
             className="h-8 w-8"
             icon={playing ? faPause : faPlay}
