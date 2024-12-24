@@ -8,6 +8,10 @@ import {
   selectMedia,
   selectTimeElapsed,
   setTimeElapsed,
+  selectLoopStart,
+  selectLoopEnd,
+  setLoopEnd,
+  setLoopStart,
 } from "../store/playbackSlice";
 import "./PlaybackArea.css";
 interface PlaybackAreaProps {
@@ -16,25 +20,36 @@ interface PlaybackAreaProps {
 }
 
 const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
-  const files = useSelector(selectFiles);
-
   const dispatch = useDispatch();
   const playing = useSelector(selectPlaying);
   const media = useSelector(selectMedia);
   const timeElapsed = useSelector(selectTimeElapsed);
+  const loopStart = useSelector(selectLoopStart);
+  const loopEnd = useSelector(selectLoopEnd);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
+  const isDraggingRef = useRef(false);
+  const isPlayingBeforeDragRef = useRef(false);
   const [videoWidth, setVideoWidth] = useState(0);
+
+  // const handleTimeElapsedChange = (newTime: number) => {
+  //   dispatch(setTimeElapsed(newTime / 100 * media!.duration));
+  // };
+  useEffect(() => {
+    if (videoRef.current) {
+      if (playing) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [playing]);
 
   useEffect(() => {
     const handleResize = () => {
       if (videoRef.current) {
         setVideoWidth(videoRef.current.clientWidth);
-      }
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.clientWidth);
       }
     };
 
@@ -49,10 +64,19 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
     if (videoRef.current) {
       setVideoWidth(videoRef.current.clientWidth);
     }
-    if (containerRef.current) {
-      setContainerWidth(containerRef.current.clientWidth);
-    }
   }, [media, videoRef.current?.clientWidth, leftMenuWidth]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (playing && videoRef.current) {
+        dispatch(setTimeElapsed(videoRef.current.currentTime));
+      } else if (!playing && videoRef.current) {
+        videoRef.current.currentTime = timeElapsed;
+      }
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, [playing, dispatch, timeElapsed]);
 
   return (
     <div className="playbackarea flex">
@@ -80,6 +104,14 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
             >
               <PlaybackControls
                 enabled={media ? true : false}
+                loopEnd={loopEnd}
+                setLoopEnd={(end: number) => {dispatch(setLoopEnd(end))}}
+                loopStart={loopStart}
+                setLoopStart={(start: number) => {dispatch(setLoopStart(start))}}
+                timeElapsed={timeElapsed}
+                isDraggingRef={isDraggingRef}
+                isPlayingBeforeDragRef={isPlayingBeforeDragRef}
+                videoRef={videoRef}
               />
             </div>
           )}

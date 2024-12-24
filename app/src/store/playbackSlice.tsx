@@ -6,6 +6,8 @@ interface PlaybackState {
   timeElapsed: number;
   speed: number;
   volume: number;
+  loopStart: number;
+  loopEnd: number;
 }
 
 const initialState: PlaybackState = {
@@ -14,6 +16,8 @@ const initialState: PlaybackState = {
   timeElapsed: 0,
   speed: 1,
   volume: 1,
+  loopStart: 0,
+  loopEnd: 0,
 };
 // Define a memoized selector to get the list of files
 export const selectMedia = (state: { playback: { media: FileState } }) =>
@@ -25,6 +29,10 @@ export const selectPlaying = (state: { playback: { playing: boolean } }) =>
 export const selectTimeElapsed = (state: {
   playback: { timeElapsed: number };
 }) => state.playback.timeElapsed;
+export const selectLoopStart = (state: { playback: { loopStart: number } }) =>
+  state.playback.loopStart;
+export const selectLoopEnd = (state: { playback: { loopEnd: number } }) =>
+  state.playback.loopEnd;
 export const addFileAndSetMedia = createAsyncThunk(
   "playback/addFileAndSetMedia",
   async (file: FileState, { dispatch }) => {
@@ -47,10 +55,20 @@ const playbackSlice = createSlice({
       state.speed = Math.min(Math.max(0.2, action.payload), 2);
     },
     setTimeElapsed: (state: PlaybackState, action: PayloadAction<number>) => {
-      state.timeElapsed = action.payload;
+      if (state.media && action.payload > state.media.duration) {
+        state.timeElapsed = state.media.duration;
+      } else {
+        state.timeElapsed = action.payload;
+      }
     },
     setPlaying: (state: PlaybackState, action: PayloadAction<boolean>) => {
       state.playing = action.payload;
+    },
+    setLoopStart: (state: PlaybackState, action: PayloadAction<number>) => {
+      state.loopStart = action.payload;
+    },
+    setLoopEnd: (state: PlaybackState, action: PayloadAction<number>) => {
+      state.loopEnd = action.payload;
     },
   },
   // extraReducers: (builder) => {
@@ -60,6 +78,13 @@ const playbackSlice = createSlice({
   // },
 });
 
-export const { setMedia, setVolume, setSpeed, setPlaying, setTimeElapsed } =
-  playbackSlice.actions;
+export const {
+  setMedia,
+  setVolume,
+  setSpeed,
+  setPlaying,
+  setTimeElapsed,
+  setLoopStart,
+  setLoopEnd,
+} = playbackSlice.actions;
 export default playbackSlice.reducer;
