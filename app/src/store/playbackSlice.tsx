@@ -52,28 +52,7 @@ const playbackSlice = createSlice({
       state.speed = Math.min(Math.max(0.2, action.payload), 2);
     },
     setTimeElapsed: (state: PlaybackState, action: PayloadAction<number>) => {
-      if (
-        state.media &&
-        action.payload >= state.loopEnd * state.media.duration &&
-        state.looping
-      ) {
-        state.timeElapsed = state.loopStart * state.media.duration;
-        state.playing = false; // Pause the video
-        setTimeout(() => {
-          state.playing = true; // Play the video after setting the time
-        }, 0);
-      } else if (
-        state.media &&
-        action.payload < state.loopStart * state.media.duration &&
-        state.looping
-      ) {
-        state.timeElapsed = state.loopStart * state.media.duration;
-      } else if (state.media && action.payload >= state.media.duration) {
-        state.timeElapsed = state.media.duration;
-        state.playing = false;
-      } else {
-        state.timeElapsed = action.payload;
-      }
+      state.timeElapsed = action.payload;
     },
     setPlaying: (state: PlaybackState, action: PayloadAction<boolean>) => {
       state.playing = action.payload;

@@ -69,14 +69,38 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       if (playing && videoRef.current) {
-        dispatch(setTimeElapsed(videoRef.current.currentTime));
+        if (
+          media &&
+          videoRef.current.currentTime >= loopEnd * media.duration &&
+          looping
+        ) {
+          const newTimeElapsed = loopStart * media.duration;
+          videoRef.current.currentTime = newTimeElapsed;
+          videoRef.current.play();
+          dispatch(setTimeElapsed(newTimeElapsed));
+        } else if (
+          media &&
+          videoRef.current.currentTime < loopStart * media.duration &&
+          looping
+        ) {
+          const newTimeElapsed = loopStart * media.duration;
+          videoRef.current.currentTime = newTimeElapsed;
+          videoRef.current.play();
+          dispatch(setTimeElapsed(newTimeElapsed));
+        } else if (media && videoRef.current.currentTime >= media.duration) {
+          const newTimeElapsed = media.duration;
+          videoRef.current.currentTime = newTimeElapsed;
+          videoRef.current.pause();
+        } else {
+          dispatch(setTimeElapsed(videoRef.current.currentTime));
+        }
       } else if (!playing && videoRef.current) {
         videoRef.current.currentTime = timeElapsed;
       }
     }, 50);
 
     return () => clearInterval(interval);
-  }, [playing, dispatch, timeElapsed]);
+  }, [playing, dispatch, timeElapsed, media, loopEnd, looping, loopStart]);
 
   useEffect(() => {
     if (media && videoRef.current) {
