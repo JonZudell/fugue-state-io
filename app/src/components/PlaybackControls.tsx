@@ -95,13 +95,20 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       <div className="px-4" style={{ height: "80%" }}>
         {media && (
           <div className="text-white text-center mb-2">
-            <span className="float-left">
-              {formatTime(loopStart, media.duration)}
-            </span>
-            <span className="float-right">
-              {formatTime(loopEnd, media.duration)}
-            </span>
-            <SpanSlider callback={handleSpanSliderChange} enabled={!playing} />
+            {looping && (
+              <>
+                <span className="float-left">
+                  {formatTime(loopStart, media.duration)}
+                </span>
+                <span className="float-right">
+                  {formatTime(loopEnd, media.duration)}
+                </span>
+                <SpanSlider
+                  callback={handleSpanSliderChange}
+                  enabled={!playing}
+                />
+              </>
+            )}
             <input
               className="elapsed-bar"
               type="range"

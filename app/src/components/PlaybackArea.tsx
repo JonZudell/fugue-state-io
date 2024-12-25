@@ -40,7 +40,8 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
 
   useEffect(() => {
     if (videoRef1.current && videoRef2.current) {
-      const activeVideoRef = activeVideo === 1 ? videoRef1.current : videoRef2.current;
+      const activeVideoRef =
+        activeVideo === 1 ? videoRef1.current : videoRef2.current;
       if (playing) {
         activeVideoRef.play();
       } else {
@@ -71,8 +72,10 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const activeVideoRef = activeVideo === 1 ? videoRef1.current : videoRef2.current;
-      const inactiveVideoRef = activeVideo === 1 ? videoRef2.current : videoRef1.current;
+      const activeVideoRef =
+        activeVideo === 1 ? videoRef1.current : videoRef2.current;
+      const inactiveVideoRef =
+        activeVideo === 1 ? videoRef2.current : videoRef1.current;
 
       if (playing && activeVideoRef) {
         if (
@@ -105,10 +108,19 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
       } else if (!playing && activeVideoRef) {
         activeVideoRef.currentTime = timeElapsed;
       }
-    }, 50);
+    }, 25);
 
     return () => clearInterval(interval);
-  }, [playing, dispatch, timeElapsed, media, loopEnd, looping, loopStart, activeVideo]);
+  }, [
+    playing,
+    dispatch,
+    timeElapsed,
+    media,
+    loopEnd,
+    looping,
+    loopStart,
+    activeVideo,
+  ]);
 
   useEffect(() => {
     if (media && videoRef1.current) {
@@ -138,7 +150,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
                 <video
                   ref={videoRef1}
                   controls={false}
-                  className={`responsive-video ${activeVideo === 1 ? 'visible' : 'hidden'}`}
+                  className={`responsive-video ${activeVideo === 1 ? "visible" : "hidden"}`}
                   loop={false} // Disable native looping
                   onLoadedMetadata={handleLoadedMetadata}
                 >
@@ -148,7 +160,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
                 <video
                   ref={videoRef2}
                   controls={false}
-                  className={`responsive-video ${activeVideo === 2 ? 'visible' : 'hidden'}`}
+                  className={`responsive-video ${activeVideo === 2 ? "visible" : "hidden"}`}
                   loop={false} // Disable native looping
                   onLoadedMetadata={handleLoadedMetadata}
                 >
