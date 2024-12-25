@@ -33,9 +33,6 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
   const isPlayingBeforeDragRef = useRef(false);
   const [videoWidth, setVideoWidth] = useState(0);
 
-  // const handleTimeElapsedChange = (newTime: number) => {
-  //   dispatch(setTimeElapsed(newTime / 100 * media!.duration));
-  // };
   useEffect(() => {
     if (videoRef.current) {
       if (playing) {

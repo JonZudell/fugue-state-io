@@ -3,6 +3,7 @@ import { addFile, FileState } from "../store/filesSlice";
 interface PlaybackState {
   media: FileState | null;
   playing: boolean;
+  looping: boolean;
   timeElapsed: number;
   speed: number;
   volume: number;
@@ -13,13 +14,14 @@ interface PlaybackState {
 const initialState: PlaybackState = {
   media: null,
   playing: false,
+  looping: false,
   timeElapsed: 0,
   speed: 1,
   volume: 1,
   loopStart: 0,
   loopEnd: 0,
 };
-// Define a memoized selector to get the list of files
+
 export const selectMedia = (state: { playback: { media: FileState } }) =>
   state.playback.media;
 export const selectVolume = (state: { playback: { volume: number } }) =>
@@ -55,8 +57,13 @@ const playbackSlice = createSlice({
       state.speed = Math.min(Math.max(0.2, action.payload), 2);
     },
     setTimeElapsed: (state: PlaybackState, action: PayloadAction<number>) => {
-      if (state.media && action.payload > state.media.duration) {
+      if (state.media && (action.payload > state.loopEnd && state.looping)) {
+        state.timeElapsed = state.loopStart * state.media.duration;
+      } else if (state.media && action.payload < state.loopStart && state.looping) {
+        state.timeElapsed = state.loopStart * state.media.duration;
+      } else if (state.media && action.payload > state.media.duration) {
         state.timeElapsed = state.media.duration;
+        state.playing = false;
       } else {
         state.timeElapsed = action.payload;
       }
@@ -66,16 +73,17 @@ const playbackSlice = createSlice({
     },
     setLoopStart: (state: PlaybackState, action: PayloadAction<number>) => {
       state.loopStart = action.payload;
+      if (state.looping && state.media && state.timeElapsed < state.loopStart * state.media.duration) {
+        state.timeElapsed = state.loopStart * state.media.duration;
+      }
     },
     setLoopEnd: (state: PlaybackState, action: PayloadAction<number>) => {
       state.loopEnd = action.payload;
+      if (state.looping && state.media && state.timeElapsed > state.loopEnd * state.media!.duration) {
+        state.timeElapsed = state.loopEnd * state.media.duration;
+      }
     },
   },
-  // extraReducers: (builder) => {
-  //   builder.addCase(addFileAndSetMedia.fulfilled, (state, action) => {
-  //     // Handle fulfilled state if needed
-  //   });
-  // },
 });
 
 export const {

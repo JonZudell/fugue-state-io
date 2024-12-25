@@ -11,16 +11,12 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   setPlaying,
   selectPlaying,
-  selectTimeElapsed,
   selectMedia,
   setTimeElapsed,
 } from "../store/playbackSlice";
-import { useEffect, useState, useRef } from "react";
 import SpanSlider from "./SpanSlider";
 interface PlaybackControlsProps {
-  focused?: boolean;
   enabled?: boolean;
-  width?: number;
   timeElapsed: number;
   isDraggingRef: React.RefObject<boolean>;
   isPlayingBeforeDragRef: React.RefObject<boolean>;
