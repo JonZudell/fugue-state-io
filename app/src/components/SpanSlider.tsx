@@ -27,8 +27,10 @@ const SpanSlider: React.FC<SpanSliderProps> = ({
   useEffect(() => {
     if (callback && spanSliderRef.current) {
       callback(
-        (thumb1Value / 100) * (spanSliderRef.current.clientWidth - 10) / (spanSliderRef.current.clientWidth - 10),
-        (thumb2Value / 100) * (spanSliderRef.current.clientWidth - 10) / (spanSliderRef.current.clientWidth - 10),
+        ((thumb1Value / 100) * (spanSliderRef.current.clientWidth - 10)) /
+          (spanSliderRef.current.clientWidth - 10),
+        ((thumb2Value / 100) * (spanSliderRef.current.clientWidth - 10)) /
+          (spanSliderRef.current.clientWidth - 10),
       );
     }
   }, [thumb1Value, thumb2Value, callback]);

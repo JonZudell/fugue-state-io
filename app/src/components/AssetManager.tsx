@@ -2,7 +2,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectFiles } from "../store/filesSlice";
-import { addFileAndSetMedia } from "../store/playbackSlice";
+import { setMedia } from "../store/playbackSlice";
 import { Key } from "react";
 import { AppDispatch } from "../store";
 import "./AssetManager.tsx";
@@ -31,7 +31,7 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
             audio.onloadedmetadata = function () {
               const duration = audio.duration;
               dispatch(
-                addFileAndSetMedia({
+                setMedia({
                   name: file.name,
                   fileType: file.type,
                   encoding: base64String,

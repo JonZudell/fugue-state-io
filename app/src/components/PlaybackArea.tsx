@@ -12,6 +12,8 @@ import {
   selectLoopEnd,
   setLoopEnd,
   setLoopStart,
+  selectLooping,
+  setMedia,
 } from "../store/playbackSlice";
 import "./PlaybackArea.css";
 interface PlaybackAreaProps {
@@ -26,6 +28,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
   const timeElapsed = useSelector(selectTimeElapsed);
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
+  const looping = useSelector(selectLooping);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -75,6 +78,21 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
     return () => clearInterval(interval);
   }, [playing, dispatch, timeElapsed]);
 
+  useEffect(() => {
+    if (media && videoRef.current) {
+      dispatch(setMedia(media)); // Dispatch the media object without videoRef
+    }
+  }, [media, videoRef, dispatch]);
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = timeElapsed;
+      if (media) {
+        dispatch(setMedia(media)); // Dispatch the media object without videoRef
+      }
+    }
+  };
+
   return (
     <div className="playbackarea flex">
       <div className="playbackarea-content flex-grow" ref={containerRef}>
@@ -88,6 +106,8 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
                 ref={videoRef}
                 controls={false}
                 className="responsive-video"
+                loop={looping}
+                onLoadedMetadata={handleLoadedMetadata}
               >
                 <source src={media.url} type={media.fileType} />
                 Your browser does not support the video tag.
@@ -102,9 +122,13 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
               <PlaybackControls
                 enabled={media ? true : false}
                 loopEnd={loopEnd}
-                setLoopEnd={(end: number) => {dispatch(setLoopEnd(end))}}
+                setLoopEnd={(end: number) => {
+                  dispatch(setLoopEnd(end));
+                }}
                 loopStart={loopStart}
-                setLoopStart={(start: number) => {dispatch(setLoopStart(start))}}
+                setLoopStart={(start: number) => {
+                  dispatch(setLoopStart(start));
+                }}
                 timeElapsed={timeElapsed}
                 isDraggingRef={isDraggingRef}
                 isPlayingBeforeDragRef={isPlayingBeforeDragRef}

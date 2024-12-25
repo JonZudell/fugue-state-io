@@ -35,13 +35,8 @@ export const selectLoopStart = (state: { playback: { loopStart: number } }) =>
   state.playback.loopStart;
 export const selectLoopEnd = (state: { playback: { loopEnd: number } }) =>
   state.playback.loopEnd;
-export const addFileAndSetMedia = createAsyncThunk(
-  "playback/addFileAndSetMedia",
-  async (file: FileState, { dispatch }) => {
-    dispatch(addFile(file));
-    dispatch(setMedia(file));
-  },
-);
+export const selectLooping = (state: { playback: { looping: boolean } }) =>
+  state.playback.looping;
 
 const playbackSlice = createSlice({
   name: "playback",
@@ -57,11 +52,23 @@ const playbackSlice = createSlice({
       state.speed = Math.min(Math.max(0.2, action.payload), 2);
     },
     setTimeElapsed: (state: PlaybackState, action: PayloadAction<number>) => {
-      if (state.media && (action.payload > state.loopEnd && state.looping)) {
+      if (
+        state.media &&
+        action.payload >= state.loopEnd * state.media.duration &&
+        state.looping
+      ) {
         state.timeElapsed = state.loopStart * state.media.duration;
-      } else if (state.media && action.payload < state.loopStart && state.looping) {
+        state.playing = false; // Pause the video
+        setTimeout(() => {
+          state.playing = true; // Play the video after setting the time
+        }, 0);
+      } else if (
+        state.media &&
+        action.payload < state.loopStart * state.media.duration &&
+        state.looping
+      ) {
         state.timeElapsed = state.loopStart * state.media.duration;
-      } else if (state.media && action.payload > state.media.duration) {
+      } else if (state.media && action.payload >= state.media.duration) {
         state.timeElapsed = state.media.duration;
         state.playing = false;
       } else {
@@ -73,14 +80,31 @@ const playbackSlice = createSlice({
     },
     setLoopStart: (state: PlaybackState, action: PayloadAction<number>) => {
       state.loopStart = action.payload;
-      if (state.looping && state.media && state.timeElapsed < state.loopStart * state.media.duration) {
+      if (
+        state.looping &&
+        state.media &&
+        state.timeElapsed < state.loopStart * state.media.duration
+      ) {
         state.timeElapsed = state.loopStart * state.media.duration;
       }
     },
     setLoopEnd: (state: PlaybackState, action: PayloadAction<number>) => {
       state.loopEnd = action.payload;
-      if (state.looping && state.media && state.timeElapsed > state.loopEnd * state.media!.duration) {
+      if (
+        state.looping &&
+        state.media &&
+        state.timeElapsed > state.loopEnd * state.media!.duration
+      ) {
         state.timeElapsed = state.loopEnd * state.media.duration;
+      }
+    },
+    setLooping: (state: PlaybackState, action: PayloadAction<boolean>) => {
+      state.looping = action.payload;
+    },
+    restartPlayback: (state: PlaybackState) => {
+      if (state.media) {
+        state.timeElapsed = state.loopStart * state.media.duration;
+        state.playing = true;
       }
     },
   },
@@ -94,5 +118,7 @@ export const {
   setTimeElapsed,
   setLoopStart,
   setLoopEnd,
+  setLooping,
+  restartPlayback,
 } = playbackSlice.actions;
 export default playbackSlice.reducer;
