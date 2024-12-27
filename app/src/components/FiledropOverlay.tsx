@@ -1,9 +1,10 @@
 "use client";
-import { addFileAndSetMedia } from "@/store/playbackSlice";
-import { addFile } from "../store/filesSlice";
+import { setMedia } from "../store/playbackSlice";
 import { AppDispatch } from "../store";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 interface FiledropOverlay {
   focused?: false;
 }
@@ -38,7 +39,7 @@ const FiledropOverlay: React.FC = () => {
               audio.onloadedmetadata = function () {
                 const duration = audio.duration;
                 dispatch(
-                  addFileAndSetMedia({
+                  setMedia({
                     name: file.name,
                     fileType: file.type,
                     encoding: base64String,
@@ -53,14 +54,14 @@ const FiledropOverlay: React.FC = () => {
         });
       }
     };
-    window.addEventListener("dragover", handleDragOver);
-    window.addEventListener("dragleave", handleDragLeave);
-    window.addEventListener("drop", handleDrop);
+    document.addEventListener("dragover", handleDragOver);
+    document.addEventListener("dragleave", handleDragLeave);
+    document.addEventListener("drop", handleDrop);
 
     return () => {
-      window.removeEventListener("dragover", handleDragOver);
-      window.removeEventListener("dragleave", handleDragLeave);
-      window.removeEventListener("drop", handleDrop);
+      document.removeEventListener("dragover", handleDragOver);
+      document.removeEventListener("dragleave", handleDragLeave);
+      document.removeEventListener("drop", handleDrop);
     };
   }, [dispatch]);
 
@@ -84,7 +85,16 @@ const FiledropOverlay: React.FC = () => {
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="modal">
+      <div
+        className="modal"
+        style={{
+          backgroundColor: "white",
+          color: "black",
+          borderRadius: "8px",
+          padding: "20px",
+          textAlign: "center",
+        }}
+      >
         <div
           className="upload-placeholder"
           style={{
@@ -93,7 +103,10 @@ const FiledropOverlay: React.FC = () => {
             padding: "20px",
             textAlign: "center",
           }}
-        ></div>
+        >
+          <FontAwesomeIcon icon={faFileUpload} className="w-8 h-8" />
+          <p>Drop to upload file!</p>
+        </div>
       </div>
     </div>
   );

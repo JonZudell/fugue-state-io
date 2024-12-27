@@ -33,24 +33,6 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
       style: { transform: "rotate(0)" },
       tabContent: <AssetManager />,
     },
-    {
-      id: 2,
-      icon: faPen,
-      style: { transform: "rotate(0)" },
-      tabContent: <div>pen</div>,
-    },
-    {
-      id: 3,
-      icon: faCode,
-      style: { transform: "rotate(0)" },
-      tabContent: <div>code</div>,
-    },
-    {
-      id: 4,
-      icon: faSliders,
-      style: { transform: "rotate(0)" },
-      tabContent: <div>sliders</div>,
-    },
   ],
   onWidthChange,
 }) => {

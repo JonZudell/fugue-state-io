@@ -65,7 +65,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   };
 
   const handleSpanSliderChange = (start: number, finish: number) => {
-    console.log("handleSpanSlider", start, finish);
     setLoopStart(start);
     setLoopEnd(finish);
   };
@@ -90,9 +89,9 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
   return (
     <div
-      className={`playback-controls h-full bg-gray-600 items-center border rounded mx-auto`}
+      className={`playback-controls bg-gray-600 items-center border rounded`}
     >
-      <div className="px-4" style={{ height: "80%" }}>
+      <div className="px-4">
         {media && (
           <div className="text-white text-center mb-2">
             {looping && (
@@ -133,16 +132,13 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           </div>
         )}
       </div>
-      <div
-        className="mx-auto flex justify-center py-4"
-        style={{ height: "20%" }}
-      >
+      <div className="mx-auto flex justify-center py-4">
         <button disabled={!enabled}>
-          <FontAwesomeIcon className="h-8 w-8" icon={faChevronLeft} />
+          <FontAwesomeIcon className="h-4 w-4" icon={faChevronLeft} />
         </button>
         <button className="mx-2" onClick={togglePlay} disabled={!enabled}>
           <FontAwesomeIcon
-            className="h-8 w-8"
+            className="h-4 w-4"
             icon={playing ? faPause : faPlay}
           />
         </button>
@@ -152,13 +148,13 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           disabled={!enabled}
         >
           <FontAwesomeIcon
-            className="h-8 w-8"
+            className="h-4 w-4"
             icon={faRepeat}
             style={{ color: looping ? "green" : "white" }}
           />
         </button>
         <button disabled={!enabled}>
-          <FontAwesomeIcon className="h-8 w-8" icon={faChevronRight} />
+          <FontAwesomeIcon className="h-4 w-4" icon={faChevronRight} />
         </button>
       </div>
     </div>

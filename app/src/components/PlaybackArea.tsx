@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from "react";
 import PlaybackControls from "./PlaybackControls";
 import { useDispatch, useSelector } from "react-redux";
-import { selectFiles } from "../store/filesSlice";
 import {
   selectPlaying,
   selectMedia,
@@ -18,10 +17,14 @@ import {
 import "./PlaybackArea.css";
 interface PlaybackAreaProps {
   focused?: false;
-  leftMenuWidth: number;
+  workspaceWidth?: number;
+  leftMenuWidth?: number;
 }
 
-const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
+const PlaybackArea: React.FC<PlaybackAreaProps> = ({
+  workspaceWidth,
+  leftMenuWidth = 0,
+}) => {
   const dispatch = useDispatch();
   const playing = useSelector(selectPlaying);
   const media = useSelector(selectMedia);
@@ -35,7 +38,6 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const isDraggingRef = useRef(false);
   const isPlayingBeforeDragRef = useRef(false);
-  const [videoWidth, setVideoWidth] = useState(0);
   const [activeVideo, setActiveVideo] = useState(1);
 
   useEffect(() => {
@@ -51,26 +53,6 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
   }, [playing, activeVideo]);
 
   useEffect(() => {
-    const handleResize = () => {
-      if (videoRef1.current) {
-        setVideoWidth(videoRef1.current.clientWidth);
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (videoRef1.current) {
-      setVideoWidth(videoRef1.current.clientWidth);
-    }
-  }, [media, videoRef1.current?.clientWidth, leftMenuWidth]);
-
-  useEffect(() => {
     const interval = setInterval(() => {
       const activeVideoRef =
         activeVideo === 1 ? videoRef1.current : videoRef2.current;
@@ -84,7 +66,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
           looping
         ) {
           const newTimeElapsed = loopStart * media.duration;
-          inactiveVideoRef.play();
+          inactiveVideoRef?.play();
           activeVideoRef.pause();
           activeVideoRef.currentTime = newTimeElapsed;
           setActiveVideo(activeVideo === 1 ? 2 : 1);
@@ -108,7 +90,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
       } else if (!playing && activeVideoRef) {
         activeVideoRef.currentTime = timeElapsed;
       }
-    }, 25);
+    }, 10);
 
     return () => clearInterval(interval);
   }, [
@@ -138,12 +120,12 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
   };
 
   return (
-    <div className="playbackarea flex">
-      <div className="playbackarea-content flex-grow" ref={containerRef}>
-        <div className="top-content h-full">
+    <div className="playbackarea">
+      <div className="playbackarea-content" ref={containerRef}>
+        <div className="top-content flex flex-col items-center">
           <div
-            className="video-container flex justify-center items-center"
-            style={{ zIndex: -1 }}
+            className="video-container relative"
+            style={{ margin: "0 auto" }}
           >
             {media && (
               <>
@@ -169,29 +151,22 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({ leftMenuWidth }) => {
                 </video>
               </>
             )}
+            <PlaybackControls
+              enabled={media ? true : false}
+              loopEnd={loopEnd}
+              setLoopEnd={(end: number) => {
+                dispatch(setLoopEnd(end));
+              }}
+              loopStart={loopStart}
+              setLoopStart={(start: number) => {
+                dispatch(setLoopStart(start));
+              }}
+              timeElapsed={timeElapsed}
+              isDraggingRef={isDraggingRef}
+              isPlayingBeforeDragRef={isPlayingBeforeDragRef}
+              videoRef={activeVideo === 1 ? videoRef1 : videoRef2}
+            />
           </div>
-          {media && (
-            <div
-              className="playback-controls absolute bottom-0"
-              style={{ width: videoWidth || "100%" }}
-            >
-              <PlaybackControls
-                enabled={media ? true : false}
-                loopEnd={loopEnd}
-                setLoopEnd={(end: number) => {
-                  dispatch(setLoopEnd(end));
-                }}
-                loopStart={loopStart}
-                setLoopStart={(start: number) => {
-                  dispatch(setLoopStart(start));
-                }}
-                timeElapsed={timeElapsed}
-                isDraggingRef={isDraggingRef}
-                isPlayingBeforeDragRef={isPlayingBeforeDragRef}
-                videoRef={activeVideo === 1 ? videoRef1 : videoRef2}
-              />
-            </div>
-          )}
         </div>
       </div>
     </div>
