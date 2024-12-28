@@ -2,7 +2,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectFiles } from "../store/filesSlice";
-import { setMedia } from "../store/playbackSlice";
+import { uploadFile } from "../store/playbackSlice";
 import { Key } from "react";
 import { AppDispatch } from "../store";
 import "./AssetManager.tsx";
@@ -21,28 +21,8 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-      Array.from(files).forEach(async (file) => {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          if (e && e.target && e.target.result) {
-            const base64String = (e.target.result as string).split(",")[1];
-            const dataUrl = `data:${file.type};base64,${base64String}`;
-            const audio = new Audio(dataUrl);
-            audio.onloadedmetadata = function () {
-              const duration = audio.duration;
-              dispatch(
-                setMedia({
-                  name: file.name,
-                  fileType: file.type,
-                  encoding: base64String,
-                  url: dataUrl,
-                  duration: duration,
-                }),
-              );
-            };
-          }
-        };
-        reader.readAsDataURL(file);
+      Array.from(files).forEach((file) => {
+        dispatch(uploadFile(file));
       });
     }
   };

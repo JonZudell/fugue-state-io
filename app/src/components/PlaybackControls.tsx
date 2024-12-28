@@ -31,6 +31,7 @@ interface PlaybackControlsProps {
   onTimeElapsedChange?: (time: number) => void;
   onMouseDown?: () => void;
   onMouseUp?: () => void;
+  className?: string;
 }
 
 const PlaybackControls: React.FC<PlaybackControlsProps> = ({
@@ -43,6 +44,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   loopEnd,
   setLoopEnd,
   videoRef,
+  className = "",
 }) => {
   const dispatch = useDispatch();
   const media = useSelector(selectMedia);
@@ -89,11 +91,11 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
   return (
     <div
-      className={`playback-controls bg-gray-600 items-center border rounded`}
+      className={`playback-controls-container items-center flex-grow  ${className}`}
     >
-      <div className="px-4">
+      <div className="playback-controls text-white text-center mb-2">
         {media && (
-          <div className="text-white text-center mb-2">
+          <div>
             {looping && (
               <>
                 <span className="float-left">
@@ -131,31 +133,32 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             </span>
           </div>
         )}
-      </div>
-      <div className="mx-auto flex justify-center py-4">
-        <button disabled={!enabled}>
-          <FontAwesomeIcon className="h-4 w-4" icon={faChevronLeft} />
-        </button>
-        <button className="mx-2" onClick={togglePlay} disabled={!enabled}>
-          <FontAwesomeIcon
-            className="h-4 w-4"
-            icon={playing ? faPause : faPlay}
-          />
-        </button>
-        <button
-          className="mx-2"
-          onClick={handleToggleLooping}
-          disabled={!enabled}
-        >
-          <FontAwesomeIcon
-            className="h-4 w-4"
-            icon={faRepeat}
-            style={{ color: looping ? "green" : "white" }}
-          />
-        </button>
-        <button disabled={!enabled}>
-          <FontAwesomeIcon className="h-4 w-4" icon={faChevronRight} />
-        </button>
+        <br />
+        <div className="mx-auto justify-center py-4">
+          <button disabled={!enabled} className="mx-1">
+            <FontAwesomeIcon className="h-4 w-4" icon={faChevronLeft} />
+          </button>
+          <button className="mx-1" onClick={togglePlay} disabled={!enabled}>
+            <FontAwesomeIcon
+              className="h-4 w-4"
+              icon={playing ? faPause : faPlay}
+            />
+          </button>
+          <button
+            className="mx-1"
+            onClick={handleToggleLooping}
+            disabled={!enabled}
+          >
+            <FontAwesomeIcon
+              className="h-4 w-4"
+              icon={faRepeat}
+              style={{ color: looping ? "green" : "white" }}
+            />
+          </button>
+          <button disabled={!enabled} className="mx-1">
+            <FontAwesomeIcon className="h-4 w-4" icon={faChevronRight} />
+          </button>
+        </div>
       </div>
     </div>
   );

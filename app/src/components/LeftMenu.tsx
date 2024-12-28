@@ -4,9 +4,6 @@ import {
   faGear,
   faUser,
   faMusic,
-  faCode,
-  faSliders,
-  faPen,
   IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 import { JSX, useState } from "react";

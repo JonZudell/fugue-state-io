@@ -1,5 +1,5 @@
 "use client";
-import { setMedia } from "../store/playbackSlice";
+import { uploadFile } from "../store/playbackSlice";
 import { AppDispatch } from "../store";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -29,28 +29,7 @@ const FiledropOverlay: React.FC = () => {
       const files = event.dataTransfer?.files;
       if (files) {
         Array.from(files).forEach(async (file) => {
-          console.log(file);
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            if (e && e.target && e.target.result) {
-              const base64String = (e.target.result as string).split(",")[1];
-              const dataUrl = `data:${file.type};base64,${base64String}`;
-              const audio = new Audio(dataUrl);
-              audio.onloadedmetadata = function () {
-                const duration = audio.duration;
-                dispatch(
-                  setMedia({
-                    name: file.name,
-                    fileType: file.type,
-                    encoding: base64String,
-                    url: dataUrl,
-                    duration: duration,
-                  }),
-                );
-              };
-            }
-          };
-          reader.readAsDataURL(file);
+          dispatch(uploadFile(file));
         });
       }
     };

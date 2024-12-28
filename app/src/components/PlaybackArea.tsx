@@ -17,14 +17,9 @@ import {
 import "./PlaybackArea.css";
 interface PlaybackAreaProps {
   focused?: false;
-  workspaceWidth?: number;
-  leftMenuWidth?: number;
 }
 
-const PlaybackArea: React.FC<PlaybackAreaProps> = ({
-  workspaceWidth,
-  leftMenuWidth = 0,
-}) => {
+const PlaybackArea: React.FC<PlaybackAreaProps> = ({}) => {
   const dispatch = useDispatch();
   const playing = useSelector(selectPlaying);
   const media = useSelector(selectMedia);
@@ -121,52 +116,51 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
 
   return (
     <div className="playbackarea">
-      <div className="playbackarea-content" ref={containerRef}>
-        <div className="top-content flex flex-col items-center">
-          <div
-            className="video-container relative"
-            style={{ margin: "0 auto" }}
-          >
-            {media && (
-              <>
-                <video
-                  ref={videoRef1}
-                  controls={false}
-                  className={`responsive-video ${activeVideo === 1 ? "visible" : "hidden"}`}
-                  loop={false} // Disable native looping
-                  onLoadedMetadata={handleLoadedMetadata}
-                >
-                  <source src={media.url} type={media.fileType} />
-                  Your browser does not support the video tag.
-                </video>
-                <video
-                  ref={videoRef2}
-                  controls={false}
-                  className={`responsive-video ${activeVideo === 2 ? "visible" : "hidden"}`}
-                  loop={false} // Disable native looping
-                  onLoadedMetadata={handleLoadedMetadata}
-                >
-                  <source src={media.url} type={media.fileType} />
-                  Your browser does not support the video tag.
-                </video>
-              </>
-            )}
-            <PlaybackControls
-              enabled={media ? true : false}
-              loopEnd={loopEnd}
-              setLoopEnd={(end: number) => {
-                dispatch(setLoopEnd(end));
-              }}
-              loopStart={loopStart}
-              setLoopStart={(start: number) => {
-                dispatch(setLoopStart(start));
-              }}
-              timeElapsed={timeElapsed}
-              isDraggingRef={isDraggingRef}
-              isPlayingBeforeDragRef={isPlayingBeforeDragRef}
-              videoRef={activeVideo === 1 ? videoRef1 : videoRef2}
-            />
-          </div>
+      <div
+        className="playbackarea-content flex flex-col items-center flex-grow"
+        ref={containerRef}
+      >
+        <div className="video-container relative flex-grow">
+          {media && (
+            <>
+              <video
+                ref={videoRef1}
+                controls={false}
+                className={`responsive-video ${activeVideo === 1 ? "visible" : "hidden"}`}
+                loop={false} // Disable native looping
+                onLoadedMetadata={handleLoadedMetadata}
+              >
+                <source src={media.url} type={media.fileType} />
+                Your browser does not support the video tag.
+              </video>
+              <video
+                ref={videoRef2}
+                controls={false}
+                className={`responsive-video ${activeVideo === 2 ? "visible" : "hidden"}`}
+                loop={false} // Disable native looping
+                onLoadedMetadata={handleLoadedMetadata}
+              >
+                <source src={media.url} type={media.fileType} />
+                Your browser does not support the video tag.
+              </video>
+              <PlaybackControls
+                enabled={true}
+                loopEnd={loopEnd}
+                setLoopEnd={(end: number) => {
+                  dispatch(setLoopEnd(end));
+                }}
+                loopStart={loopStart}
+                setLoopStart={(start: number) => {
+                  dispatch(setLoopStart(start));
+                }}
+                timeElapsed={timeElapsed}
+                isDraggingRef={isDraggingRef}
+                isPlayingBeforeDragRef={isPlayingBeforeDragRef}
+                videoRef={activeVideo === 1 ? videoRef1 : videoRef2}
+                className="absolute bottom-0 left-0 right-0"
+              />
+            </>
+          )}
         </div>
       </div>
     </div>

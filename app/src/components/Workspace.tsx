@@ -123,11 +123,8 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
         leftMenuWidth={leftMenuWidth}
         workspaceWidth={workspaceWidth}
       />
-      <PlaybackArea
-        leftMenuWidth={leftMenuWidth}
-        workspaceWidth={workspaceWidth}
-      />
-      <ShortcutLegend leftMenuWidth={leftMenuWidth} />
+      <PlaybackArea />
+      <ShortcutLegend />
     </div>
   );
 };

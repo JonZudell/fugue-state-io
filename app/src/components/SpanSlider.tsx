@@ -96,7 +96,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({
           style={{
             position: "absolute",
             left: `${(Math.min(thumb1Value, thumb2Value) / 100) * ((spanSliderRef.current?.clientWidth ?? 0) - 10)}px`,
-            width: `${((Math.max(thumb2Value, thumb1Value) - Math.min(thumb1Value, thumb2Value)) / 100) * (spanSliderRef.current?.clientWidth - 10)}px`,
+            width: `${((Math.max(thumb2Value, thumb1Value) - Math.min(thumb1Value, thumb2Value)) / 100) * ((spanSliderRef.current?.clientWidth ?? 0) - 10)}px`,
             cursor: enabled ? "grab" : "not-allowed",
           }}
           onMouseDown={(e) => {

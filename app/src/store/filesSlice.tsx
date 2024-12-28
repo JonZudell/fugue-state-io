@@ -1,10 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Summary } from "../core/waveformSummary";
 export interface FileState {
   name: string;
   fileType: string;
   encoding: string;
   url: string;
   duration: number;
+  summary?: Summary;
 }
 interface FilesState {
   files: FileState[];

@@ -1,5 +1,3 @@
-.span-slider {
-}
 .span-slider__track {
   background-color: #0f0f0f;
   position: relative;
@@ -33,20 +31,17 @@
 .span-slider__between {
   height: 10px;
   background-color: var(--tw-ring-color);
-  border-radius: 5px;
   z-index: 0;
   cursor: grab;
 }
 
 .span-slider__before {
   height: 10px;
-  background-color: #000000;
-  border-radius: 5px;
+  background-color: #a3a3a3;
   z-index: 0;
 }
 .span-slider__after {
   height: 10px;
-  background-color: #000000;
-  border-radius: 5px;
+  background-color: #a3a3a3;
   z-index: 0;
 }
