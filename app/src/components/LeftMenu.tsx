@@ -38,11 +38,12 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
   const [mouseDown, setMouseDown] = useState(false);
 
   const handleMouseMove = (e: MouseEvent) => {
-    const newWidth = e.clientX - 84;
+    const newWidth = e.clientX;
     const adjustedWidth = newWidth > smallestSize ? newWidth : 0;
     setWidth(adjustedWidth);
     if (onWidthChange) {
-      onWidthChange(adjustedWidth);
+      const totalWidth = newWidth > smallestSize ? newWidth + 74 : 68;
+      onWidthChange(totalWidth);
     }
   };
 

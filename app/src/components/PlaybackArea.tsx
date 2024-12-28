@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useLayoutEffect, use } from "react";
 import PlaybackControls from "./PlaybackControls";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -13,14 +13,25 @@ import {
   setLoopStart,
   selectLooping,
   setMedia,
+  uploadFile,
 } from "../store/playbackSlice";
 import "./PlaybackArea.css";
+import WaveformVisualizer from "./WaveformVisualizer";
+import { AppDispatch } from "../store";
 interface PlaybackAreaProps {
   focused?: false;
+  workspaceWidth: number;
+  workspaceHeight: number;
+  style: React.CSSProperties;
+  leftMenuWidth: number;
 }
 
-const PlaybackArea: React.FC<PlaybackAreaProps> = ({}) => {
-  const dispatch = useDispatch();
+const PlaybackArea: React.FC<PlaybackAreaProps> = ({
+  workspaceHeight,
+  workspaceWidth,
+  style,
+}) => {
+  const dispatch = useDispatch<AppDispatch>();
   const playing = useSelector(selectPlaying);
   const media = useSelector(selectMedia);
   const timeElapsed = useSelector(selectTimeElapsed);
@@ -28,12 +39,19 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({}) => {
   const loopEnd = useSelector(selectLoopEnd);
   const looping = useSelector(selectLooping);
 
+  const isDraggingRef = useRef(false);
+  const isPlayingBeforeDragRef = useRef(false);
   const videoRef1 = useRef<HTMLVideoElement | null>(null);
   const videoRef2 = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const isDraggingRef = useRef(false);
-  const isPlayingBeforeDragRef = useRef(false);
   const [activeVideo, setActiveVideo] = useState(1);
+  const [bufferWidth, setBufferWidth] = useState(0);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      console.log("Workspace dimensions", workspaceWidth, workspaceHeight);
+    }
+  }, [workspaceHeight, workspaceWidth]);
 
   useEffect(() => {
     if (videoRef1.current && videoRef2.current) {
@@ -101,7 +119,9 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({}) => {
 
   useEffect(() => {
     if (media && videoRef1.current) {
-      dispatch(setMedia(media)); // Dispatch the media object without videoRef
+      if (media) {
+        dispatch(uploadFile(media)); // Dispatch the media object without videoRef
+      }
     }
   }, [media, videoRef1, dispatch]);
 
@@ -109,60 +129,70 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({}) => {
     if (videoRef1.current) {
       videoRef1.current.currentTime = timeElapsed;
       if (media) {
-        dispatch(setMedia(media)); // Dispatch the media object without videoRef
+        dispatch(uploadFile(media)); // Dispatch the media object without videoRef
       }
     }
   };
 
   return (
-    <div className="playbackarea">
-      <div
-        className="playbackarea-content flex flex-col items-center flex-grow"
-        ref={containerRef}
-      >
-        <div className="video-container relative flex-grow">
-          {media && (
-            <>
-              <video
-                ref={videoRef1}
-                controls={false}
-                className={`responsive-video ${activeVideo === 1 ? "visible" : "hidden"}`}
-                loop={false} // Disable native looping
-                onLoadedMetadata={handleLoadedMetadata}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-              <video
-                ref={videoRef2}
-                controls={false}
-                className={`responsive-video ${activeVideo === 2 ? "visible" : "hidden"}`}
-                loop={false} // Disable native looping
-                onLoadedMetadata={handleLoadedMetadata}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-              <PlaybackControls
-                enabled={true}
-                loopEnd={loopEnd}
-                setLoopEnd={(end: number) => {
-                  dispatch(setLoopEnd(end));
-                }}
-                loopStart={loopStart}
-                setLoopStart={(start: number) => {
-                  dispatch(setLoopStart(start));
-                }}
-                timeElapsed={timeElapsed}
-                isDraggingRef={isDraggingRef}
-                isPlayingBeforeDragRef={isPlayingBeforeDragRef}
-                videoRef={activeVideo === 1 ? videoRef1 : videoRef2}
-                className="absolute bottom-0 left-0 right-0"
-              />
-            </>
-          )}
-        </div>
+    <div className="playbackarea" ref={containerRef} style={style}>
+      <div className="video-container">
+        {media && (
+          <div className="video-wrapper flex">
+            <video
+              ref={videoRef1}
+              controls={false}
+              className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+              loop={false}
+              onLoadedMetadata={handleLoadedMetadata}
+              style={{
+                maxHeight: `${workspaceHeight}px`,
+                maxWidth: `${workspaceWidth}px`,
+                width: `${workspaceWidth}px`,
+                height: `${workspaceHeight}px`,
+              }}
+            >
+              <source src={media.url} type={media.fileType} />
+              Your browser does not support the video tag.
+            </video>
+            <video
+              ref={videoRef2}
+              controls={false}
+              className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
+              loop={false}
+              onLoadedMetadata={handleLoadedMetadata}
+            >
+              <source src={media.url} type={media.fileType} />
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        )}
       </div>
+      {/* {media && (
+        <WaveformVisualizer
+          media={media}
+          width={dimensions.width}
+          height={dimensions.height / 2}
+        />
+      )} */}
+      {/* {media && (
+        <PlaybackControls
+          enabled={true}
+          loopEnd={loopEnd}
+          setLoopEnd={(end: number) => {
+            dispatch(setLoopEnd(end));
+          }}
+          loopStart={loopStart}
+          setLoopStart={(start: number) => {
+            dispatch(setLoopStart(start));
+          }}
+          timeElapsed={timeElapsed}
+          isDraggingRef={isDraggingRef}
+          isPlayingBeforeDragRef={isPlayingBeforeDragRef}
+          videoRef={activeVideo === 1 ? videoRef1 : videoRef2}
+          className="absolute bottom-0 left-0 right-0"
+        />
+      )} */}
     </div>
   );
 };

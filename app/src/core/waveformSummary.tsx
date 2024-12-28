@@ -22,25 +22,21 @@ export type Summary = {
   sampleRate: number;
   duration: number;
 };
-const TREE_SAMPLE_RATE = 22000;
+const TREE_SAMPLE_RATE = 1024;
 export async function generateWaveformSummary(
   audioContext: AudioContext,
   file: File,
 ): Promise<Summary> {
-  console.log("Starting generateWaveformSummary");
   const arrayBuffer = await file.arrayBuffer();
-  console.log("ArrayBuffer loaded");
   const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-  console.log("AudioBuffer decoded", audioBuffer);
   if (audioBuffer.numberOfChannels > 2) {
     throw new Error("Only mono and stereo files are supported");
   } else if (audioBuffer.numberOfChannels === 1) {
-    console.log("Processing mono audio");
     const tree = await constructTree(
       audioBuffer.getChannelData(0),
       TREE_SAMPLE_RATE,
       0,
-      audioBuffer.duration,
+      audioBuffer.getChannelData(0).length,
       0,
       "mono",
     );
@@ -50,10 +46,8 @@ export async function generateWaveformSummary(
       sampleRate: audioBuffer.sampleRate,
       duration: audioBuffer.duration,
     };
-    console.log("Mono summary generated", summary);
     return summary;
   } else {
-    console.log("Processing stereo audio");
     const channelOne = audioBuffer.getChannelData(0);
     const channelTwo = audioBuffer.getChannelData(1);
     const channelMid = channelOne.map(
@@ -69,7 +63,7 @@ export async function generateWaveformSummary(
           channelMid,
           TREE_SAMPLE_RATE,
           0,
-          audioBuffer.duration,
+          audioBuffer.getChannelData(0).length,
           0,
           "mono",
         ),
@@ -77,7 +71,7 @@ export async function generateWaveformSummary(
           channelOne,
           TREE_SAMPLE_RATE,
           0,
-          audioBuffer.duration,
+          audioBuffer.getChannelData(0).length,
           0,
           "left",
         ),
@@ -85,7 +79,7 @@ export async function generateWaveformSummary(
           channelTwo,
           TREE_SAMPLE_RATE,
           0,
-          audioBuffer.duration,
+          audioBuffer.getChannelData(0).length,
           0,
           "right",
         ),
@@ -93,7 +87,7 @@ export async function generateWaveformSummary(
           channelSide,
           TREE_SAMPLE_RATE,
           0,
-          audioBuffer.duration,
+          audioBuffer.getChannelData(0).length,
           0,
           "side",
         ),
@@ -114,10 +108,6 @@ async function constructTree(
   depth: number = 0,
   channel: string,
 ): Promise<TreeNode> {
-  console.log(
-    `Constructing tree for ${channel} channel, data length:`,
-    data.length,
-  );
   if (data.length <= minSamples) {
     const node = {
       max: Math.max(...data),
@@ -127,9 +117,6 @@ async function constructTree(
       sampleStart: startTime,
       sampleEnd: endTime,
     };
-    if (depth <= 2) {
-      console.log(`Leaf node created for ${channel} channel`, node);
-    }
     return node;
   } else {
     const midIndex = Math.floor(data.length / 2);
@@ -162,9 +149,43 @@ async function constructTree(
       left: left,
       right: right,
     };
-    if (depth <= 2) {
-      console.log(`Internal node created for ${channel} channel`, node);
-    }
     return node;
+  }
+}
+
+export function getSlice(
+  tree: TreeNode,
+  start: number,
+  end: number,
+): { high: number; low: number; avg: number } {
+  // if end - start is less than TREE_SAMPLE_RATE, return the node
+  // if end - start is greater than TREE_SAMPLE_RATE, recurse into the children
+  //    if start and end are within the left child, recurse into the left child
+  //    if start and end are within the right child, recurse into the right child
+  //    if start is within the left child and end is within the right child, return the avg of the two children
+  if (end - start <= TREE_SAMPLE_RATE) {
+    return {
+      high: tree.max,
+      low: tree.min,
+      avg: tree.avg,
+    };
+  }
+
+  const mid = (tree.sampleStart + tree.sampleEnd) / 2;
+
+  if (start >= mid) {
+    return getSlice(tree.right, start, end);
+  } else if (end <= mid) {
+    return getSlice(tree.left, start, end);
+  } else {
+    const leftSlice = getSlice(tree.left, start, mid);
+    const rightSlice = getSlice(tree.right, mid, end);
+    return {
+      high: Math.max(leftSlice.high, rightSlice.high),
+      low: Math.min(leftSlice.low, rightSlice.low),
+      avg:
+        (leftSlice.avg * (mid - start) + rightSlice.avg * (end - mid)) /
+        (end - start),
+    };
   }
 }

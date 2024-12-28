@@ -16,13 +16,24 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
   const dispatch = useDispatch();
   const workspaceRef = useRef<HTMLDivElement | null>(null);
   const [workspaceWidth, setWorkspaceWidth] = useState<number>(0);
-  const [leftMenuWidth, setLeftMenuWidth] = useState<number>(0);
+  const [workspaceHeight, setWorkspaceHeight] = useState<number>(0);
+  const [leftMenuWidth, setLeftMenuWidth] = useState<number>(32 + 256);
 
   useLayoutEffect(() => {
-    if (workspaceRef.current) {
-      setWorkspaceWidth(workspaceRef.current.offsetWidth);
-    }
-  }, []);
+    const updateWorkspaceDimensions = () => {
+      if (workspaceRef.current) {
+        setWorkspaceWidth(workspaceRef.current.offsetWidth - leftMenuWidth);
+        setWorkspaceHeight(window.innerHeight - 26);
+      }
+    };
+
+    updateWorkspaceDimensions();
+
+    window.addEventListener("resize", updateWorkspaceDimensions);
+    return () => {
+      window.removeEventListener("resize", updateWorkspaceDimensions);
+    };
+  }, [leftMenuWidth]);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey) {
@@ -123,7 +134,18 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
         leftMenuWidth={leftMenuWidth}
         workspaceWidth={workspaceWidth}
       />
-      <PlaybackArea />
+      <PlaybackArea
+        style={{
+          position: "absolute",
+          top: "26px",
+          right: "0px",
+          width: `${workspaceWidth}px`,
+          height: `${workspaceHeight}px`,
+        }}
+        leftMenuWidth={leftMenuWidth}
+        workspaceWidth={workspaceWidth}
+        workspaceHeight={workspaceHeight}
+      />
       <ShortcutLegend />
     </div>
   );

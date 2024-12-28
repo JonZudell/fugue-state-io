@@ -83,6 +83,7 @@ const playbackSlice = createSlice({
   initialState,
   reducers: {
     setMedia: (state: PlaybackState, action: PayloadAction<FileState>) => {
+      console.log("Setting media to", action.payload);
       state.media = action.payload;
     },
     setVolume: (state: PlaybackState, action: PayloadAction<number>) => {
