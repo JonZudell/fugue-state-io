@@ -94,12 +94,14 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
         style={{ width: "2px" }}
         className={`${width <= smallestSize && mouseDown ? "bg-blue-600" : "bg-gray-600"} h-screen float-left flex flex-col menu-height`}
         onMouseDown={handleMouseDown}
+        onDragStart={(e) => e.preventDefault()}
       />
       <div>
         {width > smallestSize ? (
           <div
             style={{ width: `${Math.max(width, smallestSize / 2)}px` }}
             className="drawer bg-gray-800 h-screen float-left flex flex-col justify-between undraggable"
+            onDragStart={(e) => e.preventDefault()}
           >
             {initialState[activeTab - 1].tabContent}
           </div>
@@ -111,11 +113,13 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
           }}
           className={`bg-gray-800 h-screen float-left clickable-area menu-height`}
           onMouseDown={handleMouseDown}
+          onDragStart={(e) => e.preventDefault()}
         />
         <div
           style={{ width: "2px", cursor: "ew-resize" }}
           className={`h-screen float-left clickable-area ${mouseDown ? "bg-blue-600" : "bg-gray-600 menu-height"}`}
           onMouseDown={handleMouseDown}
+          onDragStart={(e) => e.preventDefault()}
         />
       </div>
     </>

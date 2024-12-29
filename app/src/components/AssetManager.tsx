@@ -27,9 +27,9 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
     }
   };
   return (
-    <div className={`asset-manager m-4 ${focused ? "focused" : ""}`}>
+    <div className={`asset-manager m-4 ${focused ? "focused" : ""} unselectable`}>
       <div
-        className="upload-placeholder"
+        className="upload-placeholder unselectable"
         style={{
           border: "2px dashed #ccc",
           borderRadius: "8px",
@@ -37,9 +37,9 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
           textAlign: "center",
         }}
       >
-        <FontAwesomeIcon icon={faFileUpload} className="w-8 h-8" />
-        <p>Drag to upload!</p>
-        <p>-or-</p>
+        <FontAwesomeIcon icon={faFileUpload} className="w-8 h-8 unselectable" />
+        <p className="unselectable">Drag to upload!</p>
+        <p className="unselectable">-or-</p>
         <input
           type="file"
           onChange={handleFileUpload}
@@ -48,15 +48,15 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
           style={{ display: "none" }}
           id="file-upload"
         />
-        <label htmlFor="file-upload" className="cursor-pointer text-blue-500">
+        <label htmlFor="file-upload" className="cursor-pointer text-blue-500 unselectable">
           Click to upload files
         </label>
       </div>
       {files.files.length > 0 && (
-        <CollapseMenu title={"All Assets"}>
-          <div className="content">
+        <CollapseMenu title={"All Assets"} className="unselectable">
+          <div className="content unselectable">
             {files.files.map((file: { name: string }, index: Key) => (
-              <div key={index}>{file.name}</div>
+              <div key={index} className="unselectable">{file.name}</div>
             ))}
           </div>
         </CollapseMenu>

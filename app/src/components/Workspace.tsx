@@ -140,11 +140,12 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
           top: "26px",
           right: "0px",
           width: `${workspaceWidth}px`,
-          height: `${workspaceHeight - 100}px`,
+          height: `${workspaceHeight - 85}px`,
         }}
         leftMenuWidth={leftMenuWidth}
         workspaceWidth={workspaceWidth}
-        workspaceHeight={workspaceHeight - 100}
+        workspaceHeight={workspaceHeight - 85}
+        menuHeight={85}
       />
       <ShortcutLegend />
     </div>

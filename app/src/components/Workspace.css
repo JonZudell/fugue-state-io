@@ -1,3 +1,6 @@
 .workspace {
   overflow: hidden;
 }
+div {
+  -webkit-user-drag: none;
+}

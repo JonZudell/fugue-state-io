@@ -99,11 +99,11 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       style={{ height: height, width: width }}
     >
       {media && (
-        <div className="py-4 flex items-center">
-          <button disabled={!enabled} className="mx-1">
+        <div className={`flex items-center ${looping ? "looping" : "not-looping"}`}>
+          <button disabled={!enabled} className="mx-1" draggable="false">
             <FontAwesomeIcon className="h-8 w-8" icon={faChevronLeft} />
           </button>
-          <button className="mx-1" onClick={togglePlay} disabled={!enabled}>
+          <button className="mx-1" onClick={togglePlay} disabled={!enabled} draggable="false">
             <FontAwesomeIcon
               className="h-8 w-8"
               icon={playing ? faPause : faPlay}
@@ -113,6 +113,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             className="mx-1"
             onClick={handleToggleLooping}
             disabled={!enabled}
+            draggable="false"
           >
             <FontAwesomeIcon
               className="h-8 w-8"
@@ -120,22 +121,27 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               style={{ color: looping ? "green" : "white" }}
             />
           </button>
-          <button disabled={!enabled} className="mx-1">
+          <button disabled={!enabled} className="mx-1" draggable="false">
             <FontAwesomeIcon className="h-8 w-8" icon={faChevronRight} />
           </button>
           <div className="flex-grow">
             <div className={`flex flex-col ${looping ? "visible" : "hidden"}`}>
               <div className="flex justify-between">
-                <span>{formatTime(loopStart, media.duration)}</span>
-                <span>{formatTime(loopEnd, media.duration)}</span>
+                <span style={{ userSelect: "none" }}>
+                  {formatTime(loopStart, media.duration)}
+                </span>
+                <span style={{ userSelect: "none" }}>
+                  {formatTime(loopEnd, media.duration)}
+                </span>
               </div>
               <SpanSlider
                 callback={handleSpanSliderChange}
                 enabled={!playing}
               />
             </div>
+            {!looping &&  <div className="elapsed-bar-buffer" />}
             <input
-              className="elapsed-bar w-full"
+              className={`elapsed-bar w-full`}
               type="range"
               min="0"
               step={0.01}
@@ -144,12 +150,13 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               onMouseDown={handleMouseDown}
               onMouseUp={handleMouseUp}
               onChange={handleTimeElapsedChange}
+              draggable="false"
             />
             <div className="flex justify-between">
-              <span>
+              <span style={{ userSelect: "none" }}>
                 {new Date(timeElapsed * 1000).toISOString().substr(12, 7)}
               </span>
-              <span>
+              <span style={{ userSelect: "none" }}>
                 {" "}
                 -{new Date((media.duration - timeElapsed) * 1000)
                   .toISOString()

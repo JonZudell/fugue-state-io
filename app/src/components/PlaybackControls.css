@@ -59,9 +59,7 @@
   border-radius: 5px;
 }
 .playback-controls {
-  display: flex;
   float: left;
-  align-items: center;
 }
 
 .flex-grow {
@@ -72,4 +70,17 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
+}
+
+.looping {
+  padding-top: 4px;
+}
+
+.not-looping {
+  padding-top: 4px;
+}
+
+.elapsed-bar-buffer {
+height: 34px;
+width: 100%;
 }

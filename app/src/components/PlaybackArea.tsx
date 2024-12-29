@@ -27,12 +27,14 @@ interface PlaybackAreaProps {
   workspaceHeight: number;
   style: React.CSSProperties;
   leftMenuWidth: number;
+  menuHeight: number;
 }
 
 const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   workspaceHeight,
   workspaceWidth,
   style,
+  menuHeight
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const playing = useSelector(selectPlaying);
@@ -182,7 +184,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
       {media && (
         <PlaybackControls
           width={workspaceWidth}
-          height={100}
+          height={menuHeight}
           enabled={true}
           loopEnd={loopEnd}
           setLoopEnd={(end: number) => {
