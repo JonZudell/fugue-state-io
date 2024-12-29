@@ -17,7 +17,7 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
   const workspaceRef = useRef<HTMLDivElement | null>(null);
   const [workspaceWidth, setWorkspaceWidth] = useState<number>(0);
   const [workspaceHeight, setWorkspaceHeight] = useState<number>(0);
-  const [leftMenuWidth, setLeftMenuWidth] = useState<number>(32 + 256);
+  const [leftMenuWidth, setLeftMenuWidth] = useState<number>(73 + 256);
 
   useLayoutEffect(() => {
     const updateWorkspaceDimensions = () => {
@@ -140,11 +140,11 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
           top: "26px",
           right: "0px",
           width: `${workspaceWidth}px`,
-          height: `${workspaceHeight}px`,
+          height: `${workspaceHeight - 100}px`,
         }}
         leftMenuWidth={leftMenuWidth}
         workspaceWidth={workspaceWidth}
-        workspaceHeight={workspaceHeight}
+        workspaceHeight={workspaceHeight - 100}
       />
       <ShortcutLegend />
     </div>

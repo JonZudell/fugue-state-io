@@ -21,6 +21,8 @@ import SpanSlider from "./SpanSlider";
 interface PlaybackControlsProps {
   enabled?: boolean;
   timeElapsed: number;
+  width: number;
+  height: number;
   isDraggingRef: React.RefObject<boolean>;
   isPlayingBeforeDragRef: React.RefObject<boolean>;
   videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -45,6 +47,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   setLoopEnd,
   videoRef,
   className = "",
+  height,
+  width,
 }) => {
   const dispatch = useDispatch();
   const media = useSelector(selectMedia);
@@ -82,7 +86,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     console.log(percent, duration);
     const date = new Date(percent * duration * 1000);
     console.log(date);
-    return date.toISOString().substr(11, 8);
+    return date.toISOString().substr(12, 7);
   };
 
   const handleToggleLooping = () => {
@@ -91,56 +95,17 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
   return (
     <div
-      className={`playback-controls-container items-center flex-grow  ${className}`}
+      className="playback-controls bg-gray-800 text-white px-4"
+      style={{ height: height, width: width }}
     >
-      <div className="playback-controls text-white text-center mb-2">
-        {media && (
-          <div>
-            {looping && (
-              <>
-                <span className="float-left">
-                  {formatTime(loopStart, media.duration)}
-                </span>
-                <span className="float-right">
-                  {formatTime(loopEnd, media.duration)}
-                </span>
-                <SpanSlider
-                  callback={handleSpanSliderChange}
-                  enabled={!playing}
-                />
-              </>
-            )}
-            <input
-              className="elapsed-bar"
-              type="range"
-              min="0"
-              step={0.01}
-              max="100"
-              value={(timeElapsed / media.duration) * 100}
-              onMouseDown={handleMouseDown}
-              onMouseUp={handleMouseUp}
-              onChange={handleTimeElapsedChange}
-            />
-            <span className="float-left">
-              {new Date(timeElapsed * 1000).toISOString().substr(11, 8)}
-            </span>
-            <span className="float-right">
-              {" "}
-              -{" "}
-              {new Date((media.duration - timeElapsed) * 1000)
-                .toISOString()
-                .substr(11, 8)}
-            </span>
-          </div>
-        )}
-        <br />
-        <div className="mx-auto justify-center py-4">
+      {media && (
+        <div className="py-4 flex items-center">
           <button disabled={!enabled} className="mx-1">
-            <FontAwesomeIcon className="h-4 w-4" icon={faChevronLeft} />
+            <FontAwesomeIcon className="h-8 w-8" icon={faChevronLeft} />
           </button>
           <button className="mx-1" onClick={togglePlay} disabled={!enabled}>
             <FontAwesomeIcon
-              className="h-4 w-4"
+              className="h-8 w-8"
               icon={playing ? faPause : faPlay}
             />
           </button>
@@ -150,16 +115,50 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             disabled={!enabled}
           >
             <FontAwesomeIcon
-              className="h-4 w-4"
+              className="h-8 w-8"
               icon={faRepeat}
               style={{ color: looping ? "green" : "white" }}
             />
           </button>
           <button disabled={!enabled} className="mx-1">
-            <FontAwesomeIcon className="h-4 w-4" icon={faChevronRight} />
+            <FontAwesomeIcon className="h-8 w-8" icon={faChevronRight} />
           </button>
+          <div className="flex-grow">
+            <div className={`flex flex-col ${looping ? "visible" : "hidden"}`}>
+              <div className="flex justify-between">
+                <span>{formatTime(loopStart, media.duration)}</span>
+                <span>{formatTime(loopEnd, media.duration)}</span>
+              </div>
+              <SpanSlider
+                callback={handleSpanSliderChange}
+                enabled={!playing}
+              />
+            </div>
+            <input
+              className="elapsed-bar w-full"
+              type="range"
+              min="0"
+              step={0.01}
+              max="100"
+              value={(timeElapsed / media.duration) * 100}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onChange={handleTimeElapsedChange}
+            />
+            <div className="flex justify-between">
+              <span>
+                {new Date(timeElapsed * 1000).toISOString().substr(12, 7)}
+              </span>
+              <span>
+                {" "}
+                -{new Date((media.duration - timeElapsed) * 1000)
+                  .toISOString()
+                  .substr(12, 7)}
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

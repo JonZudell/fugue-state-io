@@ -13,15 +13,17 @@ interface WaveformVisualizerProps {
   startPercentage?: number;
   endPercentage?: number;
   height?: number;
+  displayRatio?: number;
 }
 
 const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   media,
-  channel = "L",
+  channel = "LR",
   startPercentage = 0,
   endPercentage = 100,
   width = 1000,
   height = 200,
+  displayRatio = 0.5,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timeElapsed = useSelector(selectTimeElapsed);
@@ -95,12 +97,74 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
             const yMax = ((1 - slice.high) * canvas.height) / 2;
             ctx.fillRect(i, yMin, 1, yMax - yMin);
           }
+        } else if (channel === "MID") {
+          ctx.fillStyle = "white";
+          const channelSummary = media.summary.channels.mono?.count || 0;
+          const startCount = Math.floor(
+            (channelSummary * startPercentage) / 100,
+          );
+          const endCount = Math.floor((channelSummary * endPercentage) / 100);
+          const samples = endCount - startCount;
+          const samplesPerPixel = samples / canvas.width;
+          const data = media.summary.channels.mono;
+          if (!data) {
+            return;
+          }
+          for (let i = 0; i < canvas.width; i++) {
+            const start = startCount + i * samplesPerPixel;
+            const end = start + samplesPerPixel;
+            const slice = getSlice(data, start, end);
+            const yMin = ((1 - slice.low) * canvas.height) / 2;
+            const yMax = ((1 - slice.high) * canvas.height) / 2;
+            ctx.fillRect(i, yMin, 1, yMax - yMin);
+          }
+        } else if (channel === "LR") {
+          ctx.fillStyle = "white";
+          const channelSummary = media.summary.channels.left?.count || 0;
+          const startCount = Math.floor(
+            (channelSummary * startPercentage) / 100,
+          );
+          const endCount = Math.floor((channelSummary * endPercentage) / 100);
+          const samples = endCount - startCount;
+          const samplesPerPixel = samples / canvas.width;
+          const data = media.summary.channels.left;
+          if (!data) {
+            return;
+          }
+          for (let i = 0; i < canvas.width; i++) {
+            const start = startCount + i * samplesPerPixel;
+            const end = start + samplesPerPixel;
+            const slice = getSlice(data, start, end);
+            const yMin = ((1 - slice.low) * canvas.height) / 4;
+            const yMax = ((1 - slice.high) * canvas.height) / 4;
+            ctx.fillRect(i, yMin, 1, yMax - yMin);
+          }
+          const dataRight = media.summary.channels.right;
+          if (!dataRight) {
+            return;
+          }
+          for (let i = 0; i < canvas.width; i++) {
+            const start = startCount + i * samplesPerPixel;
+            const end = start + samplesPerPixel;
+            const slice = getSlice(dataRight, start, end);
+            const yMin = ((1 - slice.low) * canvas.height) / 4;
+            const yMax = ((1 - slice.high) * canvas.height) / 4;
+            ctx.fillRect(i, yMin + (canvas.height * 2) / 4, 1, yMax - yMin);
+          }
         }
       }
     };
 
     drawWaveform();
-  }, [timeElapsed, channel, startPercentage, endPercentage, media, width]);
+  }, [
+    timeElapsed,
+    channel,
+    startPercentage,
+    endPercentage,
+    media,
+    width,
+    height,
+  ]);
 
   return (
     <canvas
@@ -108,7 +172,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
       width={width}
       height={height}
       className="w-full"
-      style={{ width: "100%", height: "50%" }}
+      style={{ width: "100%", height: `${displayRatio * 100}%` }}
     ></canvas>
   );
 };

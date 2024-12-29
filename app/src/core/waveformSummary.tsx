@@ -158,11 +158,6 @@ export function getSlice(
   start: number,
   end: number,
 ): { high: number; low: number; avg: number } {
-  // if end - start is less than TREE_SAMPLE_RATE, return the node
-  // if end - start is greater than TREE_SAMPLE_RATE, recurse into the children
-  //    if start and end are within the left child, recurse into the left child
-  //    if start and end are within the right child, recurse into the right child
-  //    if start is within the left child and end is within the right child, return the avg of the two children
   if (end - start <= TREE_SAMPLE_RATE) {
     return {
       high: tree.max,
@@ -174,10 +169,14 @@ export function getSlice(
   const mid = (tree.sampleStart + tree.sampleEnd) / 2;
 
   if (start >= mid) {
+    if (!tree.right) throw new Error("Right child is undefined");
     return getSlice(tree.right, start, end);
   } else if (end <= mid) {
+    if (!tree.left) throw new Error("Left child is undefined");
     return getSlice(tree.left, start, end);
   } else {
+    if (!tree.left || !tree.right)
+      throw new Error("Left or right child is undefined");
     const leftSlice = getSlice(tree.left, start, mid);
     const rightSlice = getSlice(tree.right, mid, end);
     return {

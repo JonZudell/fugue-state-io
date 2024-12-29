@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, useLayoutEffect, use } from "react";
+import { useEffect, useRef, useState } from "react";
 import PlaybackControls from "./PlaybackControls";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -14,10 +14,13 @@ import {
   selectLooping,
   setMedia,
   uploadFile,
+  selectLayout,
+  selectDisplayMode,
 } from "../store/playbackSlice";
 import "./PlaybackArea.css";
 import WaveformVisualizer from "./WaveformVisualizer";
 import { AppDispatch } from "../store";
+import Minimap from "./Minimap";
 interface PlaybackAreaProps {
   focused?: false;
   workspaceWidth: number;
@@ -38,6 +41,8 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
   const looping = useSelector(selectLooping);
+  const layout = useSelector(selectLayout);
+  const displayMode = useSelector(selectDisplayMode);
 
   const isDraggingRef = useRef(false);
   const isPlayingBeforeDragRef = useRef(false);
@@ -45,13 +50,6 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const videoRef2 = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [activeVideo, setActiveVideo] = useState(1);
-  const [bufferWidth, setBufferWidth] = useState(0);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      console.log("Workspace dimensions", workspaceWidth, workspaceHeight);
-    }
-  }, [workspaceHeight, workspaceWidth]);
 
   useEffect(() => {
     if (videoRef1.current && videoRef2.current) {
@@ -125,17 +123,16 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
     }
   }, [media, videoRef1, dispatch]);
 
-  const handleLoadedMetadata = () => {
-    if (videoRef1.current) {
-      videoRef1.current.currentTime = timeElapsed;
-      if (media) {
-        dispatch(uploadFile(media)); // Dispatch the media object without videoRef
-      }
-    }
-  };
-
   return (
     <div className="playbackarea" ref={containerRef} style={style}>
+      {media && (
+        <Minimap
+          media={media}
+          height={workspaceHeight / 10}
+          width={workspaceWidth}
+          displayRatio={1 / 10}
+        ></Minimap>
+      )}
       <div className="video-container">
         {media && (
           <div className="video-wrapper flex">
@@ -144,12 +141,12 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               controls={false}
               className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
               loop={false}
-              onLoadedMetadata={handleLoadedMetadata}
               style={{
-                maxHeight: `${workspaceHeight}px`,
+                maxHeight: `${(workspaceHeight / 10) * 4.5}px`,
                 maxWidth: `${workspaceWidth}px`,
                 width: `${workspaceWidth}px`,
-                height: `${workspaceHeight}px`,
+                height: `${((workspaceHeight) / 10) * 4.5}px`,
+                zIndex: -1,
               }}
             >
               <source src={media.url} type={media.fileType} />
@@ -160,7 +157,13 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               controls={false}
               className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
               loop={false}
-              onLoadedMetadata={handleLoadedMetadata}
+              style={{
+                maxHeight: `${(workspaceHeight / 10) * 4.5}px`,
+                maxWidth: `${workspaceWidth}px`,
+                width: `${workspaceWidth}px`,
+                height: `${(workspaceHeight / 10) * 4.5}px`,
+                zIndex: -1,
+              }}
             >
               <source src={media.url} type={media.fileType} />
               Your browser does not support the video tag.
@@ -168,15 +171,18 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           </div>
         )}
       </div>
-      {/* {media && (
+      {media && (
         <WaveformVisualizer
           media={media}
-          width={dimensions.width}
-          height={dimensions.height / 2}
+          width={workspaceWidth}
+          height={((workspaceHeight) / 10) * 4.5}
+          displayRatio={4.5 / 10}
         />
-      )} */}
-      {/* {media && (
+      )}
+      {media && (
         <PlaybackControls
+          width={workspaceWidth}
+          height={100}
           enabled={true}
           loopEnd={loopEnd}
           setLoopEnd={(end: number) => {
@@ -192,7 +198,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           videoRef={activeVideo === 1 ? videoRef1 : videoRef2}
           className="absolute bottom-0 left-0 right-0"
         />
-      )} */}
+      )}
     </div>
   );
 };
