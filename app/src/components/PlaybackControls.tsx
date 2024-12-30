@@ -83,9 +83,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     }
   };
   const formatTime = (percent: number, duration: number) => {
-    console.log(percent, duration);
     const date = new Date(percent * duration * 1000);
-    console.log(date);
     return date.toISOString().substr(12, 7);
   };
 

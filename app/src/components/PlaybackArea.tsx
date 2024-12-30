@@ -12,11 +12,9 @@ import {
   setLoopEnd,
   setLoopStart,
   selectLooping,
-  setMedia,
   uploadFile,
-  selectLayout,
-  selectDisplayMode,
 } from "../store/playbackSlice";
+import { selectDisplayMode, selectLayout, setDisplayMode } from "../store/displaySlice";
 import "./PlaybackArea.css";
 import WaveformVisualizer from "./WaveformVisualizer";
 import { AppDispatch } from "../store";
@@ -29,6 +27,24 @@ interface PlaybackAreaProps {
   leftMenuWidth: number;
   menuHeight: number;
 }
+
+const displayModeTemplateVideoWaveform = {
+  "minimap": 0.1,
+  "video": .45,
+  "waveform": .45,
+};
+
+const displayModeTemplateWaveform = {
+  "minimap": 0.1,
+  "video": 0,
+  "waveform": 0.9,
+};
+
+const displayModeTemplateVideo = {
+  "minimap": 0.1,
+  "video": 0.9,
+  "waveform": 0,
+};
 
 const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   workspaceHeight,
@@ -43,8 +59,8 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
   const looping = useSelector(selectLooping);
-  const layout = useSelector(selectLayout);
   const displayMode = useSelector(selectDisplayMode);
+  const [displayRatios, setDisplayRatios] = useState(displayModeTemplateVideoWaveform);
 
   const isDraggingRef = useRef(false);
   const isPlayingBeforeDragRef = useRef(false);
@@ -52,6 +68,28 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const videoRef2 = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [activeVideo, setActiveVideo] = useState(1);
+
+  useEffect(() => {
+    if (displayMode === "waveform-video") {
+      setDisplayRatios(displayModeTemplateVideoWaveform);
+    } else if (displayMode === "waveform") {
+      setDisplayRatios(displayModeTemplateWaveform);
+    } else if (displayMode === "video") {
+      setDisplayRatios(displayModeTemplateVideo);
+    } else {
+      setDisplayRatios(displayModeTemplateWaveform);
+    }
+  }, [displayMode]);
+
+  useEffect(() => {
+    if (media) {
+      if (media.fileType.startsWith("video")) {
+        dispatch(setDisplayMode("waveform-video"));
+      } else {
+        dispatch(setDisplayMode("waveform"));
+      }
+    }
+}, [dispatch, media])
 
   useEffect(() => {
     if (videoRef1.current && videoRef2.current) {
@@ -133,10 +171,12 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           height={workspaceHeight / 10}
           width={workspaceWidth}
           displayRatio={1 / 10}
+          startPercentage={loopStart * 100}
+          endPercentage={loopEnd * 100}
         ></Minimap>
       )}
       <div className="video-container">
-        {media && (
+        {media && displayRatios['video'] > 0 && (
           <div className="video-wrapper flex">
             <video
               ref={videoRef1}
@@ -144,10 +184,10 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
               loop={false}
               style={{
-                maxHeight: `${(workspaceHeight / 10) * 4.5}px`,
+                maxHeight: `${workspaceHeight  * displayRatios['video']}px`,
                 maxWidth: `${workspaceWidth}px`,
                 width: `${workspaceWidth}px`,
-                height: `${((workspaceHeight) / 10) * 4.5}px`,
+                height: `${workspaceHeight * displayRatios['video']}px`,
                 zIndex: -1,
               }}
             >
@@ -160,10 +200,10 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
               loop={false}
               style={{
-                maxHeight: `${(workspaceHeight / 10) * 4.5}px`,
+                maxHeight: `${workspaceHeight * displayRatios['video']}px`,
                 maxWidth: `${workspaceWidth}px`,
                 width: `${workspaceWidth}px`,
-                height: `${(workspaceHeight / 10) * 4.5}px`,
+                height: `${workspaceHeight * displayRatios['video']}px`,
                 zIndex: -1,
               }}
             >
@@ -173,12 +213,14 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           </div>
         )}
       </div>
-      {media && (
+      {media && displayRatios['waveform'] > 0 && (
         <WaveformVisualizer
           media={media}
+          startPercentage={loopStart * 100}
+          endPercentage={loopEnd * 100}
           width={workspaceWidth}
-          height={((workspaceHeight) / 10) * 4.5}
-          displayRatio={4.5 / 10}
+          height={workspaceHeight * displayRatios['waveform']}
+          displayRatio={displayRatios['waveform']}
         />
       )}
       {media && (
@@ -200,6 +242,14 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           videoRef={activeVideo === 1 ? videoRef1 : videoRef2}
           className="absolute bottom-0 left-0 right-0"
         />
+      )}
+      {!media && (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <h2>New Project!</h2>
+            <h3>Upload media to get started</h3>
+          </div>
+        </div>
       )}
     </div>
   );

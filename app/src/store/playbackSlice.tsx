@@ -11,16 +11,6 @@ interface PlaybackState {
   volume: number;
   loopStart: number;
   loopEnd: number;
-  displayMode:
-    | "waveform"
-    | "spectrogram"
-    | "video"
-    | "waveform-spectrogram"
-    | "waveform-video"
-    | "spectrogram-video"
-    | "waveform-spectrogram-video";
-  layout: "stacked" | "side-by-side";
-  minimap: boolean;
 }
 
 const initialState: PlaybackState = {
@@ -32,8 +22,6 @@ const initialState: PlaybackState = {
   volume: 1,
   loopStart: 0,
   loopEnd: 0,
-  displayMode: "waveform-video",
-  layout: "stacked",
 };
 
 export const selectMedia = (state: { playback: { media: FileState } }) =>
@@ -51,11 +39,6 @@ export const selectLoopEnd = (state: { playback: { loopEnd: number } }) =>
   state.playback.loopEnd;
 export const selectLooping = (state: { playback: { looping: boolean } }) =>
   state.playback.looping;
-export const selectDisplayMode = (state: {
-  playback: { displayMode: string };
-}) => state.playback.displayMode;
-export const selectLayout = (state: { playback: { layout: string } }) =>
-  state.playback.layout;
 
 export const uploadFile = createAsyncThunk(
   "playback/uploadFile",
@@ -98,7 +81,6 @@ const playbackSlice = createSlice({
   initialState,
   reducers: {
     setMedia: (state: PlaybackState, action: PayloadAction<FileState>) => {
-      console.log("Setting media to", action.payload);
       state.media = action.payload;
     },
     setVolume: (state: PlaybackState, action: PayloadAction<number>) => {
@@ -136,18 +118,6 @@ const playbackSlice = createSlice({
     setLooping: (state: PlaybackState, action: PayloadAction<boolean>) => {
       state.looping = action.payload;
     },
-    setDisplayMode: (
-      state: PlaybackState,
-      action: PayloadAction<PlaybackState["displayMode"]>,
-    ) => {
-      state.displayMode = action.payload;
-    },
-    setLayout: (
-      state: PlaybackState,
-      action: PayloadAction<PlaybackState["layout"]>,
-    ) => {
-      state.layout = action.payload;
-    },
     restartPlayback: (state: PlaybackState) => {
       if (state.media) {
         state.timeElapsed = state.loopStart * state.media.duration;
@@ -171,8 +141,6 @@ export const {
   setLoopStart,
   setLoopEnd,
   setLooping,
-  setDisplayMode,
-  setLayout,
   restartPlayback,
 } = playbackSlice.actions;
 export default playbackSlice.reducer;

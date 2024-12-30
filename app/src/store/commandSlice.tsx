@@ -56,15 +56,12 @@ const commandSlice = createSlice({
       }
     },
     setControlDown: (state: CommandState, action: PayloadAction<boolean>) => {
-      console.log("Setting controlDown to", action.payload);
       state.controlDown = action.payload;
     },
     setKDown: (state: CommandState, action: PayloadAction<boolean>) => {
-      console.log("Setting kDown to", action.payload);
       state.kDown = action.payload;
     },
     setEscDown: (state: CommandState, action: PayloadAction<boolean>) => {
-      console.log("Setting escDown to", action.payload);
       state.escPressed = action.payload;
     },
   },

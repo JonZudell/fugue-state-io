@@ -5,6 +5,8 @@ import {
   faUser,
   faMusic,
   IconDefinition,
+  faDisplay,
+  faTimeline,
 } from "@fortawesome/free-solid-svg-icons";
 import { JSX, useState } from "react";
 import "./LeftMenu.css";
@@ -30,6 +32,18 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
       style: { transform: "rotate(0)" },
       tabContent: <AssetManager />,
     },
+    {
+      id: 2,
+      icon: faDisplay,
+      style: { transform: "rotate(0)" },
+      tabContent: <div>Display</div>,
+    },
+    {
+      id: 3,
+      icon: faTimeline,
+      style: { transform: "rotate(0)" },
+      tabContent: <div>Timeline</div>,
+    }
   ],
   onWidthChange,
 }) => {

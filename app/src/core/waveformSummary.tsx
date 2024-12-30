@@ -22,7 +22,7 @@ export type Summary = {
   sampleRate: number;
   duration: number;
 };
-const TREE_SAMPLE_RATE = 1024;
+const TREE_SAMPLE_RATE = 2048;
 export async function generateWaveformSummary(
   audioContext: AudioContext,
   file: File,
@@ -95,7 +95,6 @@ export async function generateWaveformSummary(
       sampleRate: audioBuffer.sampleRate,
       duration: audioBuffer.duration,
     };
-    console.log("Stereo summary generated", summary);
     return summary;
   }
 }
@@ -158,7 +157,7 @@ export function getSlice(
   start: number,
   end: number,
 ): { high: number; low: number; avg: number } {
-  if (end - start <= TREE_SAMPLE_RATE) {
+  if (tree.sampleEnd - tree.sampleStart <= TREE_SAMPLE_RATE) {
     return {
       high: tree.max,
       low: tree.min,

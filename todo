@@ -1,0 +1,9 @@
+playback
+  volume
+  speed
+  eq
+menu
+  Display
+    FFT
+    Spectrogram
+  Flags

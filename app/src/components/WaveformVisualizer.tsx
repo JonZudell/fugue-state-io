@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { Summary } from "../core/waveformSummary";
-import { selectTimeElapsed } from "@/store/playbackSlice";
+import { selectLoopEnd, selectLoopStart, selectTimeElapsed } from "@/store/playbackSlice";
 import { useSelector } from "react-redux";
 import { FileState } from "@/store/filesSlice";
 import { getSlice } from "../core/waveformSummary";
@@ -14,6 +14,7 @@ interface WaveformVisualizerProps {
   endPercentage?: number;
   height?: number;
   displayRatio?: number;
+  crosshair?: boolean;
 }
 
 const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
@@ -24,9 +25,12 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   width = 1000,
   height = 200,
   displayRatio = 0.5,
+  crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timeElapsed = useSelector(selectTimeElapsed);
+  const loopStart = useSelector(selectLoopStart);
+  const loopEnd = useSelector(selectLoopEnd);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -152,19 +156,30 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
             ctx.fillRect(i, yMin + (canvas.height * 2) / 4, 1, yMax - yMin);
           }
         }
+        if (crosshair) {
+          ctx.strokeStyle = "red";
+          ctx.lineWidth = 1;
+          const percentFinished = timeElapsed / media.duration;
+          const x = (percentFinished - loopStart);
+          const diff = loopEnd - loopStart;
+          const x2 = x / diff * canvas.width;
+
+          ctx.beginPath();
+          ctx.moveTo(x2, 0);
+          ctx.lineTo(x2, canvas.height);
+          ctx.stroke();
+          ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.moveTo(x2, 0);
+          ctx.lineTo(x2, canvas.height);
+          ctx.stroke();
+        }
       }
     };
 
     drawWaveform();
-  }, [
-    timeElapsed,
-    channel,
-    startPercentage,
-    endPercentage,
-    media,
-    width,
-    height,
-  ]);
+  }, [timeElapsed, channel, startPercentage, endPercentage, media, width, height, crosshair, loopStart, loopEnd]);
 
   return (
     <canvas
