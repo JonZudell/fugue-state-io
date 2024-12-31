@@ -7,7 +7,15 @@ interface DisplayState {
   waveformEnabled: boolean;
   spectrogramEnabled: boolean;
   fourierEnabled: boolean;
-  layout: "single" | "stacked" | "side-by-side" | "stacked-top-side-by-side" | "stacked-bottom-side-by-side" | "side-by-side-left-stacked" | "side-by-side-right-stacked" | "four";
+  layout:
+    | "single"
+    | "stacked"
+    | "side-by-side"
+    | "stacked-top-side-by-side"
+    | "stacked-bottom-side-by-side"
+    | "side-by-side-left-stacked"
+    | "side-by-side-right-stacked"
+    | "four";
   layoutRatios: [number, number][];
   order: ("waveform" | "video" | "spectrogram" | "fourier")[];
   minimap: boolean;
@@ -16,13 +24,40 @@ interface DisplayState {
 
 const RatioMap: { [key: string]: [number, number][] } = {
   single: [[1, 1]],
-  stacked: [[1, 0.5], [1, 0.5]],
-  "side-by-side": [[0.5, 1], [0.5, 1]],
-  "stacked-top-side-by-side": [[0.5, 0.5], [0.5, 0.5], [1, 0.5]],
-  "stacked-bottom-side-by-side": [[1, 0.5], [0.5, 0.5], [0.5, 0.5]],
-  "side-by-side-left-stacked": [[0.5, 0.5], [0.5, 0.5], [0.5, 1]],
-  "side-by-side-right-stacked": [[0.5, 1], [0.5, 0.5], [0.5, 0.5]],
-  "four": [[0.5, 0.5], [0.5, 0.5], [0.5, 0.5], [0.5, 0.5]],
+  stacked: [
+    [1, 0.5],
+    [1, 0.5],
+  ],
+  "side-by-side": [
+    [0.5, 1],
+    [0.5, 1],
+  ],
+  "stacked-top-side-by-side": [
+    [0.5, 0.5],
+    [0.5, 0.5],
+    [1, 0.5],
+  ],
+  "stacked-bottom-side-by-side": [
+    [1, 0.5],
+    [0.5, 0.5],
+    [0.5, 0.5],
+  ],
+  "side-by-side-left-stacked": [
+    [0.5, 0.5],
+    [0.5, 0.5],
+    [0.5, 1],
+  ],
+  "side-by-side-right-stacked": [
+    [0.5, 1],
+    [0.5, 0.5],
+    [0.5, 0.5],
+  ],
+  four: [
+    [0.5, 0.5],
+    [0.5, 0.5],
+    [0.5, 0.5],
+    [0.5, 0.5],
+  ],
 };
 
 const initialState: DisplayState = {
@@ -87,7 +122,10 @@ const displaySlice = createSlice({
         state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
       }
     },
-    setWaveformEnabled: (state: DisplayState, action: PayloadAction<boolean>) => {
+    setWaveformEnabled: (
+      state: DisplayState,
+      action: PayloadAction<boolean>,
+    ) => {
       state.waveformEnabled = action.payload;
       if (action.payload) {
         state.numberOfDisplayItems = state.numberOfDisplayItems + 1;
@@ -95,7 +133,10 @@ const displaySlice = createSlice({
         state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
       }
     },
-    setSpectrogramEnabled: (state: DisplayState, action: PayloadAction<boolean>) => {
+    setSpectrogramEnabled: (
+      state: DisplayState,
+      action: PayloadAction<boolean>,
+    ) => {
       state.spectrogramEnabled = action.payload;
       if (action.payload) {
         state.numberOfDisplayItems = state.numberOfDisplayItems + 1;
@@ -103,7 +144,10 @@ const displaySlice = createSlice({
         state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
       }
     },
-    setFourierEnabled: (state: DisplayState, action: PayloadAction<boolean>) => {
+    setFourierEnabled: (
+      state: DisplayState,
+      action: PayloadAction<boolean>,
+    ) => {
       state.fourierEnabled = action.payload;
       if (action.payload) {
         state.numberOfDisplayItems = state.numberOfDisplayItems + 1;
@@ -111,7 +155,12 @@ const displaySlice = createSlice({
         state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
       }
     },
-    setOrder: (state: DisplayState, action: PayloadAction<("waveform" | "video" | "spectrogram" | "fourier")[]>) => {
+    setOrder: (
+      state: DisplayState,
+      action: PayloadAction<
+        ("waveform" | "video" | "spectrogram" | "fourier")[]
+      >,
+    ) => {
       state.order = action.payload;
     },
   },

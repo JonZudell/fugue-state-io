@@ -70,10 +70,8 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const spectrogramEnabled = useSelector(selectSpectrogramEnabled);
   const fourierEnabled = useSelector(selectFourierEnabled);
   const order = useSelector(selectOrder);
-  
+
   const [minimapRatios, setMinimapRatios] = useState(miniMapEnabled);
-
-
 
   const isDraggingRef = useRef(false);
   const isPlayingBeforeDragRef = useRef(false);
@@ -188,7 +186,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           endPercentage={loopEnd}
         ></Minimap>
       )}
-      
+
       {/* <div className="video-container">
         {media && displayRatios["video"] > 0 && (
           <div className="video-wrapper flex">
@@ -257,12 +255,16 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           className="absolute bottom-0 left-0 right-0"
         />
       )}
-      {media ? (order.length === 0 && <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <h2>No Display Settings!</h2>
-            <h3>Choose display setting to get started</h3>
+      {media ? (
+        order.length === 0 && (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center">
+              <h2>No Display Settings!</h2>
+              <h3>Choose display setting to get started</h3>
+            </div>
           </div>
-        </div>) : (
+        )
+      ) : (
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <h2>New Project!</h2>
@@ -270,7 +272,6 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           </div>
         </div>
       )}
-
     </div>
   );
 };
