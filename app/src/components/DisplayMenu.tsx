@@ -64,14 +64,14 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
           title="Waveform"
           onClick={() => dispatch(setWaveformEnabled(!waveformEnabled))}
         >
-          <FontAwesomeIcon icon={faVideo} className="h-6 w-6 m-2" />
+          <FontAwesomeIcon icon={faWaveSquare} className="h-6 w-6 m-2" />
         </div>
         <div
           className={`tooltip  ${videoEnabled ? "border border-gray-900 bg-gray-700 rounded" : "border border-gray-800"}`}
           title="Video"
           onClick={() => dispatch(setVideoEnabled(!videoEnabled))}
         >
-          <FontAwesomeIcon icon={faWaveSquare} className="h-6 w-6 m-2" />
+          <FontAwesomeIcon icon={faVideo} className="h-6 w-6 m-2" />
         </div>
         <div
           className={`tooltip  ${fourierEnabled ? "border border-gray-900 bg-gray-700 rounded" : "border border-gray-800"}`}

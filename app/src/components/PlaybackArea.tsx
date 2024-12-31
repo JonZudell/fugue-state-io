@@ -44,6 +44,89 @@ const miniMapDisabled = {
   remainder: 1,
 };
 
+const renderMediaComponent = (
+  type: string,
+  media: any,
+  videoRef: React.RefObject<HTMLVideoElement>,
+  workspaceWidth: number,
+  workspaceHeight: number,
+  minimapRatios: { minimap: number; remainder: number },
+  loopStart: number,
+  loopEnd: number
+) => {
+  switch (type) {
+    case "video":
+      return (
+        <video
+          ref={videoRef}
+          controls={false}
+          className="video-element"
+          loop={false}
+          style={{
+            maxWidth: `${workspaceWidth}px`,
+            width: `${workspaceWidth}px`,
+            maxHeight: `${workspaceHeight}px`,
+            height: `${workspaceHeight}px`,
+            zIndex: -1,
+          }}
+        >
+          <source src={media.url} type={media.fileType} />
+          Your browser does not support the video tag.
+        </video>
+      );
+    case "waveform":
+      return (
+        <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth}px`,
+                      width: `${workspaceWidth}px`,
+                      maxHeight: `${workspaceHeight}px`,
+                      height: `${workspaceHeight}px`,
+                    }}
+                  >
+        <WaveformVisualizer
+          media={media}
+          startPercentage={loopStart * 100}
+          endPercentage={loopEnd * 100}
+          width={workspaceWidth}
+          height={workspaceHeight}
+          displayRatioVertical={1}
+          displayRatioHorizontal={1}
+        />
+        </div>
+      );
+    case "spectrogram":
+      return (
+        <div
+          className="spectrogram-wrapper"
+          style={{
+            maxWidth: `${workspaceWidth}px`,
+            width: `${workspaceWidth}px`,
+            maxHeight: `${workspaceHeight}px`,
+            height: `${workspaceHeight}px`,
+            backgroundColor: "red",
+          }}
+        ></div>
+      );
+    case "fourier":
+      return (
+        <div
+          className="spectrogram-wrapper"
+          style={{
+            maxWidth: `${workspaceWidth}px`,
+            width: `${workspaceWidth}px`,
+            maxHeight: `${workspaceHeight}px`,
+            height: `${workspaceHeight}px`,
+            backgroundColor: "white",
+          }}
+        ></div>
+      );
+    default:
+      return null;
+  }
+};
+
 const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   workspaceHeight,
   workspaceWidth,
@@ -69,10 +152,8 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
 
   const isDraggingRef = useRef(false);
   const isPlayingBeforeDragRef = useRef(false);
-  const videoRef1 = useRef<HTMLVideoElement | null>(null);
-  const videoRef2 = useRef<HTMLVideoElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [activeVideo, setActiveVideo] = useState(1);
 
   useEffect(() => {
     if (minimap) {
@@ -83,54 +164,45 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   }, [minimap]);
 
   useEffect(() => {
-    if (videoRef1.current && videoRef2.current) {
-      const activeVideoRef =
-        activeVideo === 1 ? videoRef1.current : videoRef2.current;
+    if (videoRef.current) {
       if (playing) {
-        activeVideoRef.play();
+        videoRef.current.play();
       } else {
-        activeVideoRef.pause();
+        videoRef.current.pause();
       }
     }
-  }, [playing, activeVideo]);
+  }, [playing]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const activeVideoRef =
-        activeVideo === 1 ? videoRef1.current : videoRef2.current;
-      const inactiveVideoRef =
-        activeVideo === 1 ? videoRef2.current : videoRef1.current;
-
-      if (playing && activeVideoRef) {
+      if (playing && videoRef.current) {
         if (
           media &&
-          activeVideoRef.currentTime >= loopEnd * media.duration &&
+          videoRef.current.currentTime >= loopEnd * media.duration &&
           looping
         ) {
           const newTimeElapsed = loopStart * media.duration;
-          inactiveVideoRef?.play();
-          activeVideoRef.pause();
-          activeVideoRef.currentTime = newTimeElapsed;
-          setActiveVideo(activeVideo === 1 ? 2 : 1);
+          videoRef.current.currentTime = newTimeElapsed;
+          videoRef.current.play();
           dispatch(setTimeElapsed(newTimeElapsed));
         } else if (
           media &&
-          activeVideoRef.currentTime < loopStart * media.duration &&
+          videoRef.current.currentTime < loopStart * media.duration &&
           looping
         ) {
           const newTimeElapsed = loopStart * media.duration;
-          activeVideoRef.currentTime = newTimeElapsed;
-          activeVideoRef.play();
+          videoRef.current.currentTime = newTimeElapsed;
+          videoRef.current.play();
           dispatch(setTimeElapsed(newTimeElapsed));
-        } else if (media && activeVideoRef.currentTime >= media.duration) {
+        } else if (media && videoRef.current.currentTime >= media.duration) {
           const newTimeElapsed = media.duration;
-          activeVideoRef.currentTime = newTimeElapsed;
-          activeVideoRef.pause();
+          videoRef.current.currentTime = newTimeElapsed;
+          videoRef.current.pause();
         } else {
-          dispatch(setTimeElapsed(activeVideoRef.currentTime));
+          dispatch(setTimeElapsed(videoRef.current.currentTime));
         }
-      } else if (!playing && activeVideoRef) {
-        activeVideoRef.currentTime = timeElapsed;
+      } else if (!playing && videoRef.current) {
+        videoRef.current.currentTime = timeElapsed;
       }
     }, 10);
 
@@ -143,16 +215,15 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
     loopEnd,
     looping,
     loopStart,
-    activeVideo,
   ]);
 
   useEffect(() => {
-    if (media && videoRef1.current) {
+    if (media && videoRef.current) {
       if (media) {
         dispatch(uploadFile(media)); // Dispatch the media object without videoRef
       }
     }
-  }, [media, videoRef1, dispatch]);
+  }, [media, videoRef, dispatch]);
 
   return (
     <div className={`playback`} ref={containerRef} style={style}>
@@ -169,53 +240,20 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
 
       {media && layout === "single" && (
         <>
-          {order.includes("video") && (
-            <div className="video-wrapper">
-              <video
-                ref={videoRef1}
-                controls={false}
-                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth}px`,
-                  width: `${workspaceWidth}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-              <video
-                ref={videoRef2}
-                controls={false}
-                className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth}px`,
-                  width: `${workspaceWidth}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
+          {order.map((item, index) => (
+            <div key={index} className="media-wrapper">
+              {renderMediaComponent(
+                item,
+                media,
+                videoRef,
+                workspaceWidth,
+                workspaceHeight,
+                minimapRatios,
+                loopStart,
+                loopEnd
+              )}
             </div>
-          )}
-          {order.includes("waveform") && (
-            <WaveformVisualizer
-              media={media}
-              startPercentage={loopStart * 100}
-              endPercentage={loopEnd * 100}
-              width={workspaceWidth}
-              height={workspaceHeight}
-              displayRatioVertical={minimapRatios["remainder"]}
-              displayRatioHorizontal={1}
-            />
-          )}
+          ))}
         </>
       )}
       {media && layout === "side-by-side" && (
@@ -229,62 +267,15 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           {order.map((item, index) => {
             return (
               <div key={index} className="display-area-side-by-side">
-                {item === "video" && (
-                  <>
-                    <video
-                      ref={videoRef1}
-                      controls={false}
-                      className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                      loop={false}
-                      style={{
-                        maxWidth: `${workspaceWidth * 0.5}px`,
-                        width: `${workspaceWidth * 0.5}px`,
-                        maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                        height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                        zIndex: -1,
-                      }}
-                    >
-                      <source src={media.url} type={media.fileType} />
-                      Your browser does not support the video tag.
-                    </video>
-                    <video
-                      ref={videoRef2}
-                      controls={false}
-                      className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                      loop={false}
-                      style={{
-                        maxWidth: `${workspaceWidth * 0.5}px`,
-                        width: `${workspaceWidth * 0.5}px`,
-                        maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                        height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                        zIndex: -1,
-                      }}
-                    >
-                      <source src={media.url} type={media.fileType} />
-                      Your browser does not support the video tag.
-                    </video>{" "}
-                  </>
-                )}
-                {item === "waveform" && (
-                  <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder}px`,
-                    }}
-                  >
-                    <WaveformVisualizer
-                      media={media}
-                      startPercentage={loopStart * 100}
-                      endPercentage={loopEnd * 100}
-                      width={workspaceWidth * 0.5}
-                      height={workspaceHeight}
-                      displayRatioVertical={1}
-                      displayRatioHorizontal={1}
-                    />
-                  </div>
+                {renderMediaComponent(
+                  item,
+                  media,
+                  videoRef,
+                  workspaceWidth * 0.5,
+                  workspaceHeight,
+                  minimapRatios,
+                  loopStart,
+                  loopEnd
                 )}
               </div>
             );
@@ -301,44 +292,15 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           {order.map((item, index) => {
             return (
               <div key={index}>
-                {item === "video" && (
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth}px`,
-                      width: `${workspaceWidth}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-                {item === "waveform" && (
-                  <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth}px`,
-                      width: `${workspaceWidth}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    }}
-                  >
-                    <WaveformVisualizer
-                      media={media}
-                      startPercentage={loopStart * 100}
-                      endPercentage={loopEnd * 100}
-                      width={workspaceWidth}
-                      height={workspaceHeight * minimapRatios.remainder * 0.5}
-                      displayRatioVertical={1}
-                      displayRatioHorizontal={1}
-                    />
-                  </div>
+                {renderMediaComponent(
+                  item,
+                  media,
+                  videoRef,
+                  workspaceWidth,
+                  workspaceHeight * minimapRatios.remainder * 0.5,
+                  minimapRatios,
+                  loopStart,
+                  loopEnd
                 )}
               </div>
             );
@@ -353,200 +315,41 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           }}
         >
           <div className="display-area-stacked-top">
-            {order[0] === "video" && (
-              <video
-                ref={videoRef1}
-                controls={false}
-                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth}px`,
-                  width: `${workspaceWidth}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-            )}
-            {order[0] === "waveform" && (
-              <div
-                className="waveform-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth}px`,
-                  width: `${workspaceWidth}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                }}
-              >
-                <WaveformVisualizer
-                  media={media}
-                  startPercentage={loopStart * 100}
-                  endPercentage={loopEnd * 100}
-                  width={workspaceWidth}
-                  height={workspaceHeight * minimapRatios.remainder * 0.5}
-                  displayRatioVertical={1}
-                  displayRatioHorizontal={1}
-                />
-              </div>
-            )}
-            {order[0] === "spectrogram" && (
-              <div
-                className="spectrogram-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth}px`,
-                  width: `${workspaceWidth}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  backgroundColor: "red",
-                }}
-              ></div>
-            )}
-            {order[0] === "fourier" && (
-              <div
-                className="spectrogram-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth}px`,
-                  width: `${workspaceWidth}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  backgroundColor: "white",
-                }}
-              ></div>
+            {renderMediaComponent(
+              order[0],
+              media,
+              videoRef,
+              workspaceWidth,
+              workspaceHeight * minimapRatios.remainder * 0.5,
+              minimapRatios,
+              loopStart,
+              loopEnd
             )}
           </div>
           <div className="display-area-stacked-bottom">
             <div className="display-area-side-by-side">
               <div className="display-area-side-by-side-left">
-                {order[1] === "video" && (
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-                {order[1] === "waveform" && (
-                  <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    }}
-                  >
-                    <WaveformVisualizer
-                      media={media}
-                      startPercentage={loopStart * 100}
-                      endPercentage={loopEnd * 100}
-                      width={workspaceWidth}
-                      height={workspaceHeight * minimapRatios.remainder * 0.5}
-                      displayRatioVertical={1}
-                      displayRatioHorizontal={1}
-                    />
-                  </div>
-                )}
-                {order[1] === "spectrogram" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "red",
-                    }}
-                  ></div>
-                )}
-                {order[1] === "fourier" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "white",
-                    }}
-                  ></div>
+                {renderMediaComponent(
+                  order[1],
+                  media,
+                  videoRef,
+                  workspaceWidth * 0.5,
+                  workspaceHeight * minimapRatios.remainder * 0.5,
+                  minimapRatios,
+                  loopStart,
+                  loopEnd
                 )}
               </div>
               <div className="display-area-side-by-side-left">
-                {order[2] === "video" && (
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-                {order[2] === "waveform" && (
-                  <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    }}
-                  >
-                    <WaveformVisualizer
-                      media={media}
-                      startPercentage={loopStart * 100}
-                      endPercentage={loopEnd * 100}
-                      width={workspaceWidth}
-                      height={workspaceHeight * minimapRatios.remainder * 0.5}
-                      displayRatioVertical={1}
-                      displayRatioHorizontal={1}
-                    />
-                  </div>
-                )}
-                {order[2] === "spectrogram" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "red",
-                    }}
-                  ></div>
-                )}
-                {order[2] === "fourier" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "white",
-                    }}
-                  ></div>
+                {renderMediaComponent(
+                  order[2],
+                  media,
+                  videoRef,
+                  workspaceWidth * 0.5,
+                  workspaceHeight * minimapRatios.remainder * 0.5,
+                  minimapRatios,
+                  loopStart,
+                  loopEnd
                 )}
               </div>
             </div>
@@ -563,200 +366,41 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           <div className="display-area-stacked-bottom">
             <div className="display-area-side-by-side">
               <div className="display-area-side-by-side-left">
-                {order[0] === "video" && (
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-                {order[0] === "waveform" && (
-                  <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    }}
-                  >
-                    <WaveformVisualizer
-                      media={media}
-                      startPercentage={loopStart * 100}
-                      endPercentage={loopEnd * 100}
-                      width={workspaceWidth}
-                      height={workspaceHeight * minimapRatios.remainder * 0.5}
-                      displayRatioVertical={1}
-                      displayRatioHorizontal={1}
-                    />
-                  </div>
-                )}
-                {order[0] === "spectrogram" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "red",
-                    }}
-                  ></div>
-                )}
-                {order[0] === "fourier" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "white",
-                    }}
-                  ></div>
+                {renderMediaComponent(
+                  order[0],
+                  media,
+                  videoRef,
+                  workspaceWidth * 0.5,
+                  workspaceHeight * minimapRatios.remainder * 0.5,
+                  minimapRatios,
+                  loopStart,
+                  loopEnd
                 )}
               </div>
               <div className="display-area-side-by-side-left">
-                {order[1] === "video" && (
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-                {order[1] === "waveform" && (
-                  <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    }}
-                  >
-                    <WaveformVisualizer
-                      media={media}
-                      startPercentage={loopStart * 100}
-                      endPercentage={loopEnd * 100}
-                      width={workspaceWidth}
-                      height={workspaceHeight * minimapRatios.remainder * 0.5}
-                      displayRatioVertical={1}
-                      displayRatioHorizontal={1}
-                    />
-                  </div>
-                )}
-                {order[1] === "spectrogram" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "red",
-                    }}
-                  ></div>
-                )}
-                {order[1] === "fourier" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "white",
-                    }}
-                  ></div>
+                {renderMediaComponent(
+                  order[1],
+                  media,
+                  videoRef,
+                  workspaceWidth * 0.5,
+                  workspaceHeight * minimapRatios.remainder * 0.5,
+                  minimapRatios,
+                  loopStart,
+                  loopEnd
                 )}
               </div>
             </div>
           </div>
           <div className="display-area-stacked-top">
-            {order[2] === "video" && (
-              <video
-                ref={videoRef1}
-                controls={false}
-                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth}px`,
-                  width: `${workspaceWidth}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-            )}
-            {order[2] === "waveform" && (
-              <div
-                className="waveform-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth}px`,
-                  width: `${workspaceWidth}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                }}
-              >
-                <WaveformVisualizer
-                  media={media}
-                  startPercentage={loopStart * 100}
-                  endPercentage={loopEnd * 100}
-                  width={workspaceWidth}
-                  height={workspaceHeight * minimapRatios.remainder * 0.5}
-                  displayRatioVertical={1}
-                  displayRatioHorizontal={1}
-                />
-              </div>
-            )}
-            {order[2] === "spectrogram" && (
-              <div
-                className="spectrogram-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth}px`,
-                  width: `${workspaceWidth}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  backgroundColor: "red",
-                }}
-              ></div>
-            )}
-            {order[2] === "fourier" && (
-              <div
-                className="spectrogram-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth}px`,
-                  width: `${workspaceWidth}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  backgroundColor: "white",
-                }}
-              ></div>
+            {renderMediaComponent(
+              order[2],
+              media,
+              videoRef,
+              workspaceWidth,
+              workspaceHeight * minimapRatios.remainder * 0.5,
+              minimapRatios,
+              loopStart,
+              loopEnd
             )}
           </div>
         </div>
@@ -771,253 +415,40 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
         >
           <div className={"display-area-side-by-side-right"}>
             <div className={"display-area-side-by-side-right-stacked-top"}>
-              {order[0] === "video" && (
-                <>
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                  <video
-                    ref={videoRef2}
-                    controls={false}
-                    className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>{" "}
-                </>
-              )}
-              {order[0] === "waveform" && (
-                <div
-                  className="waveform-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  }}
-                >
-                  <WaveformVisualizer
-                    media={media}
-                    startPercentage={loopStart * 100}
-                    endPercentage={loopEnd * 100}
-                    width={workspaceWidth * 0.5}
-                    height={workspaceHeight * minimapRatios.remainder * 0.5}
-                    displayRatioVertical={1}
-                    displayRatioHorizontal={1}
-                  />
-                </div>
-              )}
-              {order[0] === "spectrogram" && (
-                <div
-                  className="spectrogram-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    backgroundColor: "red",
-                  }}
-                ></div>
-              )}
-              {order[0] === "fourier" && (
-                <div
-                  className="spectrogram-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    backgroundColor: "white",
-                  }}
-                ></div>
+              {renderMediaComponent(
+                order[0],
+                media,
+                videoRef,
+                workspaceWidth * 0.5,
+                workspaceHeight * 0.5 * minimapRatios["remainder"],
+                minimapRatios,
+                loopStart,
+                loopEnd
               )}
             </div>
             <div className={"display-area-side-by-side-right-stacked-top"}>
-              {order[2] === "video" && (
-                <>
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                  <video
-                    ref={videoRef2}
-                    controls={false}
-                    className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>{" "}
-                </>
-              )}
-              {order[2] === "waveform" && (
-                <div
-                  className="waveform-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  }}
-                >
-                  <WaveformVisualizer
-                    media={media}
-                    startPercentage={loopStart * 100}
-                    endPercentage={loopEnd * 100}
-                    width={workspaceWidth * 0.5}
-                    height={workspaceHeight * minimapRatios.remainder * 0.5}
-                    displayRatioVertical={1}
-                    displayRatioHorizontal={1}
-                  />
-                </div>
-              )}
-              {order[2] === "spectrogram" && (
-                <div
-                  className="spectrogram-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    backgroundColor: "red",
-                  }}
-                ></div>
-              )}
-              {order[2] === "fourier" && (
-                <div
-                  className="spectrogram-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    backgroundColor: "white",
-                  }}
-                ></div>
+              {renderMediaComponent(
+                order[1],
+                media,
+                videoRef,
+                workspaceWidth * 0.5,
+                workspaceHeight * 0.5 * minimapRatios["remainder"],
+                minimapRatios,
+                loopStart,
+                loopEnd
               )}
             </div>
           </div>
           <div className={"display-area-side-by-side-left"}>
-            {order[1] === "video" && (
-              <>
-                <video
-                  ref={videoRef1}
-                  controls={false}
-                  className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                  loop={false}
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                    height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                    zIndex: -1,
-                  }}
-                >
-                  <source src={media.url} type={media.fileType} />
-                  Your browser does not support the video tag.
-                </video>
-                <video
-                  ref={videoRef2}
-                  controls={false}
-                  className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                  loop={false}
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                    height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                    zIndex: -1,
-                  }}
-                >
-                  <source src={media.url} type={media.fileType} />
-                  Your browser does not support the video tag.
-                </video>{" "}
-              </>
-            )}
-            {order[1] === "waveform" && (
-              <div
-                className="waveform-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                }}
-              >
-                <WaveformVisualizer
-                  media={media}
-                  startPercentage={loopStart * 100}
-                  endPercentage={loopEnd * 100}
-                  width={workspaceWidth * 0.5}
-                  height={workspaceHeight * minimapRatios.remainder * 0.5}
-                  displayRatioVertical={1}
-                  displayRatioHorizontal={1}
-                />
-              </div>
-            )}
-            {order[1] === "spectrogram" && (
-              <div
-                className="spectrogram-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder}px`,
-                  backgroundColor: "red",
-                }}
-              ></div>
-            )}
-            {order[1] === "fourier" && (
-              <div
-                className="spectrogram-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder}px`,
-                  backgroundColor: "white",
-                }}
-              ></div>
+            {renderMediaComponent(
+              order[2],
+              media,
+              videoRef,
+              workspaceWidth * 0.5,
+              workspaceHeight * minimapRatios["remainder"],
+              minimapRatios,
+              loopStart,
+              loopEnd
             )}
           </div>
         </div>
@@ -1032,253 +463,40 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           }}
         >
           <div className={"display-area-side-by-side-left"}>
-            {order[0] === "video" && (
-              <>
-                <video
-                  ref={videoRef1}
-                  controls={false}
-                  className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                  loop={false}
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                    height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                    zIndex: -1,
-                  }}
-                >
-                  <source src={media.url} type={media.fileType} />
-                  Your browser does not support the video tag.
-                </video>
-                <video
-                  ref={videoRef2}
-                  controls={false}
-                  className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                  loop={false}
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                    height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                    zIndex: -1,
-                  }}
-                >
-                  <source src={media.url} type={media.fileType} />
-                  Your browser does not support the video tag.
-                </video>{" "}
-              </>
-            )}
-            {order[0] === "waveform" && (
-              <div
-                className="waveform-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                }}
-              >
-                <WaveformVisualizer
-                  media={media}
-                  startPercentage={loopStart * 100}
-                  endPercentage={loopEnd * 100}
-                  width={workspaceWidth * 0.5}
-                  height={workspaceHeight * minimapRatios.remainder * 0.5}
-                  displayRatioVertical={1}
-                  displayRatioHorizontal={1}
-                />
-              </div>
-            )}
-            {order[0] === "spectrogram" && (
-              <div
-                className="spectrogram-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder}px`,
-                  backgroundColor: "red",
-                }}
-              ></div>
-            )}
-            {order[0] === "fourier" && (
-              <div
-                className="spectrogram-wrapper"
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
-                  height: `${workspaceHeight * minimapRatios.remainder}px`,
-                  backgroundColor: "white",
-                }}
-              ></div>
+            {renderMediaComponent(
+              order[0],
+              media,
+              videoRef,
+              workspaceWidth * 0.5,
+              workspaceHeight * minimapRatios["remainder"],
+              minimapRatios,
+              loopStart,
+              loopEnd
             )}
           </div>
           <div className={"display-area-side-by-side-right"}>
             <div className={"display-area-side-by-side-right-stacked-top"}>
-              {order[1] === "video" && (
-                <>
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                  <video
-                    ref={videoRef2}
-                    controls={false}
-                    className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>{" "}
-                </>
-              )}
-              {order[1] === "waveform" && (
-                <div
-                  className="waveform-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  }}
-                >
-                  <WaveformVisualizer
-                    media={media}
-                    startPercentage={loopStart * 100}
-                    endPercentage={loopEnd * 100}
-                    width={workspaceWidth * 0.5}
-                    height={workspaceHeight * minimapRatios.remainder * 0.5}
-                    displayRatioVertical={1}
-                    displayRatioHorizontal={1}
-                  />
-                </div>
-              )}
-              {order[1] === "spectrogram" && (
-                <div
-                  className="spectrogram-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    backgroundColor: "red",
-                  }}
-                ></div>
-              )}
-              {order[1] === "fourier" && (
-                <div
-                  className="spectrogram-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    backgroundColor: "white",
-                  }}
-                ></div>
+              {renderMediaComponent(
+                order[1],
+                media,
+                videoRef,
+                workspaceWidth * 0.5,
+                workspaceHeight * 0.5 * minimapRatios["remainder"],
+                minimapRatios,
+                loopStart,
+                loopEnd
               )}
             </div>
             <div className={"display-area-side-by-side-right-stacked-top"}>
-              {order[2] === "video" && (
-                <>
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                  <video
-                    ref={videoRef2}
-                    controls={false}
-                    className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>{" "}
-                </>
-              )}
-              {order[2] === "waveform" && (
-                <div
-                  className="waveform-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                  }}
-                >
-                  <WaveformVisualizer
-                    media={media}
-                    startPercentage={loopStart * 100}
-                    endPercentage={loopEnd * 100}
-                    width={workspaceWidth * 0.5}
-                    height={workspaceHeight * minimapRatios.remainder * 0.5}
-                    displayRatioVertical={1}
-                    displayRatioHorizontal={1}
-                  />
-                </div>
-              )}
-              {order[2] === "spectrogram" && (
-                <div
-                  className="spectrogram-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    backgroundColor: "red",
-                  }}
-                ></div>
-              )}
-              {order[2] === "fourier" && (
-                <div
-                  className="spectrogram-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    backgroundColor: "white",
-                  }}
-                ></div>
+              {renderMediaComponent(
+                order[2],
+                media,
+                videoRef,
+                workspaceWidth * 0.5,
+                workspaceHeight * 0.5 * minimapRatios["remainder"],
+                minimapRatios,
+                loopStart,
+                loopEnd
               )}
             </div>
           </div>
@@ -1294,133 +512,27 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           <div className="display-area-stacked-bottom">
             <div className="display-area-side-by-side">
               <div className="display-area-side-by-side-left">
-                {order[0] === "video" && (
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-                {order[0] === "waveform" && (
-                  <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    }}
-                  >
-                    <WaveformVisualizer
-                      media={media}
-                      startPercentage={loopStart * 100}
-                      endPercentage={loopEnd * 100}
-                      width={workspaceWidth}
-                      height={workspaceHeight * minimapRatios.remainder * 0.5}
-                      displayRatioVertical={1}
-                      displayRatioHorizontal={1}
-                    />
-                  </div>
-                )}
-                {order[0] === "spectrogram" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "red",
-                    }}
-                  ></div>
-                )}
-                {order[0] === "fourier" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "white",
-                    }}
-                  ></div>
+                {renderMediaComponent(
+                  order[0],
+                  media,
+                  videoRef,
+                  workspaceWidth * 0.5,
+                  workspaceHeight * minimapRatios.remainder * 0.5,
+                  minimapRatios,
+                  loopStart,
+                  loopEnd
                 )}
               </div>
               <div className="display-area-side-by-side-left">
-                {order[1] === "video" && (
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-                {order[1] === "waveform" && (
-                  <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    }}
-                  >
-                    <WaveformVisualizer
-                      media={media}
-                      startPercentage={loopStart * 100}
-                      endPercentage={loopEnd * 100}
-                      width={workspaceWidth}
-                      height={workspaceHeight * minimapRatios.remainder * 0.5}
-                      displayRatioVertical={1}
-                      displayRatioHorizontal={1}
-                    />
-                  </div>
-                )}
-                {order[1] === "spectrogram" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "red",
-                    }}
-                  ></div>
-                )}
-                {order[1] === "fourier" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "white",
-                    }}
-                  ></div>
+                {renderMediaComponent(
+                  order[1],
+                  media,
+                  videoRef,
+                  workspaceWidth * 0.5,
+                  workspaceHeight * minimapRatios.remainder * 0.5,
+                  minimapRatios,
+                  loopStart,
+                  loopEnd
                 )}
               </div>
             </div>
@@ -1428,133 +540,27 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           <div className="display-area-stacked-bottom">
             <div className="display-area-side-by-side">
               <div className="display-area-side-by-side-left">
-                {order[2] === "video" && (
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-                {order[2] === "waveform" && (
-                  <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    }}
-                  >
-                    <WaveformVisualizer
-                      media={media}
-                      startPercentage={loopStart * 100}
-                      endPercentage={loopEnd * 100}
-                      width={workspaceWidth}
-                      height={workspaceHeight * minimapRatios.remainder * 0.5}
-                      displayRatioVertical={1}
-                      displayRatioHorizontal={1}
-                    />
-                  </div>
-                )}
-                {order[2] === "spectrogram" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "red",
-                    }}
-                  ></div>
-                )}
-                {order[2] === "fourier" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "white",
-                    }}
-                  ></div>
+                {renderMediaComponent(
+                  order[2],
+                  media,
+                  videoRef,
+                  workspaceWidth * 0.5,
+                  workspaceHeight * minimapRatios.remainder * 0.5,
+                  minimapRatios,
+                  loopStart,
+                  loopEnd
                 )}
               </div>
               <div className="display-area-side-by-side-left">
-                {order[3] === "video" && (
-                  <video
-                    ref={videoRef1}
-                    controls={false}
-                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                    loop={false}
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      zIndex: -1,
-                    }}
-                  >
-                    <source src={media.url} type={media.fileType} />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-                {order[3] === "waveform" && (
-                  <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    }}
-                  >
-                    <WaveformVisualizer
-                      media={media}
-                      startPercentage={loopStart * 100}
-                      endPercentage={loopEnd * 100}
-                      width={workspaceWidth}
-                      height={workspaceHeight * minimapRatios.remainder * 0.5}
-                      displayRatioVertical={1}
-                      displayRatioHorizontal={1}
-                    />
-                  </div>
-                )}
-                {order[3] === "spectrogram" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "red",
-                    }}
-                  ></div>
-                )}
-                {order[3] === "fourier" && (
-                  <div
-                    className="spectrogram-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth * 0.5}px`,
-                      width: `${workspaceWidth * 0.5}px`,
-                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                      backgroundColor: "white",
-                    }}
-                  ></div>
+                {renderMediaComponent(
+                  order[3],
+                  media,
+                  videoRef,
+                  workspaceWidth * 0.5,
+                  workspaceHeight * minimapRatios.remainder * 0.5,
+                  minimapRatios,
+                  loopStart,
+                  loopEnd
                 )}
               </div>
             </div>
@@ -1577,7 +583,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           timeElapsed={timeElapsed}
           isDraggingRef={isDraggingRef}
           isPlayingBeforeDragRef={isPlayingBeforeDragRef}
-          videoRef={activeVideo === 1 ? videoRef1 : videoRef2}
+          videoRef={videoRef}
           className="absolute bottom-0 left-0 right-0"
         />
       )}
