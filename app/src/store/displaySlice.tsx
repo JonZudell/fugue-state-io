@@ -23,8 +23,8 @@ interface DisplayState {
 }
 
 const RatioMap: { [key: string]: [number, number, number, number][] } = {
-  "single": [[1, 1, 0, 0]],
-  "stacked": [
+  single: [[1, 1, 0, 0]],
+  stacked: [
     [1, 0.5, 0, 0],
     [1, 0.5, 0, 0.5],
   ],
@@ -52,7 +52,7 @@ const RatioMap: { [key: string]: [number, number, number, number][] } = {
     [0.5, 0.5, 0.5, 0],
     [0.5, 0.5, 0.5, 0.5],
   ],
-  "four": [
+  four: [
     [0.5, 0.5, 0, 0],
     [0.5, 0.5, 0.5, 0],
     [0.5, 0.5, 0, 0.5],

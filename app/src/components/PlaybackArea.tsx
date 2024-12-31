@@ -19,10 +19,6 @@ import {
   selectZoomEnd,
   selectLayout,
   selectMinimap,
-  selectVideoEnabled,
-  selectWaveformEnabled,
-  selectSpectrogramEnabled,
-  selectFourierEnabled,
   selectOrder,
   selectLayoutRatios,
 } from "../store/displaySlice";
@@ -65,7 +61,6 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const zoomStart = useSelector(selectZoomStart);
   const zoomEnd = useSelector(selectZoomEnd);
   const layout = useSelector(selectLayout);
-  const layoutRatios = useSelector(selectLayoutRatios);
   const minimap = useSelector(selectMinimap);
   const order = useSelector(selectOrder);
 
@@ -172,126 +167,112 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           endPercentage={loopEnd}
         ></Minimap>
       )}
-      <div className={`${layout.startsWith('side-by-side') && "display-area-side-by-side"}`} style={{ height: workspaceHeight * minimapRatios["remainder"], width: workspaceWidth }}>
-      {!order.includes("video") && (
-        <div className="hidden-video-elements">
-          <video ref={videoRef1} className="hidden">
-            <source src={media?.url} type={media?.fileType} />
-            Your browser does not support the video tag.
-          </video>
-          <video ref={videoRef2} className="hidden">
-            <source src={media?.url} type={media?.fileType} />
-            Your browser does not support the video tag.
-          </video>
-        </div>
+
+      {media && layout === "single" && (
+        <>
+          {order.includes("video") && (
+            <div className="video-wrapper">
+              <video
+                ref={videoRef1}
+                controls={false}
+                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                loop={false}
+                style={{
+                  maxWidth: `${workspaceWidth}px`,
+                  width: `${workspaceWidth}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                  height: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                  zIndex: -1,
+                }}
+              >
+                <source src={media.url} type={media.fileType} />
+                Your browser does not support the video tag.
+              </video>
+              <video
+                ref={videoRef2}
+                controls={false}
+                className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
+                loop={false}
+                style={{
+                  maxWidth: `${workspaceWidth}px`,
+                  width: `${workspaceWidth}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                  height: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                  zIndex: -1,
+                }}
+              >
+                <source src={media.url} type={media.fileType} />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+          {order.includes("waveform") && (
+            <WaveformVisualizer
+              media={media}
+              startPercentage={loopStart * 100}
+              endPercentage={loopEnd * 100}
+              width={workspaceWidth}
+              height={workspaceHeight}
+              displayRatioVertical={minimapRatios["remainder"]}
+              displayRatioHorizontal={1}
+            />)}
+        </>
       )}
-      {media &&
-        order.length > 0 && layoutRatios && layoutRatios.length === order.length &&
-        order.map((item, index) => {
-          const layoutRatio = layoutRatios[index] || [1, 1, 0, 0];
-          if (item === "video") {
+      {media && layout === "side-by-side" && (
+        <>
+          {order.map((item, index) => {
             return (
-                <div key={index} className="video-wrapper flex justify-center items-center">
-                <video
+                <div
+                key={index}
+                className=""
+
+                >
+                {item === "video" && (
+                  <video
                   ref={videoRef1}
                   controls={false}
                   className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
                   loop={false}
                   style={{
-                  maxWidth: `${workspaceWidth * layoutRatio[0]}px`,
-                  width: `${workspaceWidth * layoutRatio[0]}px`,
-                  maxHeight: `${workspaceHeight * layoutRatio[1] * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * layoutRatio[1] * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder}px`,
+                    zIndex: -1,
                   }}
-                >
+                  >
                   <source src={media.url} type={media.fileType} />
                   Your browser does not support the video tag.
-                </video>
-                <video
-                  ref={videoRef2}
-                  controls={false}
-                  className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                  loop={false}
+                  </video>
+                )}
+                {item === "waveform" && (
+                  <div className="waveform-wrapper"
                   style={{
-                  maxWidth: `${workspaceWidth * layoutRatio[0]}px`,
-                  width: `${workspaceWidth * layoutRatio[0]}px`,
-                  maxHeight: `${workspaceHeight * layoutRatio[1] * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * layoutRatio[1] * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                  }}
-                >
-                  <source src={media.url} type={media.fileType} />
-                  Your browser does not support the video tag.
-                </video>
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder}px`,
+                    }}>
+                    <WaveformVisualizer
+                    media={media}
+                    startPercentage={loopStart * 100}
+                    endPercentage={loopEnd * 100}
+                    width={workspaceWidth * 0.5}
+                    height={workspaceHeight}
+                    displayRatioVertical={1}
+                    displayRatioHorizontal={1}
+                    />
+                  </div>
+                )}
                 </div>
             );
-          } else if (item === "waveform") {
-            return (
-              <WaveformVisualizer
-                key={index}
-                media={media}
-                startPercentage={loopStart * 100}
-                endPercentage={loopEnd * 100}
-                width={workspaceWidth * layoutRatio[0]}
-                height={workspaceHeight * layoutRatio[1] *  minimapRatios["remainder"]}
-                displayRatioVertical={minimapRatios["remainder"] * layoutRatio[1]}
-                displayRatioHorizontal={layoutRatio[0]}
-              />
-            );
-          }
-          return null;
-        })}
-
-      {/* <div className="video-container">
-        {media && displayRatios["video"] > 0 && (
-          <div className="video-wrapper flex">
-            <video
-              ref={videoRef1}
-              controls={false}
-              className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-              loop={false}
-              style={{
-                maxHeight: `${workspaceHeight * displayRatios["video"]}px`,
-                maxWidth: `${workspaceWidth}px`,
-                width: `${workspaceWidth}px`,
-                height: `${workspaceHeight * displayRatios["video"]}px`,
-                zIndex: -1,
-              }}
-            >
-              <source src={media.url} type={media.fileType} />
-              Your browser does not support the video tag.
-            </video>
-            <video
-              ref={videoRef2}
-              controls={false}
-              className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-              loop={false}
-              style={{
-                maxHeight: `${workspaceHeight * displayRatios["video"]}px`,
-                maxWidth: `${workspaceWidth}px`,
-                width: `${workspaceWidth}px`,
-                height: `${workspaceHeight * displayRatios["video"]}px`,
-                zIndex: -1,
-              }}
-            >
-              <source src={media.url} type={media.fileType} />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        )}
-      </div>
-      {media && displayRatios["waveform"] > 0 && (
-        <WaveformVisualizer
-          media={media}
-          startPercentage={loopStart * 100}
-          endPercentage={loopEnd * 100}
-          width={workspaceWidth}
-          height={workspaceHeight * displayRatios["waveform"]}
-          displayRatio={displayRatios["waveform"]}
-        />
-      )} */}
-      </div>
+          })}
+        </>
+      )}
+      {media && layout === "stacked" && (
+        <>
+        </>
+      )}
       {media && (
         <PlaybackControls
           width={workspaceWidth}

@@ -209,7 +209,10 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
       width={width}
       height={height}
       className="w-full"
-      style={{ width: `${displayRatioHorizontal * 100}%`, height: `${displayRatioVertical * 100}%` }}
+      style={{
+        width: `${displayRatioHorizontal * 100}%`,
+        height: `${displayRatioVertical * 100}%`,
+      }}
     ></canvas>
   );
 };
