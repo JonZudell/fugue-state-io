@@ -1,6 +1,8 @@
 "use client";
 import { useState, useLayoutEffect, useEffect, useRef } from "react";
 import "./SpanSlider.css";
+import { selectLooping } from "../store/playbackSlice";
+import { useSelector } from "react-redux";
 interface SpanSliderProps {
   className?: string;
   callback?: (start: number, finish: number) => void;
@@ -16,8 +18,15 @@ const SpanSlider: React.FC<SpanSliderProps> = ({
   const spanSliderRef = useRef<HTMLDivElement>(null);
   const [thumb1Value, setThumb1Value] = useState(0);
   const [thumb2Value, setThumb2Value] = useState(100);
+  const [width, setWidth] = useState(0);
+  const looping = useSelector(selectLooping);
 
   useLayoutEffect(() => {
+    if (spanSliderRef.current) {
+      setWidth(spanSliderRef.current.clientWidth);
+    }
+  }, [spanSliderRef.current?.clientWidth]);
+  useEffect(() => {
     if (spanSliderRef.current) {
       setThumb1Value((prev) => Math.min(Math.max(prev, 0), 100));
       setThumb2Value((prev) => Math.min(Math.max(prev, 0), 100));
@@ -33,7 +42,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({
           (spanSliderRef.current.clientWidth - 10),
       );
     }
-  }, [thumb1Value, thumb2Value, callback]);
+  }, [thumb1Value, thumb2Value, callback, looping]);
 
   const handleThumb1Drag = (e: MouseEvent) => {
     if (!enabled) return;
@@ -75,7 +84,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({
           className="span-slider__thumb_1"
           style={{
             position: "absolute",
-            left: `${(thumb1Value / 100) * ((spanSliderRef.current?.clientWidth ?? 0) - 10)}px`,
+            left: `${(thumb1Value / 100) * ((width) - 10)}px`,
             cursor: enabled ? "ew-resize" : "not-allowed",
           }}
           onMouseDown={(e) => {
@@ -95,8 +104,8 @@ const SpanSlider: React.FC<SpanSliderProps> = ({
           className="span-slider__between"
           style={{
             position: "absolute",
-            left: `${(Math.min(thumb1Value, thumb2Value) / 100) * ((spanSliderRef.current?.clientWidth ?? 0) - 10)}px`,
-            width: `${((Math.max(thumb2Value, thumb1Value) - Math.min(thumb1Value, thumb2Value)) / 100) * ((spanSliderRef.current?.clientWidth ?? 0) - 10)}px`,
+            left: `${(Math.min(thumb1Value, thumb2Value) / 100) * ((width) - 10)}px`,
+            width: `${((Math.max(thumb2Value, thumb1Value) - Math.min(thumb1Value, thumb2Value)) / 100) * ((width) - 10)}px`,
             cursor: enabled ? "grab" : "not-allowed",
           }}
           onMouseDown={(e) => {

@@ -27,7 +27,9 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
     }
   };
   return (
-    <div className={`asset-manager m-4 ${focused ? "focused" : ""} unselectable`}>
+    <div
+      className={`asset-manager m-4 ${focused ? "focused" : ""} unselectable`}
+    >
       <div
         className="upload-placeholder unselectable"
         style={{
@@ -48,7 +50,10 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
           style={{ display: "none" }}
           id="file-upload"
         />
-        <label htmlFor="file-upload" className="cursor-pointer text-blue-500 unselectable">
+        <label
+          htmlFor="file-upload"
+          className="cursor-pointer text-blue-500 unselectable"
+        >
           Click to upload files
         </label>
       </div>
@@ -56,7 +61,9 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
         <CollapseMenu title={"All Assets"} className="unselectable">
           <div className="content unselectable">
             {files.files.map((file: { name: string }, index: Key) => (
-              <div key={index} className="unselectable">{file.name}</div>
+              <div key={index} className="unselectable">
+                {file.name}
+              </div>
             ))}
           </div>
         </CollapseMenu>

@@ -1,7 +1,11 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { Summary } from "../core/waveformSummary";
-import { selectLoopEnd, selectLoopStart, selectTimeElapsed } from "@/store/playbackSlice";
+import {
+  selectLoopEnd,
+  selectLoopStart,
+  selectTimeElapsed,
+} from "@/store/playbackSlice";
 import { useSelector } from "react-redux";
 import { FileState } from "@/store/filesSlice";
 import { getSlice } from "../core/waveformSummary";
@@ -32,6 +36,47 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
 
+  const drawSlice = (
+    ctx: CanvasRenderingContext2D,
+    data: any,
+    startCount: number,
+    endCount: number,
+    canvas: HTMLCanvasElement,
+    channel: string,
+    channels: number,
+  ) => {
+    ctx.fillStyle = "#A0A0A0";
+    const samples = endCount - startCount;
+    const samplesPerPixel = samples / canvas.width;
+    for (let i = 0; i < canvas.width; i++) {
+      if (channels === 2) {
+        if (channel === "L") {
+          const start = startCount + i * samplesPerPixel;
+          const end = start + samplesPerPixel;
+          const slice = getSlice(data, start, end);
+          const yMin = ((1 - slice.low) * canvas.height) / 4;
+          const yMax = ((1 - slice.high) * canvas.height) / 4;
+          ctx.fillRect(i, yMin, 1, yMax - yMin);
+        }
+        if (channel === "R") {
+          const start = startCount + i * samplesPerPixel;
+          const end = start + samplesPerPixel;
+          const slice = getSlice(data, start, end);
+          const yMin = ((1 - slice.low) * canvas.height) / 4;
+          const yMax = ((1 - slice.high) * canvas.height) / 4;
+          ctx.fillRect(i, yMin + (canvas.height / 2), 1, yMax - yMin);
+        }
+      } else {
+        const start = startCount + i * samplesPerPixel;
+        const end = start + samplesPerPixel;
+        const slice = getSlice(data, start, end);
+        const yMin = ((1 - slice.low) * canvas.height) / 2;
+        const yMax = ((1 - slice.high) * canvas.height) / 2;
+        ctx.fillRect(i, yMin, 1, yMax - yMin);
+      }
+    }
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
@@ -50,119 +95,62 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
     }
 
     // clear canvas
-    ctx.fillStyle = "white";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const drawWaveform = () => {
-      console.log("drawing waveform", width, height);
       if (media && media.summary && canvas) {
         if (!ctx) {
           return;
         }
         if (channel === "L") {
-          ctx.fillStyle = "white";
           const channelSummary = media.summary.channels.left?.count || 0;
           const startCount = Math.floor(
             (channelSummary * startPercentage) / 100,
           );
           const endCount = Math.floor((channelSummary * endPercentage) / 100);
-          const samples = endCount - startCount;
-          const samplesPerPixel = samples / canvas.width;
           const data = media.summary.channels.left;
           if (!data) {
             return;
           }
-          for (let i = 0; i < canvas.width; i++) {
-            const start = startCount + i * samplesPerPixel;
-            const end = start + samplesPerPixel;
-            const slice = getSlice(data, start, end);
-            const yMin = ((1 - slice.low) * canvas.height) / 2;
-            const yMax = ((1 - slice.high) * canvas.height) / 2;
-            ctx.fillRect(i, yMin, 1, yMax - yMin);
-          }
+          drawSlice(ctx, data, startCount, endCount, canvas, channel, 1);
         } else if (channel === "R") {
-          ctx.fillStyle = "white";
           const channelSummary = media.summary.channels.right?.count || 0;
           const startCount = Math.floor(
             (channelSummary * startPercentage) / 100,
           );
           const endCount = Math.floor((channelSummary * endPercentage) / 100);
-          const samples = endCount - startCount;
-          const samplesPerPixel = samples / canvas.width;
           const data = media.summary.channels.right;
           if (!data) {
             return;
           }
-          for (let i = 0; i < canvas.width; i++) {
-            const start = startCount + i * samplesPerPixel;
-            const end = start + samplesPerPixel;
-            const slice = getSlice(data, start, end);
-            const yMin = ((1 - slice.low) * canvas.height) / 2;
-            const yMax = ((1 - slice.high) * canvas.height) / 2;
-            ctx.fillRect(i, yMin, 1, yMax - yMin);
-          }
+          drawSlice(ctx, data, startCount, endCount, canvas, channel, 1);
         } else if (channel === "MID") {
-          ctx.fillStyle = "white";
           const channelSummary = media.summary.channels.mono?.count || 0;
           const startCount = Math.floor(
             (channelSummary * startPercentage) / 100,
           );
           const endCount = Math.floor((channelSummary * endPercentage) / 100);
-          const samples = endCount - startCount;
-          const samplesPerPixel = samples / canvas.width;
           const data = media.summary.channels.mono;
           if (!data) {
             return;
           }
-          for (let i = 0; i < canvas.width; i++) {
-            const start = startCount + i * samplesPerPixel;
-            const end = start + samplesPerPixel;
-            const slice = getSlice(data, start, end);
-            const yMin = ((1 - slice.low) * canvas.height) / 2;
-            const yMax = ((1 - slice.high) * canvas.height) / 2;
-            ctx.fillRect(i, yMin, 1, yMax - yMin);
-          }
+          drawSlice(ctx, data, startCount, endCount, canvas, channel, 1);
         } else if (channel === "LR") {
-          ctx.fillStyle = "white";
           const channelSummary = media.summary.channels.left?.count || 0;
           const startCount = Math.floor(
             (channelSummary * startPercentage) / 100,
           );
           const endCount = Math.floor((channelSummary * endPercentage) / 100);
-          const samples = endCount - startCount;
-          const samplesPerPixel = samples / canvas.width;
-          const data = media.summary.channels.left;
-          if (!data) {
-            return;
-          }
-          for (let i = 0; i < canvas.width; i++) {
-            const start = startCount + i * samplesPerPixel;
-            const end = start + samplesPerPixel;
-            const slice = getSlice(data, start, end);
-            const yMin = ((1 - slice.low) * canvas.height) / 4;
-            const yMax = ((1 - slice.high) * canvas.height) / 4;
-            ctx.fillRect(i, yMin, 1, yMax - yMin);
-          }
-          const dataRight = media.summary.channels.right;
-          if (!dataRight) {
-            return;
-          }
-          for (let i = 0; i < canvas.width; i++) {
-            const start = startCount + i * samplesPerPixel;
-            const end = start + samplesPerPixel;
-            const slice = getSlice(dataRight, start, end);
-            const yMin = ((1 - slice.low) * canvas.height) / 4;
-            const yMax = ((1 - slice.high) * canvas.height) / 4;
-            ctx.fillRect(i, yMin + (canvas.height * 2) / 4, 1, yMax - yMin);
-          }
+          drawSlice(ctx, media.summary.channels.left, startCount, endCount, canvas, "L", 2);
+          drawSlice(ctx,  media.summary.channels.right, startCount, endCount, canvas, "R", 2);
         }
         if (crosshair) {
           ctx.strokeStyle = "red";
           ctx.lineWidth = 1;
           const percentFinished = timeElapsed / media.duration;
-          const x = (percentFinished - loopStart);
+          const x = percentFinished - loopStart;
           const diff = loopEnd - loopStart;
-          const x2 = x / diff * canvas.width;
+          const x2 = (x / diff) * canvas.width;
 
           ctx.beginPath();
           ctx.moveTo(x2, 0);
@@ -179,7 +167,18 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
     };
 
     drawWaveform();
-  }, [timeElapsed, channel, startPercentage, endPercentage, media, width, height, crosshair, loopStart, loopEnd]);
+  }, [
+    timeElapsed,
+    channel,
+    startPercentage,
+    endPercentage,
+    media,
+    width,
+    height,
+    crosshair,
+    loopStart,
+    loopEnd,
+  ]);
 
   return (
     <canvas

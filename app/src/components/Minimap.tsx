@@ -1,9 +1,14 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { Summary } from "../core/waveformSummary";
-import { selectLoopEnd, selectLoopStart, selectTimeElapsed } from "@/store/playbackSlice";
+import {
+  selectLoopEnd,
+  selectLooping,
+  selectLoopStart,
+  selectTimeElapsed,
+} from "../store/playbackSlice";
 import { useSelector } from "react-redux";
-import { FileState } from "@/store/filesSlice";
+import { FileState } from "../store/filesSlice";
 import { getSlice } from "../core/waveformSummary";
 interface MinimapProps {
   media?: FileState;
@@ -31,6 +36,7 @@ const Minimap: React.FC<MinimapProps> = ({
   const timeElapsed = useSelector(selectTimeElapsed);
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
+  const looping = useSelector(selectLooping);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -53,13 +59,20 @@ const Minimap: React.FC<MinimapProps> = ({
     ctx.fillStyle = "white";
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const drawSlice = (ctx: CanvasRenderingContext2D, data: any, start: number, end: number, canvas: HTMLCanvasElement, isOutsideLoop: (x: number) => boolean) => {
+    const drawSlice = (
+      ctx: CanvasRenderingContext2D,
+      data: any,
+      start: number,
+      end: number,
+      canvas: HTMLCanvasElement,
+      isOutsideLoop: (x: number) => boolean,
+    ) => {
       const samplesPerPixel = (end - start) / canvas.width;
       for (let i = 0; i < canvas.width; i++) {
         if (isOutsideLoop(i)) {
-            ctx.fillStyle = "#166534"; // Tailwind green-800 color
+          ctx.fillStyle = "#3F3F3F"; // Tailwind green-800 color
         } else {
-            ctx.fillStyle = "#4ade80"; // Tailwind green-400 color
+          ctx.fillStyle = "#A0A0A0"; // Tailwind green-400 color
         }
         const sliceStart = start + i * samplesPerPixel;
         const sliceEnd = sliceStart + samplesPerPixel;
@@ -71,12 +84,21 @@ const Minimap: React.FC<MinimapProps> = ({
     };
 
     const drawWaveform = () => {
-      console.log("drawing waveform", width, height);
+      const loopStartX = loopStart * canvas.width;
+      const loopEndX = loopEnd * canvas.width;
+      if (looping) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 1)";
+        ctx.fillStyle = "rgba(128, 128, 128, 0.5)";
+        ctx.fillRect(loopStartX, 0, loopEndX - loopStartX, canvas.height);
+      }
       if (media && media.summary && canvas) {
         if (!ctx) {
           return;
         }
         const isOutsideLoop = (x: number) => {
+          if (!looping) {
+            return false;
+          }
           const percentage = x / canvas.width;
           return percentage < loopStart || percentage > loopEnd;
         };
@@ -111,10 +133,24 @@ const Minimap: React.FC<MinimapProps> = ({
           const dataLeft = media.summary.channels.left;
           const dataRight = media.summary.channels.right;
           if (dataLeft) {
-            drawSlice(ctx, dataLeft, startCount, endCount, canvas, isOutsideLoop);
+            drawSlice(
+              ctx,
+              dataLeft,
+              startCount,
+              endCount,
+              canvas,
+              isOutsideLoop,
+            );
           }
           if (dataRight) {
-            drawSlice(ctx, dataRight, startCount, endCount, canvas, isOutsideLoop);
+            drawSlice(
+              ctx,
+              dataRight,
+              startCount,
+              endCount,
+              canvas,
+              isOutsideLoop,
+            );
           }
         }
 
@@ -134,18 +170,29 @@ const Minimap: React.FC<MinimapProps> = ({
           ctx.lineTo(x, canvas.height);
           ctx.stroke();
         }
+        if (looping) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 1)";
+        ctx.lineWidth = 5;
+        ctx.strokeRect(loopStartX, 0, loopEndX - loopStartX, canvas.height);
+        }
       }
-          // Draw clear rectangle spanning the entire height from loopStart to loopEnd
-          const loopStartX = loopStart * canvas.width;
-          const loopEndX = loopEnd * canvas.width;
-          ctx.strokeStyle = "rgba(255, 255, 255, 1)";
-          ctx.fillStyle = "rgba(128, 128, 128, 0.5)";
-          ctx.fillRect(loopStartX, 0, loopEndX - loopStartX, canvas.height);
-          ctx.strokeRect(loopStartX, 0, loopEndX - loopStartX, canvas.height);
+
     };
 
     drawWaveform();
-  }, [timeElapsed, channel, startPercentage, endPercentage, media, width, height, crosshair, loopStart, loopEnd]);
+  }, [
+    timeElapsed,
+    channel,
+    startPercentage,
+    endPercentage,
+    media,
+    width,
+    height,
+    crosshair,
+    loopStart,
+    loopEnd,
+    looping,
+  ]);
 
   return (
     <canvas

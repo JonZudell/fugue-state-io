@@ -43,7 +43,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
       icon: faTimeline,
       style: { transform: "rotate(0)" },
       tabContent: <div>Timeline</div>,
-    }
+    },
   ],
   onWidthChange,
 }) => {

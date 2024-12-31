@@ -97,11 +97,18 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       style={{ height: height, width: width }}
     >
       {media && (
-        <div className={`flex items-center ${looping ? "looping" : "not-looping"}`}>
+        <div
+          className={`flex items-center ${looping ? "looping" : "not-looping"}`}
+        >
           <button disabled={!enabled} className="mx-1" draggable="false">
             <FontAwesomeIcon className="h-8 w-8" icon={faChevronLeft} />
           </button>
-          <button className="mx-1" onClick={togglePlay} disabled={!enabled} draggable="false">
+          <button
+            className="mx-1"
+            onClick={togglePlay}
+            disabled={!enabled}
+            draggable="false"
+          >
             <FontAwesomeIcon
               className="h-8 w-8"
               icon={playing ? faPause : faPlay}
@@ -137,7 +144,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
                 enabled={!playing}
               />
             </div>
-            {!looping &&  <div className="elapsed-bar-buffer" />}
+            {!looping && <div className="elapsed-bar-buffer" />}
             <input
               className={`elapsed-bar w-full`}
               type="range"
@@ -156,7 +163,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               </span>
               <span style={{ userSelect: "none" }}>
                 {" "}
-                -{new Date((media.duration - timeElapsed) * 1000)
+                -
+                {new Date((media.duration - timeElapsed) * 1000)
                   .toISOString()
                   .substr(12, 7)}
               </span>

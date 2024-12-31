@@ -21,7 +21,7 @@ const initialState: PlaybackState = {
   speed: 1,
   volume: 1,
   loopStart: 0,
-  loopEnd: 0,
+  loopEnd: 1,
 };
 
 export const selectMedia = (state: { playback: { media: FileState } }) =>
@@ -117,6 +117,10 @@ const playbackSlice = createSlice({
     },
     setLooping: (state: PlaybackState, action: PayloadAction<boolean>) => {
       state.looping = action.payload;
+      if (state.looping) {
+        state.loopStart = 0;
+        state.loopEnd = 1;
+      }
     },
     restartPlayback: (state: PlaybackState) => {
       if (state.media) {
