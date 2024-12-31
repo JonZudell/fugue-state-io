@@ -214,20 +214,733 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               height={workspaceHeight}
               displayRatioVertical={minimapRatios["remainder"]}
               displayRatioHorizontal={1}
-            />)}
+            />
+          )}
         </>
       )}
       {media && layout === "side-by-side" && (
-        <div className={"display-area-side-by-side"} style={{ height: workspaceHeight * minimapRatios["remainder"], width: workspaceWidth }}>
+        <div
+          className={"display-area-side-by-side"}
+          style={{
+            height: workspaceHeight * minimapRatios["remainder"],
+            width: workspaceWidth,
+          }}
+        >
           {order.map((item, index) => {
             return (
-                <div
-                key={index}
-                className="display-area-side-by-side"
-
-                >
+              <div key={index} className="display-area-side-by-side">
                 {item === "video" && (
-                  <><video
+                  <>
+                    <video
+                      ref={videoRef1}
+                      controls={false}
+                      className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                      loop={false}
+                      style={{
+                        maxWidth: `${workspaceWidth * 0.5}px`,
+                        width: `${workspaceWidth * 0.5}px`,
+                        maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                        height: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                        zIndex: -1,
+                      }}
+                    >
+                      <source src={media.url} type={media.fileType} />
+                      Your browser does not support the video tag.
+                    </video>
+                    <video
+                      ref={videoRef2}
+                      controls={false}
+                      className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
+                      loop={false}
+                      style={{
+                        maxWidth: `${workspaceWidth * 0.5}px`,
+                        width: `${workspaceWidth * 0.5}px`,
+                        maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                        height: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                        zIndex: -1,
+                      }}
+                    >
+                      <source src={media.url} type={media.fileType} />
+                      Your browser does not support the video tag.
+                    </video>{" "}
+                  </>
+                )}
+                {item === "waveform" && (
+                  <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder}px`,
+                    }}
+                  >
+                    <WaveformVisualizer
+                      media={media}
+                      startPercentage={loopStart * 100}
+                      endPercentage={loopEnd * 100}
+                      width={workspaceWidth * 0.5}
+                      height={workspaceHeight}
+                      displayRatioVertical={1}
+                      displayRatioHorizontal={1}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {media && layout === "stacked" && (
+        <div
+          style={{
+            height: workspaceHeight * minimapRatios["remainder"],
+            width: workspaceWidth,
+          }}
+        >
+          {order.map((item, index) => {
+            return (
+              <div key={index}>
+                {item === "video" && (
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth}px`,
+                      width: `${workspaceWidth}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {item === "waveform" && (
+                  <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth}px`,
+                      width: `${workspaceWidth}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    }}
+                  >
+                    <WaveformVisualizer
+                      media={media}
+                      startPercentage={loopStart * 100}
+                      endPercentage={loopEnd * 100}
+                      width={workspaceWidth}
+                      height={workspaceHeight * minimapRatios.remainder * 0.5}
+                      displayRatioVertical={1}
+                      displayRatioHorizontal={1}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {media && layout === "stacked-bottom-side-by-side" && (
+        <div
+          style={{
+            height: workspaceHeight * minimapRatios["remainder"],
+            width: workspaceWidth,
+          }}
+        >
+          <div className="display-area-stacked-top">
+            {order[0] === "video" && (
+              <video
+                ref={videoRef1}
+                controls={false}
+                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                loop={false}
+                style={{
+                  maxWidth: `${workspaceWidth}px`,
+                  width: `${workspaceWidth}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  zIndex: -1,
+                }}
+              >
+                <source src={media.url} type={media.fileType} />
+                Your browser does not support the video tag.
+              </video>
+            )}
+            {order[0] === "waveform" && (
+              <div
+                className="waveform-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth}px`,
+                  width: `${workspaceWidth}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                }}
+              >
+                <WaveformVisualizer
+                  media={media}
+                  startPercentage={loopStart * 100}
+                  endPercentage={loopEnd * 100}
+                  width={workspaceWidth}
+                  height={workspaceHeight * minimapRatios.remainder * 0.5}
+                  displayRatioVertical={1}
+                  displayRatioHorizontal={1}
+                />
+              </div>
+            )}
+            {order[0] === "spectrogram" && (
+              <div
+                className="spectrogram-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth}px`,
+                  width: `${workspaceWidth}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  backgroundColor: "red",
+                }}
+              ></div>
+            )}
+            {order[0] === "fourier" && (
+              <div
+                className="spectrogram-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth}px`,
+                  width: `${workspaceWidth}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  backgroundColor: "white",
+                }}
+              ></div>
+            )}
+          </div>
+          <div className="display-area-stacked-bottom">
+            <div className="display-area-side-by-side">
+              <div className="display-area-side-by-side-left">
+                {order[1] === "video" && (
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {order[1] === "waveform" && (
+                  <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    }}
+                  >
+                    <WaveformVisualizer
+                      media={media}
+                      startPercentage={loopStart * 100}
+                      endPercentage={loopEnd * 100}
+                      width={workspaceWidth}
+                      height={workspaceHeight * minimapRatios.remainder * 0.5}
+                      displayRatioVertical={1}
+                      displayRatioHorizontal={1}
+                    />
+                  </div>
+                )}
+                {order[1] === "spectrogram" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "red",
+                    }}
+                  ></div>
+                )}
+                {order[1] === "fourier" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "white",
+                    }}
+                  ></div>
+                )}
+              </div>
+              <div className="display-area-side-by-side-left">
+                {order[2] === "video" && (
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {order[2] === "waveform" && (
+                  <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    }}
+                  >
+                    <WaveformVisualizer
+                      media={media}
+                      startPercentage={loopStart * 100}
+                      endPercentage={loopEnd * 100}
+                      width={workspaceWidth}
+                      height={workspaceHeight * minimapRatios.remainder * 0.5}
+                      displayRatioVertical={1}
+                      displayRatioHorizontal={1}
+                    />
+                  </div>
+                )}
+                {order[2] === "spectrogram" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "red",
+                    }}
+                  ></div>
+                )}
+                {order[2] === "fourier" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "white",
+                    }}
+                  ></div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {media && layout === "stacked-top-side-by-side" && (
+        <div
+          style={{
+            height: workspaceHeight * minimapRatios["remainder"],
+            width: workspaceWidth,
+          }}
+        >
+          <div className="display-area-stacked-bottom">
+            <div className="display-area-side-by-side">
+              <div className="display-area-side-by-side-left">
+                {order[0] === "video" && (
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {order[0] === "waveform" && (
+                  <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    }}
+                  >
+                    <WaveformVisualizer
+                      media={media}
+                      startPercentage={loopStart * 100}
+                      endPercentage={loopEnd * 100}
+                      width={workspaceWidth}
+                      height={workspaceHeight * minimapRatios.remainder * 0.5}
+                      displayRatioVertical={1}
+                      displayRatioHorizontal={1}
+                    />
+                  </div>
+                )}
+                {order[0] === "spectrogram" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "red",
+                    }}
+                  ></div>
+                )}
+                {order[0] === "fourier" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "white",
+                    }}
+                  ></div>
+                )}
+              </div>
+              <div className="display-area-side-by-side-left">
+                {order[1] === "video" && (
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {order[1] === "waveform" && (
+                  <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    }}
+                  >
+                    <WaveformVisualizer
+                      media={media}
+                      startPercentage={loopStart * 100}
+                      endPercentage={loopEnd * 100}
+                      width={workspaceWidth}
+                      height={workspaceHeight * minimapRatios.remainder * 0.5}
+                      displayRatioVertical={1}
+                      displayRatioHorizontal={1}
+                    />
+                  </div>
+                )}
+                {order[1] === "spectrogram" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "red",
+                    }}
+                  ></div>
+                )}
+                {order[1] === "fourier" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "white",
+                    }}
+                  ></div>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="display-area-stacked-top">
+            {order[2] === "video" && (
+              <video
+                ref={videoRef1}
+                controls={false}
+                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                loop={false}
+                style={{
+                  maxWidth: `${workspaceWidth}px`,
+                  width: `${workspaceWidth}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  zIndex: -1,
+                }}
+              >
+                <source src={media.url} type={media.fileType} />
+                Your browser does not support the video tag.
+              </video>
+            )}
+            {order[2] === "waveform" && (
+              <div
+                className="waveform-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth}px`,
+                  width: `${workspaceWidth}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                }}
+              >
+                <WaveformVisualizer
+                  media={media}
+                  startPercentage={loopStart * 100}
+                  endPercentage={loopEnd * 100}
+                  width={workspaceWidth}
+                  height={workspaceHeight * minimapRatios.remainder * 0.5}
+                  displayRatioVertical={1}
+                  displayRatioHorizontal={1}
+                />
+              </div>
+            )}
+            {order[2] === "spectrogram" && (
+              <div
+                className="spectrogram-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth}px`,
+                  width: `${workspaceWidth}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  backgroundColor: "red",
+                }}
+              ></div>
+            )}
+            {order[2] === "fourier" && (
+              <div
+                className="spectrogram-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth}px`,
+                  width: `${workspaceWidth}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  backgroundColor: "white",
+                }}
+              ></div>
+            )}
+          </div>
+        </div>
+      )}
+      {media && layout === "side-by-side-left-stacked" && (
+        <div
+          className={"display-area-side-by-side"}
+          style={{
+            height: workspaceHeight * minimapRatios["remainder"],
+            width: workspaceWidth,
+          }}
+        >
+          <div className={"display-area-side-by-side-right"}>
+            <div className={"display-area-side-by-side-right-stacked-top"}>
+              {order[0] === "video" && (
+                <>
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                  <video
+                    ref={videoRef2}
+                    controls={false}
+                    className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>{" "}
+                </>
+              )}
+              {order[0] === "waveform" && (
+                <div
+                  className="waveform-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  }}
+                >
+                  <WaveformVisualizer
+                    media={media}
+                    startPercentage={loopStart * 100}
+                    endPercentage={loopEnd * 100}
+                    width={workspaceWidth * 0.5}
+                    height={workspaceHeight * minimapRatios.remainder * 0.5}
+                    displayRatioVertical={1}
+                    displayRatioHorizontal={1}
+                  />
+                </div>
+              )}
+              {order[0] === "spectrogram" && (
+                <div
+                  className="spectrogram-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    backgroundColor: "red",
+                  }}
+                ></div>
+              )}
+              {order[0] === "fourier" && (
+                <div
+                  className="spectrogram-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    backgroundColor: "white",
+                  }}
+                ></div>
+              )}
+            </div>
+            <div className={"display-area-side-by-side-right-stacked-top"}>
+              {order[2] === "video" && (
+                <>
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                  <video
+                    ref={videoRef2}
+                    controls={false}
+                    className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>{" "}
+                </>
+              )}
+              {order[2] === "waveform" && (
+                <div
+                  className="waveform-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  }}
+                >
+                  <WaveformVisualizer
+                    media={media}
+                    startPercentage={loopStart * 100}
+                    endPercentage={loopEnd * 100}
+                    width={workspaceWidth * 0.5}
+                    height={workspaceHeight * minimapRatios.remainder * 0.5}
+                    displayRatioVertical={1}
+                    displayRatioHorizontal={1}
+                  />
+                </div>
+              )}
+              {order[2] === "spectrogram" && (
+                <div
+                  className="spectrogram-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    backgroundColor: "red",
+                  }}
+                ></div>
+              )}
+              {order[2] === "fourier" && (
+                <div
+                  className="spectrogram-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    backgroundColor: "white",
+                  }}
+                ></div>
+              )}
+            </div>
+          </div>
+          <div className={"display-area-side-by-side-left"}>
+            {order[1] === "video" && (
+              <>
+                <video
                   ref={videoRef1}
                   controls={false}
                   className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
@@ -258,562 +971,596 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 >
                   <source src={media.url} type={media.fileType} />
                   Your browser does not support the video tag.
-                </video>                  </>
-                )}
-                {item === "waveform" && (
-                  <div className="waveform-wrapper"
-                  style={{
-                    maxWidth: `${workspaceWidth * 0.5}px`,
-                    width: `${workspaceWidth * 0.5}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder}px`,
-                    }}>
-                    <WaveformVisualizer
-                    media={media}
-                    startPercentage={loopStart * 100}
-                    endPercentage={loopEnd * 100}
-                    width={workspaceWidth * 0.5}
-                    height={workspaceHeight}
-                    displayRatioVertical={1}
-                    displayRatioHorizontal={1}
-                    />
-                  </div>
-                )}
-                </div>
-            );
-          })}
+                </video>{" "}
+              </>
+            )}
+            {order[1] === "waveform" && (
+              <div
+                className="waveform-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth * 0.5}px`,
+                  width: `${workspaceWidth * 0.5}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                }}
+              >
+                <WaveformVisualizer
+                  media={media}
+                  startPercentage={loopStart * 100}
+                  endPercentage={loopEnd * 100}
+                  width={workspaceWidth * 0.5}
+                  height={workspaceHeight * minimapRatios.remainder * 0.5}
+                  displayRatioVertical={1}
+                  displayRatioHorizontal={1}
+                />
+              </div>
+            )}
+            {order[1] === "spectrogram" && (
+              <div
+                className="spectrogram-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth * 0.5}px`,
+                  width: `${workspaceWidth * 0.5}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder}px`,
+                  backgroundColor: "red",
+                }}
+              ></div>
+            )}
+            {order[1] === "fourier" && (
+              <div
+                className="spectrogram-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth * 0.5}px`,
+                  width: `${workspaceWidth * 0.5}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder}px`,
+                  backgroundColor: "white",
+                }}
+              ></div>
+            )}
+          </div>
         </div>
       )}
-      {media && layout === "stacked" && (
-        <div style={{ height: workspaceHeight * minimapRatios["remainder"], width: workspaceWidth }}>
-          {order.map((item, index) => {
-            return (
-                <div
-                key={index}
-                >
-                {item === "video" && (
-                  <video
+
+      {media && layout === "side-by-side-right-stacked" && (
+        <div
+          className={"display-area-side-by-side"}
+          style={{
+            height: workspaceHeight * minimapRatios["remainder"],
+            width: workspaceWidth,
+          }}
+        >
+          <div className={"display-area-side-by-side-left"}>
+            {order[0] === "video" && (
+              <>
+                <video
                   ref={videoRef1}
                   controls={false}
                   className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
                   loop={false}
                   style={{
-                    maxWidth: `${workspaceWidth}px`,
-                    width: `${workspaceWidth}px`,
-                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                    height: `${workspaceHeight * minimapRatios["remainder"]}px`,
                     zIndex: -1,
                   }}
-                  >
+                >
                   <source src={media.url} type={media.fileType} />
                   Your browser does not support the video tag.
-                  </video>
-                )}
-                {item === "waveform" && (
-                  <div className="waveform-wrapper"
+                </video>
+                <video
+                  ref={videoRef2}
+                  controls={false}
+                  className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
+                  loop={false}
                   style={{
-                    maxWidth: `${workspaceWidth}px`,
-                    width: `${workspaceWidth}px`,
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                    height: `${workspaceHeight * minimapRatios["remainder"]}px`,
+                    zIndex: -1,
+                  }}
+                >
+                  <source src={media.url} type={media.fileType} />
+                  Your browser does not support the video tag.
+                </video>{" "}
+              </>
+            )}
+            {order[0] === "waveform" && (
+              <div
+                className="waveform-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth * 0.5}px`,
+                  width: `${workspaceWidth * 0.5}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                }}
+              >
+                <WaveformVisualizer
+                  media={media}
+                  startPercentage={loopStart * 100}
+                  endPercentage={loopEnd * 100}
+                  width={workspaceWidth * 0.5}
+                  height={workspaceHeight * minimapRatios.remainder * 0.5}
+                  displayRatioVertical={1}
+                  displayRatioHorizontal={1}
+                />
+              </div>
+            )}
+            {order[0] === "spectrogram" && (
+              <div
+                className="spectrogram-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth * 0.5}px`,
+                  width: `${workspaceWidth * 0.5}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder}px`,
+                  backgroundColor: "red",
+                }}
+              ></div>
+            )}
+            {order[0] === "fourier" && (
+              <div
+                className="spectrogram-wrapper"
+                style={{
+                  maxWidth: `${workspaceWidth * 0.5}px`,
+                  width: `${workspaceWidth * 0.5}px`,
+                  maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
+                  height: `${workspaceHeight * minimapRatios.remainder}px`,
+                  backgroundColor: "white",
+                }}
+              ></div>
+            )}
+          </div>
+          <div className={"display-area-side-by-side-right"}>
+            <div className={"display-area-side-by-side-right-stacked-top"}>
+              {order[1] === "video" && (
+                <>
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                  <video
+                    ref={videoRef2}
+                    controls={false}
+                    className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>{" "}
+                </>
+              )}
+              {order[1] === "waveform" && (
+                <div
+                  className="waveform-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
                     maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
                     height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                    }}>
-                    <WaveformVisualizer
+                  }}
+                >
+                  <WaveformVisualizer
                     media={media}
                     startPercentage={loopStart * 100}
                     endPercentage={loopEnd * 100}
-                    width={workspaceWidth}
+                    width={workspaceWidth * 0.5}
                     height={workspaceHeight * minimapRatios.remainder * 0.5}
                     displayRatioVertical={1}
                     displayRatioHorizontal={1}
+                  />
+                </div>
+              )}
+              {order[1] === "spectrogram" && (
+                <div
+                  className="spectrogram-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    backgroundColor: "red",
+                  }}
+                ></div>
+              )}
+              {order[1] === "fourier" && (
+                <div
+                  className="spectrogram-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    backgroundColor: "white",
+                  }}
+                ></div>
+              )}
+            </div>
+            <div className={"display-area-side-by-side-right-stacked-top"}>
+              {order[2] === "video" && (
+                <>
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                  <video
+                    ref={videoRef2}
+                    controls={false}
+                    className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>{" "}
+                </>
+              )}
+              {order[2] === "waveform" && (
+                <div
+                  className="waveform-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                  }}
+                >
+                  <WaveformVisualizer
+                    media={media}
+                    startPercentage={loopStart * 100}
+                    endPercentage={loopEnd * 100}
+                    width={workspaceWidth * 0.5}
+                    height={workspaceHeight * minimapRatios.remainder * 0.5}
+                    displayRatioVertical={1}
+                    displayRatioHorizontal={1}
+                  />
+                </div>
+              )}
+              {order[2] === "spectrogram" && (
+                <div
+                  className="spectrogram-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    backgroundColor: "red",
+                  }}
+                ></div>
+              )}
+              {order[2] === "fourier" && (
+                <div
+                  className="spectrogram-wrapper"
+                  style={{
+                    maxWidth: `${workspaceWidth * 0.5}px`,
+                    width: `${workspaceWidth * 0.5}px`,
+                    maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    backgroundColor: "white",
+                  }}
+                ></div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {media && layout === "four" && (
+        <div
+          style={{
+            height: workspaceHeight * minimapRatios["remainder"],
+            width: workspaceWidth,
+          }}
+        >
+          <div className="display-area-stacked-bottom">
+            <div className="display-area-side-by-side">
+              <div className="display-area-side-by-side-left">
+                {order[0] === "video" && (
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {order[0] === "waveform" && (
+                  <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    }}
+                  >
+                    <WaveformVisualizer
+                      media={media}
+                      startPercentage={loopStart * 100}
+                      endPercentage={loopEnd * 100}
+                      width={workspaceWidth}
+                      height={workspaceHeight * minimapRatios.remainder * 0.5}
+                      displayRatioVertical={1}
+                      displayRatioHorizontal={1}
                     />
                   </div>
                 )}
-                </div>
-            );
-          })}
-        </div>
-      )}{media && layout === "side-by-side-left-stacked" && (
-        <div className={"display-area-side-by-side"} style={{ height: workspaceHeight * minimapRatios["remainder"], width: workspaceWidth }}>
-          <div className={"display-area-side-by-side-right"}>
-            <div className={"display-area-side-by-side-right-stacked-top"}>
-            {order[0] === "video" && (
-              <>
-              <video
-                ref={videoRef1}
-                controls={false}
-                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-              <video
-                ref={videoRef2}
-                controls={false}
-                className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>              </>
-            )}
-            {order[0] === "waveform" && (
-              <div className="waveform-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                }}>
-                <WaveformVisualizer
-                media={media}
-                startPercentage={loopStart * 100}
-                endPercentage={loopEnd * 100}
-                width={workspaceWidth * 0.5}
-                height={workspaceHeight * minimapRatios.remainder * 0.5}
-                displayRatioVertical={1}
-                displayRatioHorizontal={1}
-                />
+                {order[0] === "spectrogram" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "red",
+                    }}
+                  ></div>
+                )}
+                {order[0] === "fourier" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "white",
+                    }}
+                  ></div>
+                )}
               </div>
-              )}
-            {order[0] === "spectrogram" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                backgroundColor: "red",
-                }}>
+              <div className="display-area-side-by-side-left">
+                {order[1] === "video" && (
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {order[1] === "waveform" && (
+                  <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    }}
+                  >
+                    <WaveformVisualizer
+                      media={media}
+                      startPercentage={loopStart * 100}
+                      endPercentage={loopEnd * 100}
+                      width={workspaceWidth}
+                      height={workspaceHeight * minimapRatios.remainder * 0.5}
+                      displayRatioVertical={1}
+                      displayRatioHorizontal={1}
+                    />
+                  </div>
+                )}
+                {order[1] === "spectrogram" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "red",
+                    }}
+                  ></div>
+                )}
+                {order[1] === "fourier" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "white",
+                    }}
+                  ></div>
+                )}
               </div>
-              )}
-              {order[0] === "fourier" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                backgroundColor: "white",
-                }}>
-              </div>
-              )}
-            </div>
-            <div className={"display-area-side-by-side-right-stacked-top"}>
-            {order[2] === "video" && (
-              <>
-              <video
-                ref={videoRef1}
-                controls={false}
-                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-              <video
-                ref={videoRef2}
-                controls={false}
-                className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>              </>
-            )}
-            {order[2] === "waveform" && (
-              <div className="waveform-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                }}>
-                <WaveformVisualizer
-                media={media}
-                startPercentage={loopStart * 100}
-                endPercentage={loopEnd * 100}
-                width={workspaceWidth * 0.5}
-                height={workspaceHeight * minimapRatios.remainder * 0.5}
-                displayRatioVertical={1}
-                displayRatioHorizontal={1}
-                />
-              </div>
-              )}
-            {order[2] === "spectrogram" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                backgroundColor: "red",
-                }}>
-              </div>
-              )}
-              {order[2] === "fourier" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                backgroundColor: "white",
-                }}>
-              </div>
-              )}
             </div>
           </div>
-          <div className={"display-area-side-by-side-left"}>
-            {order[1] === "video" && (
-              <>
-              <video
-                ref={videoRef1}
-                controls={false}
-                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-              <video
-                ref={videoRef2}
-                controls={false}
-                className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>              </>
-            )}
-            {order[1] === "waveform" && (
-              <div className="waveform-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                }}>
-                <WaveformVisualizer
-                media={media}
-                startPercentage={loopStart * 100}
-                endPercentage={loopEnd * 100}
-                width={workspaceWidth * 0.5}
-                height={workspaceHeight * minimapRatios.remainder * 0.5}
-                displayRatioVertical={1}
-                displayRatioHorizontal={1}
-                />
+          <div className="display-area-stacked-bottom">
+            <div className="display-area-side-by-side">
+              <div className="display-area-side-by-side-left">
+                {order[2] === "video" && (
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {order[2] === "waveform" && (
+                  <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    }}
+                  >
+                    <WaveformVisualizer
+                      media={media}
+                      startPercentage={loopStart * 100}
+                      endPercentage={loopEnd * 100}
+                      width={workspaceWidth}
+                      height={workspaceHeight * minimapRatios.remainder * 0.5}
+                      displayRatioVertical={1}
+                      displayRatioHorizontal={1}
+                    />
+                  </div>
+                )}
+                {order[2] === "spectrogram" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "red",
+                    }}
+                  ></div>
+                )}
+                {order[2] === "fourier" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "white",
+                    }}
+                  ></div>
+                )}
               </div>
-              )}
-            {order[1] === "spectrogram" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
-                height: `${workspaceHeight * minimapRatios.remainder}px`,
-                backgroundColor: "red",
-                }}>
+              <div className="display-area-side-by-side-left">
+                {order[3] === "video" && (
+                  <video
+                    ref={videoRef1}
+                    controls={false}
+                    className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                    loop={false}
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      zIndex: -1,
+                    }}
+                  >
+                    <source src={media.url} type={media.fileType} />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {order[3] === "waveform" && (
+                  <div
+                    className="waveform-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                    }}
+                  >
+                    <WaveformVisualizer
+                      media={media}
+                      startPercentage={loopStart * 100}
+                      endPercentage={loopEnd * 100}
+                      width={workspaceWidth}
+                      height={workspaceHeight * minimapRatios.remainder * 0.5}
+                      displayRatioVertical={1}
+                      displayRatioHorizontal={1}
+                    />
+                  </div>
+                )}
+                {order[3] === "spectrogram" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "red",
+                    }}
+                  ></div>
+                )}
+                {order[3] === "fourier" && (
+                  <div
+                    className="spectrogram-wrapper"
+                    style={{
+                      maxWidth: `${workspaceWidth * 0.5}px`,
+                      width: `${workspaceWidth * 0.5}px`,
+                      maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
+                      backgroundColor: "white",
+                    }}
+                  ></div>
+                )}
               </div>
-              )}
-              {order[1] === "fourier" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
-                height: `${workspaceHeight * minimapRatios.remainder}px`,
-                backgroundColor: "white",
-                }}>
-              </div>
-              )}
-          </div>
-        </div>
-      )}
-      
-      {media && layout === "side-by-side-right-stacked" && (
-        <div className={"display-area-side-by-side"} style={{ height: workspaceHeight * minimapRatios["remainder"], width: workspaceWidth }}>
-          <div className={"display-area-side-by-side-left"}>
-            {order[0] === "video" && (
-              <>
-              <video
-                ref={videoRef1}
-                controls={false}
-                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-              <video
-                ref={videoRef2}
-                controls={false}
-                className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>              </>
-            )}
-            {order[0] === "waveform" && (
-              <div className="waveform-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                }}>
-                <WaveformVisualizer
-                media={media}
-                startPercentage={loopStart * 100}
-                endPercentage={loopEnd * 100}
-                width={workspaceWidth * 0.5}
-                height={workspaceHeight * minimapRatios.remainder * 0.5}
-                displayRatioVertical={1}
-                displayRatioHorizontal={1}
-                />
-              </div>
-              )}
-            {order[0] === "spectrogram" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
-                height: `${workspaceHeight * minimapRatios.remainder}px`,
-                backgroundColor: "red",
-                }}>
-              </div>
-              )}
-              {order[0] === "fourier" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
-                height: `${workspaceHeight * minimapRatios.remainder}px`,
-                backgroundColor: "white",
-                }}>
-              </div>
-              )}
-          </div>
-          <div className={"display-area-side-by-side-right"}>
-            <div className={"display-area-side-by-side-right-stacked-top"}>
-            {order[1] === "video" && (
-              <>
-              <video
-                ref={videoRef1}
-                controls={false}
-                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-              <video
-                ref={videoRef2}
-                controls={false}
-                className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>              </>
-            )}
-            {order[1] === "waveform" && (
-              <div className="waveform-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                }}>
-                <WaveformVisualizer
-                media={media}
-                startPercentage={loopStart * 100}
-                endPercentage={loopEnd * 100}
-                width={workspaceWidth * 0.5}
-                height={workspaceHeight * minimapRatios.remainder * 0.5}
-                displayRatioVertical={1}
-                displayRatioHorizontal={1}
-                />
-              </div>
-              )}
-            {order[1] === "spectrogram" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                backgroundColor: "red",
-                }}>
-              </div>
-              )}
-              {order[1] === "fourier" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                backgroundColor: "white",
-                }}>
-              </div>
-              )}
-            </div>
-            <div className={"display-area-side-by-side-right-stacked-top"}>
-            {order[2] === "video" && (
-              <>
-              <video
-                ref={videoRef1}
-                controls={false}
-                className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>
-              <video
-                ref={videoRef2}
-                controls={false}
-                className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
-                loop={false}
-                style={{
-                  maxWidth: `${workspaceWidth * 0.5}px`,
-                  width: `${workspaceWidth * 0.5}px`,
-                  maxHeight: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  height: `${workspaceHeight * 0.5 * minimapRatios["remainder"]}px`,
-                  zIndex: -1,
-                }}
-              >
-                <source src={media.url} type={media.fileType} />
-                Your browser does not support the video tag.
-              </video>              </>
-            )}
-            {order[2] === "waveform" && (
-              <div className="waveform-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                }}>
-                <WaveformVisualizer
-                media={media}
-                startPercentage={loopStart * 100}
-                endPercentage={loopEnd * 100}
-                width={workspaceWidth * 0.5}
-                height={workspaceHeight * minimapRatios.remainder * 0.5}
-                displayRatioVertical={1}
-                displayRatioHorizontal={1}
-                />
-              </div>
-              )}
-            {order[2] === "spectrogram" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                backgroundColor: "red",
-                }}>
-              </div>
-              )}
-              {order[2] === "fourier" && (
-              <div className="spectrogram-wrapper"
-              style={{
-                maxWidth: `${workspaceWidth * 0.5}px`,
-                width: `${workspaceWidth * 0.5}px`,
-                maxHeight: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                height: `${workspaceHeight * minimapRatios.remainder * 0.5}px`,
-                backgroundColor: "white",
-                }}>
-              </div>
-              )}
             </div>
           </div>
         </div>
       )}
-      
       {media && (
         <PlaybackControls
           width={workspaceWidth}
