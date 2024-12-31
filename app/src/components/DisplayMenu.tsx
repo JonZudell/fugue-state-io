@@ -21,6 +21,7 @@ import {
   setSpectrogramEnabled,
   setLayout,
 } from "../store/displaySlice";
+import DisplayOrderSelect from "./DisplayOrderSelect";
 
 interface DisplayMenuProps {
   focused?: boolean;
@@ -88,7 +89,7 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
         </div>
       </div>
       <h2 className=" text-lg">Render Layout</h2>
-      {numberOfDisplayItems === 1 && (
+      {(numberOfDisplayItems === 0 || numberOfDisplayItems === 1) && (
         <div className="flex flex-wrap">
           <div
             className={`tooltip  ${layout === "single" ? "border border-gray-900 bg-gray-700 rounded" : "border border-gray-800"}`}
@@ -455,6 +456,7 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
         </div>
       )}
       <h2 className=" text-lg">Display Order</h2>
+      <DisplayOrderSelect />
     </div>
   );
 };

@@ -16,61 +16,62 @@ interface DisplayState {
     | "side-by-side-left-stacked"
     | "side-by-side-right-stacked"
     | "four";
-  layoutRatios: [number, number][];
+  layoutRatios: [number, number, number, number][];
   order: ("waveform" | "video" | "spectrogram" | "fourier")[];
   minimap: boolean;
   numberOfDisplayItems: number;
 }
 
-const RatioMap: { [key: string]: [number, number][] } = {
-  single: [[1, 1]],
-  stacked: [
-    [1, 0.5],
-    [1, 0.5],
+const RatioMap: { [key: string]: [number, number, number, number][] } = {
+  "single": [[1, 1, 0, 0]],
+  "stacked": [
+    [1, 0.5, 0, 0],
+    [1, 0.5, 0, 0.5],
   ],
   "side-by-side": [
-    [0.5, 1],
-    [0.5, 1],
+    [0.5, 1, 0, 0],
+    [0.5, 1, 0.5, 0],
   ],
   "stacked-top-side-by-side": [
-    [0.5, 0.5],
-    [0.5, 0.5],
-    [1, 0.5],
+    [0.5, 0.5, 0, 0],
+    [0.5, 0.5, 0, 0.5],
+    [1, 0.5, 0, 0.5],
   ],
   "stacked-bottom-side-by-side": [
-    [1, 0.5],
-    [0.5, 0.5],
-    [0.5, 0.5],
+    [1, 0.5, 0, 0],
+    [0.5, 0.5, 0, 0.5],
+    [0.5, 0.5, 0.5, 0],
   ],
   "side-by-side-left-stacked": [
-    [0.5, 0.5],
-    [0.5, 0.5],
-    [0.5, 1],
+    [0.5, 0.5, 0, 0],
+    [0.5, 0.5, 0, 0.5],
+    [0.5, 1, 0.5, 0],
   ],
   "side-by-side-right-stacked": [
-    [0.5, 1],
-    [0.5, 0.5],
-    [0.5, 0.5],
+    [0.5, 1, 0, 0],
+    [0.5, 0.5, 0.5, 0],
+    [0.5, 0.5, 0.5, 0.5],
   ],
-  four: [
-    [0.5, 0.5],
-    [0.5, 0.5],
-    [0.5, 0.5],
-    [0.5, 0.5],
+  "four": [
+    [0.5, 0.5, 0, 0],
+    [0.5, 0.5, 0.5, 0],
+    [0.5, 0.5, 0, 0.5],
+    [0.5, 0.5, 0.5, 0.5],
   ],
 };
 
 const initialState: DisplayState = {
   zoomStart: 0,
   zoomEnd: 1,
-  videoEnabled: false,
+  videoEnabled: true,
   waveformEnabled: true,
   spectrogramEnabled: false,
   fourierEnabled: false,
-  layout: "single",
-  layoutRatios: RatioMap["single"],
-  order: ["waveform"],
+  layout: "stacked",
+  layoutRatios: RatioMap["stacked"],
+  order: ["video", "waveform"],
   minimap: true,
+  numberOfDisplayItems: 2,
 };
 
 export const selectZoomStart = (state: { display: DisplayState }) =>
@@ -121,6 +122,27 @@ const displaySlice = createSlice({
       } else {
         state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
       }
+      if (
+        state.numberOfDisplayItems === 0 ||
+        state.numberOfDisplayItems === 1
+      ) {
+        state.layout = "single";
+        state.layoutRatios = RatioMap["single"];
+      } else if (state.numberOfDisplayItems === 2) {
+        state.layout = "stacked";
+        state.layoutRatios = RatioMap["stacled"];
+      } else if (state.numberOfDisplayItems === 3) {
+        state.layout = "stacked-bottom-side-by-side";
+        state.layoutRatios = RatioMap["stacked-bottom-side-by-side"];
+      } else if (state.numberOfDisplayItems === 4) {
+        state.layout = "four";
+        state.layoutRatios = RatioMap["four"];
+      }
+      if (action.payload) {
+        state.order.push("video");
+      } else {
+        state.order = state.order.filter((item) => item !== "video");
+      }
     },
     setWaveformEnabled: (
       state: DisplayState,
@@ -131,6 +153,28 @@ const displaySlice = createSlice({
         state.numberOfDisplayItems = state.numberOfDisplayItems + 1;
       } else {
         state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
+      }
+      if (
+        state.numberOfDisplayItems === 0 ||
+        state.numberOfDisplayItems === 1
+      ) {
+        state.layout = "single";
+        state.layoutRatios = RatioMap["single"];
+      } else if (state.numberOfDisplayItems === 2) {
+        state.layout = "stacked";
+        state.layoutRatios = RatioMap["stacked"];
+      } else if (state.numberOfDisplayItems === 3) {
+        state.layout = "stacked-bottom-side-by-side";
+        state.layoutRatios = RatioMap["stacked-bottom-side-by-side"];
+      } else if (state.numberOfDisplayItems === 4) {
+        state.layout = "four";
+        state.layoutRatios = RatioMap["four"];
+      }
+
+      if (action.payload) {
+        state.order.push("waveform");
+      } else {
+        state.order = state.order.filter((item) => item !== "waveform");
       }
     },
     setSpectrogramEnabled: (
@@ -143,6 +187,28 @@ const displaySlice = createSlice({
       } else {
         state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
       }
+      if (
+        state.numberOfDisplayItems === 0 ||
+        state.numberOfDisplayItems === 1
+      ) {
+        state.layout = "single";
+        state.layoutRatios = RatioMap["single"];
+      } else if (state.numberOfDisplayItems === 2) {
+        state.layout = "stacked";
+        state.layoutRatios = RatioMap["stacled"];
+      } else if (state.numberOfDisplayItems === 3) {
+        state.layout = "stacked-bottom-side-by-side";
+        state.layoutRatios = RatioMap["stacked-bottom-side-by-side"];
+      } else if (state.numberOfDisplayItems === 4) {
+        state.layout = "four";
+        state.layoutRatios = RatioMap["four"];
+      }
+
+      if (action.payload) {
+        state.order.push("spectrogram");
+      } else {
+        state.order = state.order.filter((item) => item !== "spectrogram");
+      }
     },
     setFourierEnabled: (
       state: DisplayState,
@@ -154,12 +220,32 @@ const displaySlice = createSlice({
       } else {
         state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
       }
+      if (
+        state.numberOfDisplayItems === 0 ||
+        state.numberOfDisplayItems === 1
+      ) {
+        state.layout = "single";
+        state.layoutRatios = RatioMap["single"];
+      } else if (state.numberOfDisplayItems === 2) {
+        state.layout = "stacked";
+        state.layoutRatios = RatioMap["stacled"];
+      } else if (state.numberOfDisplayItems === 3) {
+        state.layout = "stacked-bottom-side-by-side";
+        state.layoutRatios = RatioMap["stacked-bottom-side-by-side"];
+      } else if (state.numberOfDisplayItems === 4) {
+        state.layout = "four";
+        state.layoutRatios = RatioMap["four"];
+      }
+
+      if (action.payload) {
+        state.order.push("fourier");
+      } else {
+        state.order = state.order.filter((item) => item !== "fourier");
+      }
     },
     setOrder: (
       state: DisplayState,
-      action: PayloadAction<
-        ("waveform" | "video" | "spectrogram" | "fourier")[]
-      >,
+      action: PayloadAction<DisplayState["order"]>,
     ) => {
       state.order = action.payload;
     },

@@ -24,6 +24,7 @@ import {
   selectSpectrogramEnabled,
   selectFourierEnabled,
   selectOrder,
+  selectLayoutRatios,
 } from "../store/displaySlice";
 import "./PlaybackArea.css";
 import WaveformVisualizer from "./WaveformVisualizer";
@@ -64,14 +65,13 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const zoomStart = useSelector(selectZoomStart);
   const zoomEnd = useSelector(selectZoomEnd);
   const layout = useSelector(selectLayout);
+  const layoutRatios = useSelector(selectLayoutRatios);
   const minimap = useSelector(selectMinimap);
-  const videoEnabled = useSelector(selectVideoEnabled);
-  const waveformEnabled = useSelector(selectWaveformEnabled);
-  const spectrogramEnabled = useSelector(selectSpectrogramEnabled);
-  const fourierEnabled = useSelector(selectFourierEnabled);
   const order = useSelector(selectOrder);
 
-  const [minimapRatios, setMinimapRatios] = useState(miniMapEnabled);
+  const [minimapRatios, setMinimapRatios] = useState(
+    minimap ? miniMapEnabled : miniMapDisabled,
+  );
 
   const isDraggingRef = useRef(false);
   const isPlayingBeforeDragRef = useRef(false);
@@ -80,27 +80,13 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [activeVideo, setActiveVideo] = useState(1);
 
-  // useEffect(() => {
-  //   if (displayMode === "waveform-video") {
-  //     setDisplayRatios(displayModeTemplateVideoWaveform);
-  //   } else if (displayMode === "waveform") {
-  //     setDisplayRatios(displayModeTemplateWaveform);
-  //   } else if (displayMode === "video") {
-  //     setDisplayRatios(displayModeTemplateVideo);
-  //   } else {
-  //     setDisplayRatios(displayModeTemplateWaveform);
-  //   }
-  // }, [displayMode]);
-
-  // useEffect(() => {
-  //   if (media) {
-  //     if (media.fileType.startsWith("video")) {
-  //       dispatch(setDisplayMode("waveform-video"));
-  //     } else {
-  //       dispatch(setDisplayMode("waveform"));
-  //     }
-  //   }
-  // }, [dispatch, media]);
+  useEffect(() => {
+    if (minimap) {
+      setMinimapRatios(miniMapEnabled);
+    } else {
+      setMinimapRatios(miniMapDisabled);
+    }
+  }, [minimap]);
 
   useEffect(() => {
     if (videoRef1.current && videoRef2.current) {
@@ -175,8 +161,8 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   }, [media, videoRef1, dispatch]);
 
   return (
-    <div className="playbackarea" ref={containerRef} style={style}>
-      {media && (
+    <div className={`playback`} ref={containerRef} style={style}>
+      {media && minimap && (
         <Minimap
           media={media}
           height={workspaceHeight * minimapRatios["minimap"]}
@@ -186,6 +172,76 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           endPercentage={loopEnd}
         ></Minimap>
       )}
+      <div className={`${layout.startsWith('side-by-side') && "display-area-side-by-side"}`} style={{ height: workspaceHeight * minimapRatios["remainder"], width: workspaceWidth }}>
+      {!order.includes("video") && (
+        <div className="hidden-video-elements">
+          <video ref={videoRef1} className="hidden">
+            <source src={media?.url} type={media?.fileType} />
+            Your browser does not support the video tag.
+          </video>
+          <video ref={videoRef2} className="hidden">
+            <source src={media?.url} type={media?.fileType} />
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      )}
+      {media &&
+        order.length > 0 && layoutRatios && layoutRatios.length === order.length &&
+        order.map((item, index) => {
+          const layoutRatio = layoutRatios[index] || [1, 1, 0, 0];
+          if (item === "video") {
+            return (
+                <div key={index} className="video-wrapper flex justify-center items-center">
+                <video
+                  ref={videoRef1}
+                  controls={false}
+                  className={`video-element ${activeVideo === 1 ? "visible" : "hidden"}`}
+                  loop={false}
+                  style={{
+                  maxWidth: `${workspaceWidth * layoutRatio[0]}px`,
+                  width: `${workspaceWidth * layoutRatio[0]}px`,
+                  maxHeight: `${workspaceHeight * layoutRatio[1] * minimapRatios["remainder"]}px`,
+                  height: `${workspaceHeight * layoutRatio[1] * minimapRatios["remainder"]}px`,
+                  zIndex: -1,
+                  }}
+                >
+                  <source src={media.url} type={media.fileType} />
+                  Your browser does not support the video tag.
+                </video>
+                <video
+                  ref={videoRef2}
+                  controls={false}
+                  className={`video-element ${activeVideo === 2 ? "visible" : "hidden"}`}
+                  loop={false}
+                  style={{
+                  maxWidth: `${workspaceWidth * layoutRatio[0]}px`,
+                  width: `${workspaceWidth * layoutRatio[0]}px`,
+                  maxHeight: `${workspaceHeight * layoutRatio[1] * minimapRatios["remainder"]}px`,
+                  height: `${workspaceHeight * layoutRatio[1] * minimapRatios["remainder"]}px`,
+                  zIndex: -1,
+                  }}
+                >
+                  <source src={media.url} type={media.fileType} />
+                  Your browser does not support the video tag.
+                </video>
+                </div>
+            );
+          } else if (item === "waveform") {
+            return (
+              <WaveformVisualizer
+                key={index}
+                media={media}
+                startPercentage={loopStart * 100}
+                endPercentage={loopEnd * 100}
+                width={workspaceWidth * layoutRatio[0]}
+                height={workspaceHeight * layoutRatio[1] *  minimapRatios["remainder"]}
+                displayRatioVertical={minimapRatios["remainder"] * layoutRatio[1]}
+                displayRatioHorizontal={layoutRatio[0]}
+              />
+            );
+          }
+          return null;
+        })}
 
       {/* <div className="video-container">
         {media && displayRatios["video"] > 0 && (
@@ -235,6 +291,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           displayRatio={displayRatios["waveform"]}
         />
       )} */}
+      </div>
       {media && (
         <PlaybackControls
           width={workspaceWidth}

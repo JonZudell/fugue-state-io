@@ -19,6 +19,8 @@ interface WaveformVisualizerProps {
   height?: number;
   displayRatio?: number;
   crosshair?: boolean;
+  displayRatioVertical?: number;
+  displayRatioHorizontal?: number;
 }
 
 const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
@@ -28,7 +30,8 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   endPercentage = 100,
   width = 1000,
   height = 200,
-  displayRatio = 0.5,
+  displayRatioVertical = 0.5,
+  displayRatioHorizontal = 0.5,
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -206,7 +209,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
       width={width}
       height={height}
       className="w-full"
-      style={{ width: "100%", height: `${displayRatio * 100}%` }}
+      style={{ width: `${displayRatioHorizontal * 100}%`, height: `${displayRatioVertical * 100}%` }}
     ></canvas>
   );
 };
