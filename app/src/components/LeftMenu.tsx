@@ -7,10 +7,13 @@ import {
   IconDefinition,
   faDisplay,
   faTimeline,
+  faFileWaveform,
+  faFlag,
 } from "@fortawesome/free-solid-svg-icons";
 import { JSX, useState } from "react";
 import "./LeftMenu.css";
 import AssetManager from "./AssetManager";
+import DisplayMenu from "./DisplayMenu";
 
 interface LeftMenuProps {
   smallestSize?: number;
@@ -28,7 +31,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
   initialState = [
     {
       id: 1,
-      icon: faMusic,
+      icon: faFileWaveform,
       style: { transform: "rotate(0)" },
       tabContent: <AssetManager />,
     },
@@ -36,11 +39,11 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
       id: 2,
       icon: faDisplay,
       style: { transform: "rotate(0)" },
-      tabContent: <div>Display</div>,
+      tabContent: <DisplayMenu />,
     },
     {
       id: 3,
-      icon: faTimeline,
+      icon: faFlag,
       style: { transform: "rotate(0)" },
       tabContent: <div>Timeline</div>,
     },

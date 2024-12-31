@@ -46,7 +46,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   loopEnd,
   setLoopEnd,
   videoRef,
-  className = "",
   height,
   width,
 }) => {

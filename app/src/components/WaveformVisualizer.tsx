@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { Summary } from "../core/waveformSummary";
+import { Summary, TreeNode } from "../core/waveformSummary";
 import {
   selectLoopEnd,
   selectLoopStart,
@@ -38,7 +38,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
 
   const drawSlice = (
     ctx: CanvasRenderingContext2D,
-    data: any,
+    data: TreeNode,
     startCount: number,
     endCount: number,
     canvas: HTMLCanvasElement,
@@ -64,7 +64,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
           const slice = getSlice(data, start, end);
           const yMin = ((1 - slice.low) * canvas.height) / 4;
           const yMax = ((1 - slice.high) * canvas.height) / 4;
-          ctx.fillRect(i, yMin + (canvas.height / 2), 1, yMax - yMin);
+          ctx.fillRect(i, yMin + canvas.height / 2, 1, yMax - yMin);
         }
       } else {
         const start = startCount + i * samplesPerPixel;
@@ -141,8 +141,28 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
             (channelSummary * startPercentage) / 100,
           );
           const endCount = Math.floor((channelSummary * endPercentage) / 100);
-          drawSlice(ctx, media.summary.channels.left, startCount, endCount, canvas, "L", 2);
-          drawSlice(ctx,  media.summary.channels.right, startCount, endCount, canvas, "R", 2);
+          if (media.summary.channels.left) {
+            drawSlice(
+              ctx,
+              media.summary.channels.left,
+              startCount,
+              endCount,
+              canvas,
+              "L",
+              2,
+            );
+          }
+          if (media.summary.channels.right) {
+            drawSlice(
+              ctx,
+              media.summary.channels.right,
+              startCount,
+              endCount,
+              canvas,
+              "R",
+              2,
+            );
+          }
         }
         if (crosshair) {
           ctx.strokeStyle = "red";

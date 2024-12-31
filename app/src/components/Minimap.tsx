@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { Summary } from "../core/waveformSummary";
+import { Summary, TreeNode } from "../core/waveformSummary";
 import {
   selectLoopEnd,
   selectLooping,
@@ -61,7 +61,7 @@ const Minimap: React.FC<MinimapProps> = ({
 
     const drawSlice = (
       ctx: CanvasRenderingContext2D,
-      data: any,
+      data: TreeNode,
       start: number,
       end: number,
       canvas: HTMLCanvasElement,
@@ -171,12 +171,11 @@ const Minimap: React.FC<MinimapProps> = ({
           ctx.stroke();
         }
         if (looping) {
-        ctx.strokeStyle = "rgba(255, 255, 255, 1)";
-        ctx.lineWidth = 5;
-        ctx.strokeRect(loopStartX, 0, loopEndX - loopStartX, canvas.height);
+          ctx.strokeStyle = "rgba(255, 255, 255, 1)";
+          ctx.lineWidth = 5;
+          ctx.strokeRect(loopStartX, 0, loopEndX - loopStartX, canvas.height);
         }
       }
-
     };
 
     drawWaveform();

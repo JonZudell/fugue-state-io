@@ -5,7 +5,6 @@ import { selectFiles } from "../store/filesSlice";
 import { uploadFile } from "../store/playbackSlice";
 import { Key } from "react";
 import { AppDispatch } from "../store";
-import "./AssetManager.tsx";
 import CollapseMenu from "./CollapseMenu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";

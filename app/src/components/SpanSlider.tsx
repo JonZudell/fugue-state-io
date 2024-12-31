@@ -84,7 +84,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({
           className="span-slider__thumb_1"
           style={{
             position: "absolute",
-            left: `${(thumb1Value / 100) * ((width) - 10)}px`,
+            left: `${(thumb1Value / 100) * (width - 10)}px`,
             cursor: enabled ? "ew-resize" : "not-allowed",
           }}
           onMouseDown={(e) => {
@@ -104,8 +104,8 @@ const SpanSlider: React.FC<SpanSliderProps> = ({
           className="span-slider__between"
           style={{
             position: "absolute",
-            left: `${(Math.min(thumb1Value, thumb2Value) / 100) * ((width) - 10)}px`,
-            width: `${((Math.max(thumb2Value, thumb1Value) - Math.min(thumb1Value, thumb2Value)) / 100) * ((width) - 10)}px`,
+            left: `${(Math.min(thumb1Value, thumb2Value) / 100) * (width - 10)}px`,
+            width: `${((Math.max(thumb2Value, thumb1Value) - Math.min(thumb1Value, thumb2Value)) / 100) * (width - 10)}px`,
             cursor: enabled ? "grab" : "not-allowed",
           }}
           onMouseDown={(e) => {
