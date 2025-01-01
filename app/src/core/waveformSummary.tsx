@@ -6,8 +6,8 @@ export type TreeNode = {
   max: number;
   min: number;
   avg: number;
-  real?: Array;
-  imag?: Array;
+  real?: number[];
+  imag?: number[];
   count: number;
   sampleStart: number;
   sampleEnd: number;
@@ -185,9 +185,20 @@ async function constructTree(
   channel: string,
 ): Promise<TreeNode> {
   if (data.length <= minSamples) {
+    const input = new Array(TREE_SAMPLE_RATE).fill(0);
+    const output = new Array(TREE_SAMPLE_RATE).fill(0);
+    data.forEach((value, index) => {
+      input[index] = value;
+    });
+    console.log("output", output);
+    console.log("input", input);
+    fft.realTransform(output, input);
+    console.log("outputAfter", output);
+    console.log("inputAfter", input);
     const node = {
       max: Math.max(...data),
       min: Math.min(...data),
+      real: output,
       avg: data.reduce((a, b) => a + b, 0) / data.length,
       count: data.length,
       sampleStart: startTime,
