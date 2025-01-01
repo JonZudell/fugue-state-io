@@ -37,7 +37,6 @@ function frameFromSlice(array: number[], start: number, end: number): Frame {
 
 function interleavedFramesFromChannelData(data: number[]): Frame[] {
   const frames: Frame[] = [];
-  const frameCount = Math.floor(data.length / SAMPLE_BIN_SIZE);
   const interpolatedFrameCount = data.length / HALF_SAMPLE_BIN_SIZE;
 
   for (let i = 0; i < interpolatedFrameCount; i++) {
@@ -61,9 +60,6 @@ function summarizeFrame(frame: Frame): SummarizedFrame {
     input[index] = value;
   });
   fft.realTransform(output, input);
-
-  console.log("output", output);
-  console.log("input", input);
   return {
     max: max,
     min: min,

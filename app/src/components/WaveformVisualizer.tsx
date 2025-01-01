@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { Summary, TreeNode } from "../core/waveformSummary";
 import {
   selectLoopEnd,
   selectLoopStart,
@@ -8,11 +7,9 @@ import {
 } from "@/store/playbackSlice";
 import { useSelector } from "react-redux";
 import { FileState } from "@/store/filesSlice";
-import { getSlice } from "../core/waveformSummary";
 interface WaveformVisualizerProps {
   media?: FileState;
   width?: number;
-  summary?: Summary;
   channel?: string;
   startPercentage?: number;
   endPercentage?: number;
@@ -62,6 +59,32 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
     const drawWaveform = () => {
       if (media && media.summary && canvas) {
         if (!ctx) {
+          return;
+        }
+
+        const { summary } = media;
+        const summaryLength = summary.mono.length;
+        const startSample = Math.floor((startPercentage / 100) * summaryLength);
+        const endSample = Math.floor((endPercentage / 100) * summaryLength);
+        const samplesPerPixel = (endSample - startSample) / canvas.width;
+        if ( channel=== "LR" && summary.left && summary.right) {
+          for (let i = 0; i < canvas.width; i++) {
+
+            const startIndex = Math.floor((i * samplesPerPixel) + startSample);
+            const endIndex = Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
+            const leftSlice = summary.left.slice(startIndex, endIndex);
+            const rightSlice = summary.right.slice(startIndex, endIndex);
+            const rightMin = Math.min(...rightSlice.map((frame) => frame.min));
+            const rightMax = Math.max(...rightSlice.map((frame) => frame.max));
+            
+            const leftMin = Math.min(...leftSlice.map((frame) => frame.min));
+            const leftMax = Math.max(...leftSlice.map((frame) => frame.max));
+            ctx.fillStyle = "rgba(255, 255, 255, 1)";
+            ctx.fillRect(i, canvas.height / 4 - leftMax * canvas.height / 4, 1, (leftMax - leftMin) * canvas.height / 4);
+            ctx.fillStyle = "rgba(255, 255, 255, 1)";
+            ctx.fillRect(i, canvas.height / 4 - rightMax * canvas.height / 4 + (canvas.height / 2), 1, (rightMax - rightMin) * canvas.height / 4);
+          }
+        } else {
           return;
         }
         
