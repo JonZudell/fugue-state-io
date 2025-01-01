@@ -30,55 +30,14 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   endPercentage = 100,
   width = 1000,
   height = 200,
-  displayRatioVertical = 0.5,
-  displayRatioHorizontal = 0.5,
+  displayRatioVertical = 1,
+  displayRatioHorizontal = 1,
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timeElapsed = useSelector(selectTimeElapsed);
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
-
-  const drawSlice = (
-    ctx: CanvasRenderingContext2D,
-    data: TreeNode,
-    startCount: number,
-    endCount: number,
-    canvas: HTMLCanvasElement,
-    channel: string,
-    channels: number,
-  ) => {
-    ctx.fillStyle = "#A0A0A0";
-    const samples = endCount - startCount;
-    const samplesPerPixel = samples / canvas.width;
-    for (let i = 0; i < canvas.width; i++) {
-      if (channels === 2) {
-        if (channel === "L") {
-          const start = startCount + i * samplesPerPixel;
-          const end = start + samplesPerPixel;
-          const slice = getSlice(data, start, end);
-          const yMin = ((1 - slice.low) * canvas.height) / 4;
-          const yMax = ((1 - slice.high) * canvas.height) / 4;
-          ctx.fillRect(i, yMin, 1, yMax - yMin);
-        }
-        if (channel === "R") {
-          const start = startCount + i * samplesPerPixel;
-          const end = start + samplesPerPixel;
-          const slice = getSlice(data, start, end);
-          const yMin = ((1 - slice.low) * canvas.height) / 4;
-          const yMax = ((1 - slice.high) * canvas.height) / 4;
-          ctx.fillRect(i, yMin + canvas.height / 2, 1, yMax - yMin);
-        }
-      } else {
-        const start = startCount + i * samplesPerPixel;
-        const end = start + samplesPerPixel;
-        const slice = getSlice(data, start, end);
-        const yMin = ((1 - slice.low) * canvas.height) / 2;
-        const yMax = ((1 - slice.high) * canvas.height) / 2;
-        ctx.fillRect(i, yMin, 1, yMax - yMin);
-      }
-    }
-  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -105,68 +64,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
         if (!ctx) {
           return;
         }
-        if (channel === "L") {
-          const channelSummary = media.summary.channels.left?.count || 0;
-          const startCount = Math.floor(
-            (channelSummary * startPercentage) / 100,
-          );
-          const endCount = Math.floor((channelSummary * endPercentage) / 100);
-          const data = media.summary.channels.left;
-          if (!data) {
-            return;
-          }
-          drawSlice(ctx, data, startCount, endCount, canvas, channel, 1);
-        } else if (channel === "R") {
-          const channelSummary = media.summary.channels.right?.count || 0;
-          const startCount = Math.floor(
-            (channelSummary * startPercentage) / 100,
-          );
-          const endCount = Math.floor((channelSummary * endPercentage) / 100);
-          const data = media.summary.channels.right;
-          if (!data) {
-            return;
-          }
-          drawSlice(ctx, data, startCount, endCount, canvas, channel, 1);
-        } else if (channel === "MID") {
-          const channelSummary = media.summary.channels.mono?.count || 0;
-          const startCount = Math.floor(
-            (channelSummary * startPercentage) / 100,
-          );
-          const endCount = Math.floor((channelSummary * endPercentage) / 100);
-          const data = media.summary.channels.mono;
-          if (!data) {
-            return;
-          }
-          drawSlice(ctx, data, startCount, endCount, canvas, channel, 1);
-        } else if (channel === "LR") {
-          const channelSummary = media.summary.channels.left?.count || 0;
-          const startCount = Math.floor(
-            (channelSummary * startPercentage) / 100,
-          );
-          const endCount = Math.floor((channelSummary * endPercentage) / 100);
-          if (media.summary.channels.left) {
-            drawSlice(
-              ctx,
-              media.summary.channels.left,
-              startCount,
-              endCount,
-              canvas,
-              "L",
-              2,
-            );
-          }
-          if (media.summary.channels.right) {
-            drawSlice(
-              ctx,
-              media.summary.channels.right,
-              startCount,
-              endCount,
-              canvas,
-              "R",
-              2,
-            );
-          }
-        }
+        
         if (crosshair) {
           ctx.strokeStyle = "red";
           ctx.lineWidth = 1;

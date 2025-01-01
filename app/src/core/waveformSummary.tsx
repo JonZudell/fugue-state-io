@@ -1,278 +1,148 @@
 import FFT from 'fft.js';
 const SAMPLE_RATE = 44100;
-const TREE_SAMPLE_RATE = 4096;
-const fft = new FFT(TREE_SAMPLE_RATE);
-export type TreeNode = {
+const SAMPLE_BIN_SIZE = 2048;
+const HALF_SAMPLE_BIN_SIZE = Math.floor(SAMPLE_BIN_SIZE / 2);
+const fft = new FFT(SAMPLE_BIN_SIZE);
+
+type Frame = {
+  start: number;
+  end: number;
+  data: number[];
+};  
+
+type SummarizedFrame = {
   max: number;
   min: number;
   avg: number;
-  real?: number[];
-  imag?: number[];
-  count: number;
-  sampleStart: number;
-  sampleEnd: number;
-  left?: TreeNode;
-  right?: TreeNode;
+  fft: number[];
 };
 
 export type Channels = {
-  mono: TreeNode;
-  monoOverlap: TreeNode;
-  left?: TreeNode;
-  leftOverlap?: TreeNode;
-  right?: TreeNode;
-  rightOverlap?: TreeNode;
-  side?: TreeNode;
-  sideOverlap?: TreeNode;
+  mono: SummarizedFrame[];
+  left?: SummarizedFrame[];
+  right?: SummarizedFrame[];
+  side?: SummarizedFrame[];
 };
 
-export type Summary = {
-  stereo: boolean;
-  channels: Channels;
-  sampleRate: number;
-  duration: number;
-};
+function frameFromSlice(array: number[], start: number, end: number): Frame {
+  const data = Array.from(array.slice(start, end))
+  const fft1: number[] = new Array(Math.pow(2, Math.ceil(Math.log2(data.length)))).fill(0);
+  fft.transform(fft1, data);
+  return {
+    data: data,
+    start: start,
+    end: end
+  };
+}
+
+function interleavedFramesFromChannelData(data: number[]): Frame[] {
+  const frames: Frame[] = [];
+  const frameCount = Math.floor(data.length / SAMPLE_BIN_SIZE);
+  const interpolatedFrameCount = data.length / HALF_SAMPLE_BIN_SIZE;
+
+  for (let i = 0; i < interpolatedFrameCount; i++) {
+    const start = i * HALF_SAMPLE_BIN_SIZE;
+    const end = Math.min((i * HALF_SAMPLE_BIN_SIZE) + SAMPLE_BIN_SIZE, data.length);
+    const frame = frameFromSlice(data, start, end);
+    frames.push(frame);
+  }
+  console.log('interleavedFrames:', frames);
+  return frames;
+}
+
+function summarizeFrame(frame: Frame): SummarizedFrame {
+  const count = frame.data.length;
+  const max = Math.max(...frame.data);
+  const min = Math.min(...frame.data);
+  const avg = frame.data.reduce((a, b) => a + b, 0) / count;
+  const input: number[] = new Array(SAMPLE_BIN_SIZE).fill(0);
+  const output: number[] = new Array(SAMPLE_BIN_SIZE).fill(0);
+  frame.data.forEach((value, index) => {
+    input[index] = value;
+  });
+  fft.realTransform(output, input);
+
+  console.log("output", output);
+  console.log("input", input);
+  return {
+    max: max,
+    min: min,
+    avg: avg,
+    fft: output
+  };
+}
+
+function summarizeInterleavedFrames(frames: Frame[]): SummarizedFrame[] {
+  let lastFrame: SummarizedFrame = summarizeFrame(frames[0]);
+  const summarizedFrames: SummarizedFrame[] = [];
+
+  let ndx = 0;
+
+  while (ndx < frames.length) {
+    const summarizedFrame = summarizeFrame(frames[ndx]);
+    const thisFrame = { ...summarizedFrames[ndx] };
+
+    thisFrame.max = (lastFrame.max + summarizedFrame.max) / 2;
+    thisFrame.min = (lastFrame.min + summarizedFrame.min) / 2;
+    thisFrame.avg = (lastFrame.avg + summarizedFrame.avg) / 2;
+    thisFrame.fft = lastFrame.fft.map((value, index) => (value + summarizedFrame.fft[index]) / 2);
+
+  
+    summarizedFrames.push(thisFrame);
+    lastFrame = summarizedFrame;
+    ndx++;
+  }
+  return summarizedFrames;
+}
+
 export async function generateWaveformSummary(
   audioContext: AudioContext,
   file: File,
-): Promise<Summary> {
+): Promise<Channels> {
   const arrayBuffer = await file.arrayBuffer();
-  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  console.debug('ArrayBuffer length:', arrayBuffer.byteLength);
 
-  const halfTreeSampleRate = Math.floor(TREE_SAMPLE_RATE / 2);
+  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  console.debug('AudioBuffer duration:', audioBuffer.duration);
+  console.debug('AudioBuffer number of channels:', audioBuffer.numberOfChannels);
 
   if (audioBuffer.numberOfChannels > 2) {
     throw new Error("Only mono and stereo files are supported");
   } else if (audioBuffer.numberOfChannels === 1) {
-    const array: Array<number> = Array.from(audioBuffer.getChannelData(0));
-    const tree = await constructTree(
-      array,
-      TREE_SAMPLE_RATE,
-      0,
-      array.length,
-      0,
-      "mono",
-    );
+    const interleavedFrames: Frame[] = interleavedFramesFromChannelData(Array.from(audioBuffer.getChannelData(0)));
+    console.debug('Interleaved frames length (mono):', interleavedFrames.length);
 
-    const channelOneOverlap = Array.from(audioBuffer.getChannelData(0));
-    channelOneOverlap.splice(0, halfTreeSampleRate);
-    channelOneOverlap.splice(channelOneOverlap.length - halfTreeSampleRate, halfTreeSampleRate);
-    const monoOverlap = await constructTree(
-      channelOneOverlap,
-      TREE_SAMPLE_RATE,
-      0,
-      audioBuffer.getChannelData(0).length,
-      0,
-      "mono",
-    );
-    const summary: Summary = {
-      stereo: false,
-      channels: { mono: tree, monoOverlap: monoOverlap },
-      sampleRate: audioBuffer.sampleRate,
-      duration: audioBuffer.duration,
-    };
-    return summary;
+    const mono: SummarizedFrame[] = summarizeInterleavedFrames(interleavedFrames);
+    console.debug('Summarized frames length (mono):', mono.length);
+
+    return {mono: mono};
   } else {
-    const channelOne = Array.from(audioBuffer.getChannelData(0));
-    const channelOneOverlap = Array.from(audioBuffer.getChannelData(0));
-    channelOneOverlap.splice(0, halfTreeSampleRate);
-    channelOneOverlap.splice(channelOneOverlap.length - halfTreeSampleRate, halfTreeSampleRate);
+    const leftInterleaved: Frame[] = interleavedFramesFromChannelData(Array.from(audioBuffer.getChannelData(0)));
+    const rightInterleaved: Frame[] = interleavedFramesFromChannelData(Array.from(audioBuffer.getChannelData(1)));
+    console.debug('Interleaved frames length (left):', leftInterleaved.length);
+    console.debug('Interleaved frames length (right):', rightInterleaved.length);
 
-    const channelTwo = Array.from(audioBuffer.getChannelData(1));
-    const channelTwoOverlap = Array.from(audioBuffer.getChannelData(1));
-    channelTwoOverlap.splice(0, halfTreeSampleRate);
-    channelTwoOverlap.splice(channelTwoOverlap.length - halfTreeSampleRate, halfTreeSampleRate);
+    const left: SummarizedFrame[] = summarizeInterleavedFrames(leftInterleaved);
+    const right: SummarizedFrame[] = summarizeInterleavedFrames(rightInterleaved);
+    console.debug('Summarized frames length (left):', left.length);
+    console.debug('Summarized frames length (right):', right.length);
 
-    const channelMid = channelOne.map(
-      (value, index) => (value + channelTwo[index]) / 2,
+    const midChannel: Float32Array = new Float32Array(leftInterleaved.length);
+    const sideChannel: Float32Array = new Float32Array(leftInterleaved.length);
+    midChannel.forEach((value, index) => {
+      midChannel[index] = (leftInterleaved[index].data[index] + rightInterleaved[index].data[index]) / 2;}
     );
-    const channelMidOverlap = channelOne.map(
-      (value, index) => (value - channelTwo[index]) / 2,
+    sideChannel.forEach((value, index) => {
+      sideChannel[index] = (leftInterleaved[index].data[index] - rightInterleaved[index].data[index]) / 2;}
     );
-    channelMidOverlap.splice(0, halfTreeSampleRate);
-    channelMidOverlap.splice(channelMidOverlap.length - halfTreeSampleRate, halfTreeSampleRate);
+    console.debug('Mid channel length:', midChannel.length);
+    console.debug('Side channel length:', sideChannel.length);
 
-    const channelSide = channelOne.map(
-      (value, index) => (value - channelTwo[index]) / 2,
-    );
-    const channelSideOverlap = channelOne.map(
-      (value, index) => (value - channelTwo[index]) / 2,
-    );
-    channelSideOverlap.splice(0, halfTreeSampleRate);
-    channelSideOverlap.splice(channelSideOverlap.length - halfTreeSampleRate, halfTreeSampleRate);
+    const mid: SummarizedFrame[] = summarizeInterleavedFrames(leftInterleaved);
+    const side: SummarizedFrame[] = summarizeInterleavedFrames(rightInterleaved);
+    console.debug('Summarized frames length (mid):', mid.length);
+    console.debug('Summarized frames length (side):', side.length);
 
-    const summary: Summary = {
-      stereo: true,
-      channels: {
-        mono: await constructTree(
-          channelMid,
-          TREE_SAMPLE_RATE,
-          0,
-          audioBuffer.getChannelData(0).length,
-          0,
-          "mono",
-        ),
-        monoOverlap: await constructTree(
-          channelMidOverlap,
-          TREE_SAMPLE_RATE,
-          0,
-          audioBuffer.getChannelData(0).length,
-          0,
-          "mono",
-        ),
-        left: await constructTree(
-          channelOne,
-          TREE_SAMPLE_RATE,
-          0,
-          audioBuffer.getChannelData(0).length,
-          0,
-          "left",
-        ),
-        leftOverlap: await constructTree(
-          channelOneOverlap,
-          TREE_SAMPLE_RATE,
-          0,
-          audioBuffer.getChannelData(0).length,
-          0,
-          "left",
-        ),
-        right: await constructTree(
-          channelTwo,
-          TREE_SAMPLE_RATE,
-          0,
-          audioBuffer.getChannelData(0).length,
-          0,
-          "right",
-        ),
-        rightOverlap: await constructTree(
-          channelTwoOverlap,
-          TREE_SAMPLE_RATE,
-          0,
-          audioBuffer.getChannelData(0).length,
-          0,
-          "right",
-        ),
-        side: await constructTree(
-          channelSide,
-          TREE_SAMPLE_RATE,
-          0,
-          audioBuffer.getChannelData(0).length,
-          0,
-          "side",
-        ),
-        sideOverlap: await constructTree(
-          channelSideOverlap,
-          TREE_SAMPLE_RATE,
-          0,
-          audioBuffer.getChannelData(0).length,
-          0,
-          "side",
-        ),
-      },
-      sampleRate: audioBuffer.sampleRate,
-      duration: audioBuffer.duration,
-    };
-    return summary;
-  }
-}
-
-async function constructTree(
-  data: number[],
-  minSamples: number,
-  startTime: number,
-  endTime: number,
-  depth: number = 0,
-  channel: string,
-): Promise<TreeNode> {
-  if (data.length <= minSamples) {
-    const input = new Array(TREE_SAMPLE_RATE).fill(0);
-    const output = new Array(TREE_SAMPLE_RATE).fill(0);
-    data.forEach((value, index) => {
-      input[index] = value;
-    });
-    console.log("output", output);
-    console.log("input", input);
-    fft.realTransform(output, input);
-    console.log("outputAfter", output);
-    console.log("inputAfter", input);
-    const node = {
-      max: Math.max(...data),
-      min: Math.min(...data),
-      real: output,
-      avg: data.reduce((a, b) => a + b, 0) / data.length,
-      count: data.length,
-      sampleStart: startTime,
-      sampleEnd: endTime,
-    };
-    return node;
-  } else {
-    const midIndex = Math.floor(data.length / 2);
-    const midTime = (startTime + endTime) / 2;
-    const left = await constructTree(
-      data.slice(0, midIndex),
-      minSamples,
-      startTime,
-      midTime,
-      depth + 1,
-      channel,
-    );
-    const right = await constructTree(
-      data.slice(midIndex),
-      minSamples,
-      midTime,
-      endTime,
-      depth + 1,
-      channel,
-    );
-
-    const node = {
-      max: Math.max(left.max, right.max),
-      min: Math.min(left.min, right.min),
-      avg:
-        (left.avg * left.count + right.avg * right.count) /
-        (left.count + right.count),
-      count: left.count + right.count,
-      sampleStart: startTime,
-      sampleEnd: endTime,
-      left: left,
-      right: right,
-    };
-    return node;
-  }
-}
-
-export function getSlice(
-  tree: TreeNode,
-  start: number,
-  end: number,
-): { high: number; low: number; avg: number } {
-  if (tree.sampleEnd - tree.sampleStart <= TREE_SAMPLE_RATE) {
-    return {
-      high: tree.max,
-      low: tree.min,
-      avg: tree.avg,
-    };
-  }
-
-  const mid = (tree.sampleStart + tree.sampleEnd) / 2;
-
-  if (start >= mid) {
-    if (!tree.right) throw new Error("Right child is undefined");
-    return getSlice(tree.right, start, end);
-  } else if (end <= mid) {
-    if (!tree.left) throw new Error("Left child is undefined");
-    return getSlice(tree.left, start, end);
-  } else {
-    if (!tree.left || !tree.right)
-      throw new Error("Left or right child is undefined");
-    const leftSlice = getSlice(tree.left, start, mid);
-    const rightSlice = getSlice(tree.right, mid, end);
-    return {
-      high: Math.max(leftSlice.high, rightSlice.high),
-      low: Math.min(leftSlice.low, rightSlice.low),
-      avg:
-        (leftSlice.avg * (mid - start) + rightSlice.avg * (end - mid)) /
-        (end - start),
-    };
+    return {mono: mid, left: left, right: right, side: side};
   }
 }
