@@ -52,7 +52,7 @@ const renderMediaComponent = (
   workspaceHeight: number,
   minimapRatios: { minimap: number; remainder: number },
   loopStart: number,
-  loopEnd: number
+  loopEnd: number,
 ) => {
   switch (type) {
     case "video":
@@ -77,23 +77,23 @@ const renderMediaComponent = (
     case "waveform":
       return (
         <div
-                    className="waveform-wrapper"
-                    style={{
-                      maxWidth: `${workspaceWidth}px`,
-                      width: `${workspaceWidth}px`,
-                      maxHeight: `${workspaceHeight}px`,
-                      height: `${workspaceHeight}px`,
-                    }}
-                  >
-        <WaveformVisualizer
-          media={media}
-          startPercentage={loopStart * 100}
-          endPercentage={loopEnd * 100}
-          width={workspaceWidth}
-          height={workspaceHeight}
-          displayRatioVertical={1}
-          displayRatioHorizontal={1}
-        />
+          className="waveform-wrapper"
+          style={{
+            maxWidth: `${workspaceWidth}px`,
+            width: `${workspaceWidth}px`,
+            maxHeight: `${workspaceHeight}px`,
+            height: `${workspaceHeight}px`,
+          }}
+        >
+          <WaveformVisualizer
+            media={media}
+            startPercentage={loopStart * 100}
+            endPercentage={loopEnd * 100}
+            width={workspaceWidth}
+            height={workspaceHeight}
+            displayRatioVertical={1}
+            displayRatioHorizontal={1}
+          />
         </div>
       );
     case "spectrogram":
@@ -207,15 +207,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
     }, 10);
 
     return () => clearInterval(interval);
-  }, [
-    playing,
-    dispatch,
-    timeElapsed,
-    media,
-    loopEnd,
-    looping,
-    loopStart,
-  ]);
+  }, [playing, dispatch, timeElapsed, media, loopEnd, looping, loopStart]);
 
   useEffect(() => {
     if (media && videoRef.current) {
@@ -250,7 +242,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 workspaceHeight,
                 minimapRatios,
                 loopStart,
-                loopEnd
+                loopEnd,
               )}
             </div>
           ))}
@@ -275,7 +267,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                   workspaceHeight,
                   minimapRatios,
                   loopStart,
-                  loopEnd
+                  loopEnd,
                 )}
               </div>
             );
@@ -300,7 +292,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                   workspaceHeight * minimapRatios.remainder * 0.5,
                   minimapRatios,
                   loopStart,
-                  loopEnd
+                  loopEnd,
                 )}
               </div>
             );
@@ -323,7 +315,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               workspaceHeight * minimapRatios.remainder * 0.5,
               minimapRatios,
               loopStart,
-              loopEnd
+              loopEnd,
             )}
           </div>
           <div className="display-area-stacked-bottom">
@@ -337,7 +329,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                   workspaceHeight * minimapRatios.remainder * 0.5,
                   minimapRatios,
                   loopStart,
-                  loopEnd
+                  loopEnd,
                 )}
               </div>
               <div className="display-area-side-by-side-left">
@@ -349,7 +341,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                   workspaceHeight * minimapRatios.remainder * 0.5,
                   minimapRatios,
                   loopStart,
-                  loopEnd
+                  loopEnd,
                 )}
               </div>
             </div>
@@ -374,7 +366,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                   workspaceHeight * minimapRatios.remainder * 0.5,
                   minimapRatios,
                   loopStart,
-                  loopEnd
+                  loopEnd,
                 )}
               </div>
               <div className="display-area-side-by-side-left">
@@ -386,7 +378,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                   workspaceHeight * minimapRatios.remainder * 0.5,
                   minimapRatios,
                   loopStart,
-                  loopEnd
+                  loopEnd,
                 )}
               </div>
             </div>
@@ -400,7 +392,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               workspaceHeight * minimapRatios.remainder * 0.5,
               minimapRatios,
               loopStart,
-              loopEnd
+              loopEnd,
             )}
           </div>
         </div>
@@ -423,7 +415,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 workspaceHeight * 0.5 * minimapRatios["remainder"],
                 minimapRatios,
                 loopStart,
-                loopEnd
+                loopEnd,
               )}
             </div>
             <div className={"display-area-side-by-side-right-stacked-top"}>
@@ -435,7 +427,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 workspaceHeight * 0.5 * minimapRatios["remainder"],
                 minimapRatios,
                 loopStart,
-                loopEnd
+                loopEnd,
               )}
             </div>
           </div>
@@ -448,7 +440,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               workspaceHeight * minimapRatios["remainder"],
               minimapRatios,
               loopStart,
-              loopEnd
+              loopEnd,
             )}
           </div>
         </div>
@@ -471,7 +463,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               workspaceHeight * minimapRatios["remainder"],
               minimapRatios,
               loopStart,
-              loopEnd
+              loopEnd,
             )}
           </div>
           <div className={"display-area-side-by-side-right"}>
@@ -484,7 +476,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 workspaceHeight * 0.5 * minimapRatios["remainder"],
                 minimapRatios,
                 loopStart,
-                loopEnd
+                loopEnd,
               )}
             </div>
             <div className={"display-area-side-by-side-right-stacked-top"}>
@@ -496,7 +488,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 workspaceHeight * 0.5 * minimapRatios["remainder"],
                 minimapRatios,
                 loopStart,
-                loopEnd
+                loopEnd,
               )}
             </div>
           </div>
@@ -520,7 +512,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                   workspaceHeight * minimapRatios.remainder * 0.5,
                   minimapRatios,
                   loopStart,
-                  loopEnd
+                  loopEnd,
                 )}
               </div>
               <div className="display-area-side-by-side-left">
@@ -532,7 +524,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                   workspaceHeight * minimapRatios.remainder * 0.5,
                   minimapRatios,
                   loopStart,
-                  loopEnd
+                  loopEnd,
                 )}
               </div>
             </div>
@@ -548,7 +540,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                   workspaceHeight * minimapRatios.remainder * 0.5,
                   minimapRatios,
                   loopStart,
-                  loopEnd
+                  loopEnd,
                 )}
               </div>
               <div className="display-area-side-by-side-left">
@@ -560,7 +552,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                   workspaceHeight * minimapRatios.remainder * 0.5,
                   minimapRatios,
                   loopStart,
-                  loopEnd
+                  loopEnd,
                 )}
               </div>
             </div>

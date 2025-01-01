@@ -1,11 +1,13 @@
-const FFT = require('fft.js');
+import FFT from 'fft.js';
 const SAMPLE_RATE = 44100;
 const TREE_SAMPLE_RATE = 4096;
-
+const fft = new FFT(TREE_SAMPLE_RATE);
 export type TreeNode = {
   max: number;
   min: number;
   avg: number;
+  real?: Array;
+  imag?: Array;
   count: number;
   sampleStart: number;
   sampleEnd: number;
@@ -36,23 +38,25 @@ export async function generateWaveformSummary(
 ): Promise<Summary> {
   const arrayBuffer = await file.arrayBuffer();
   const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
   const halfTreeSampleRate = Math.floor(TREE_SAMPLE_RATE / 2);
 
   if (audioBuffer.numberOfChannels > 2) {
     throw new Error("Only mono and stereo files are supported");
   } else if (audioBuffer.numberOfChannels === 1) {
+    const array: Array<number> = Array.from(audioBuffer.getChannelData(0));
     const tree = await constructTree(
-      audioBuffer.getChannelData(0),
+      array,
       TREE_SAMPLE_RATE,
       0,
-      audioBuffer.getChannelData(0).length,
+      array.length,
       0,
       "mono",
     );
 
-    const channelOneOverlap = audioBuffer.getChannelData(0);
-    const channelOneOverlapCut = channelOneOverlap.slice(0, halfTreeSampleRate);
-    channelOneOverlap.set(channelOneOverlapCut, channelOneOverlap.length - halfTreeSampleRate);
+    const channelOneOverlap = Array.from(audioBuffer.getChannelData(0));
+    channelOneOverlap.splice(0, halfTreeSampleRate);
+    channelOneOverlap.splice(channelOneOverlap.length - halfTreeSampleRate, halfTreeSampleRate);
     const monoOverlap = await constructTree(
       channelOneOverlap,
       TREE_SAMPLE_RATE,
@@ -63,30 +67,30 @@ export async function generateWaveformSummary(
     );
     const summary: Summary = {
       stereo: false,
-      channels: { mono: tree, monoOverlap },
+      channels: { mono: tree, monoOverlap: monoOverlap },
       sampleRate: audioBuffer.sampleRate,
       duration: audioBuffer.duration,
     };
     return summary;
   } else {
-    const channelOne = audioBuffer.getChannelData(0);
-    const channelOneOverlap = audioBuffer.getChannelData(0);
-    const channelOneOverlapCut = channelOneOverlap.slice(0, halfTreeSampleRate);
-    channelOneOverlap.set(channelOneOverlapCut, channelOneOverlap.length - halfTreeSampleRate);
+    const channelOne = Array.from(audioBuffer.getChannelData(0));
+    const channelOneOverlap = Array.from(audioBuffer.getChannelData(0));
+    channelOneOverlap.splice(0, halfTreeSampleRate);
+    channelOneOverlap.splice(channelOneOverlap.length - halfTreeSampleRate, halfTreeSampleRate);
 
-    const channelTwo = audioBuffer.getChannelData(1);
-    const channelTwoOverlap = audioBuffer.getChannelData(0);
-    const channelTwoOverlapCut = channelTwoOverlap.slice(0, halfTreeSampleRate);
-    channelTwoOverlap.set(channelTwoOverlapCut, channelTwoOverlap.length - halfTreeSampleRate);
+    const channelTwo = Array.from(audioBuffer.getChannelData(1));
+    const channelTwoOverlap = Array.from(audioBuffer.getChannelData(1));
+    channelTwoOverlap.splice(0, halfTreeSampleRate);
+    channelTwoOverlap.splice(channelTwoOverlap.length - halfTreeSampleRate, halfTreeSampleRate);
 
     const channelMid = channelOne.map(
       (value, index) => (value + channelTwo[index]) / 2,
     );
     const channelMidOverlap = channelOne.map(
-      (value, index) => (value + channelTwo[index]) / 2,
+      (value, index) => (value - channelTwo[index]) / 2,
     );
-    const channelMidOverlapCut = channelMidOverlap.slice(0, halfTreeSampleRate);
-    channelMidOverlap.set(channelMidOverlapCut, channelMidOverlap.length - halfTreeSampleRate);
+    channelMidOverlap.splice(0, halfTreeSampleRate);
+    channelMidOverlap.splice(channelMidOverlap.length - halfTreeSampleRate, halfTreeSampleRate);
 
     const channelSide = channelOne.map(
       (value, index) => (value - channelTwo[index]) / 2,
@@ -94,8 +98,8 @@ export async function generateWaveformSummary(
     const channelSideOverlap = channelOne.map(
       (value, index) => (value - channelTwo[index]) / 2,
     );
-    const channelSideOverlapCut = channelSideOverlap.slice(0, halfTreeSampleRate);
-    channelSideOverlap.set(channelSideOverlapCut, channelSideOverlap.length - halfTreeSampleRate);
+    channelSideOverlap.splice(0, halfTreeSampleRate);
+    channelSideOverlap.splice(channelSideOverlap.length - halfTreeSampleRate, halfTreeSampleRate);
 
     const summary: Summary = {
       stereo: true,
@@ -173,7 +177,7 @@ export async function generateWaveformSummary(
 }
 
 async function constructTree(
-  data: Float32Array<ArrayBufferLike>,
+  data: number[],
   minSamples: number,
   startTime: number,
   endTime: number,
@@ -209,6 +213,7 @@ async function constructTree(
       depth + 1,
       channel,
     );
+
     const node = {
       max: Math.max(left.max, right.max),
       min: Math.min(left.min, right.min),
