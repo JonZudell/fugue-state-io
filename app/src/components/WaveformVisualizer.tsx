@@ -4,9 +4,9 @@ import {
   selectLoopEnd,
   selectLoopStart,
   selectTimeElapsed,
-} from "@/store/playbackSlice";
+} from "../store/playbackSlice";
 import { useSelector } from "react-redux";
-import { FileState } from "@/store/filesSlice";
+import { FileState } from "../store/filesSlice";
 interface WaveformVisualizerProps {
   media?: FileState;
   width?: number;
@@ -67,27 +67,39 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
         const startSample = Math.floor((startPercentage / 100) * summaryLength);
         const endSample = Math.floor((endPercentage / 100) * summaryLength);
         const samplesPerPixel = (endSample - startSample) / canvas.width;
-        if ( channel=== "LR" && summary.left && summary.right) {
+        if (channel === "LR" && summary.left && summary.right) {
           for (let i = 0; i < canvas.width; i++) {
-
-            const startIndex = Math.floor((i * samplesPerPixel) + startSample);
-            const endIndex = Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
+            const startIndex = Math.floor(i * samplesPerPixel + startSample);
+            const endIndex =
+              Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
             const leftSlice = summary.left.slice(startIndex, endIndex);
             const rightSlice = summary.right.slice(startIndex, endIndex);
             const rightMin = Math.min(...rightSlice.map((frame) => frame.min));
             const rightMax = Math.max(...rightSlice.map((frame) => frame.max));
-            
+
             const leftMin = Math.min(...leftSlice.map((frame) => frame.min));
             const leftMax = Math.max(...leftSlice.map((frame) => frame.max));
             ctx.fillStyle = "rgba(255, 255, 255, 1)";
-            ctx.fillRect(i, canvas.height / 4 - leftMax * canvas.height / 4, 1, (leftMax - leftMin) * canvas.height / 4);
+            ctx.fillRect(
+              i,
+              canvas.height / 4 - (leftMax * canvas.height) / 4,
+              1,
+              ((leftMax - leftMin) * canvas.height) / 4,
+            );
             ctx.fillStyle = "rgba(255, 255, 255, 1)";
-            ctx.fillRect(i, canvas.height / 4 - rightMax * canvas.height / 4 + (canvas.height / 2), 1, (rightMax - rightMin) * canvas.height / 4);
+            ctx.fillRect(
+              i,
+              canvas.height / 4 -
+                (rightMax * canvas.height) / 4 +
+                canvas.height / 2,
+              1,
+              ((rightMax - rightMin) * canvas.height) / 4,
+            );
           }
         } else {
           return;
         }
-        
+
         if (crosshair) {
           ctx.strokeStyle = "red";
           ctx.lineWidth = 1;

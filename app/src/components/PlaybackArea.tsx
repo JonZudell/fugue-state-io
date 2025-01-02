@@ -112,11 +112,23 @@ const renderMediaComponent = (
       );
     case "fourier":
       return (
-        <FourierDisplay
-        media={media}
-        width={workspaceWidth}
-        height={workspaceHeight}
-        />
+        <div
+          className="fourier-wrapper"
+          style={{
+            maxWidth: `${workspaceWidth}px`,
+            width: `${workspaceWidth}px`,
+            maxHeight: `${workspaceHeight}px`,
+            height: `${workspaceHeight}px`,
+          }}
+        >
+          <FourierDisplay
+            media={media}
+            width={workspaceWidth}
+            height={workspaceHeight}
+            displayRatioVertical={1}
+            displayRatioHorizontal={1}
+          />
+        </div>
       );
     default:
       return null;

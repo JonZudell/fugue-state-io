@@ -13,17 +13,19 @@ interface FourierDisplayProps {
   width?: number;
   channel?: string;
   height?: number;
-  displayRatio?: number;
   crosshair?: boolean;
+  displayRatioVertical?: number;
+  displayRatioHorizontal?: number;
 }
 
 const FourierDisplay: React.FC<FourierDisplayProps> = ({
   media,
-  channel = "MID",
+  channel = "LR",
   width = 1000,
   height = 1000,
   crosshair = true,
-  displayRatio = 1,
+  displayRatioVertical = 1,
+  displayRatioHorizontal = 1,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timeElapsed = useSelector(selectTimeElapsed);
@@ -46,36 +48,63 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       canvas.width = container.clientWidth;
       canvas.height = container.clientHeight / 2; // Set height to half of container
     }
+  }, [
+    timeElapsed,
+    channel,
+    media,
+    width,
+    height,
+    crosshair,
+    loopStart,
+    loopEnd,
+  ]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return;
+    }
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return;
+    }
+
+    // Set canvas width to container width
+    const container = canvas.parentElement;
+    if (container) {
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight / 2; // Set height to half of container
+    }
 
     // clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const drawChannel = (
+    const drawFourier = (
       ctx: CanvasRenderingContext2D,
       canvas: HTMLCanvasElement,
-      summary: SummarizedFrame[],
-      samplesPerPixel: number,
-      startSample: number,
-      channelHeight: number
+      channel: SummarizedFrame[],
+      timeElapsed: number,
+      channelHeight: number,
+      offset: number = 0,
     ) => {
-      const reducedFrames = [];
-      for (let i = 0; i < media?.summary; i++) {
-        const startIndex = Math.floor((i * samplesPerPixel) + startSample);
-        const endIndex = Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
-        const slice = summary.slice(startIndex, endIndex);
-        const min = Math.min(...slice.map((frame) => frame.min));
-        const max = Math.max(...slice.map((frame) => frame.max));
-        ctx.fillStyle = "rgba(255, 255, 255, 1)";
-        ctx.fillRect(i, channelHeight - max * channelHeight, 1, (max - min) * channelHeight);
+      if (!media) {
+        return;
       }
+      const fourierIndex = Math.min(
+        Math.floor(channel.length * (timeElapsed / media.duration)),
+        channel.length - 1,
+      );
+      const pixelsPerMagnitude =
+        canvas.width / channel[fourierIndex].magnitudes.length;
       for (let i = 0; i < canvas.width; i++) {
-        const startIndex = Math.floor((i * samplesPerPixel) + startSample);
-        const endIndex = Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
-        const slice = summary.slice(startIndex, endIndex);
-        const min = Math.min(...slice.map((frame) => frame.min));
-        const max = Math.max(...slice.map((frame) => frame.max));
-        ctx.fillStyle = "rgba(255, 255, 255, 1)";
-        ctx.fillRect(i, channelHeight - max * channelHeight, 1, (max - min) * channelHeight);
+        const magnitudeIndex = Math.floor((i / pixelsPerMagnitude) * 0.5);
+        console.log(fourierIndex);
+        const magnitude = Math.log10(
+          channel[fourierIndex].magnitudes[magnitudeIndex] + 1,
+        );
+        const y = channelHeight - magnitude * channelHeight;
+        ctx.fillStyle = "white";
+        ctx.fillRect(i, y + offset, 1, magnitude * channelHeight);
       }
     };
 
@@ -86,24 +115,63 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         }
 
         const { summary } = media;
-        const summaryLength = summary.mono.length;
-        const startSample = 0;
-        const endSample = summaryLength;
-        const samplesPerPixel = (endSample - startSample) / canvas.width;
 
         if (channel === "LR" && summary.left && summary.right) {
-          drawChannel(ctx, canvas, summary.left, samplesPerPixel, startSample, canvas.height / 4);
-          drawChannel(ctx, canvas, summary.right, samplesPerPixel, startSample, canvas.height / 4);
-        } else if (channel === "MID" && summary.mono) {
-          drawChannel(ctx, canvas, summary.mono, samplesPerPixel, startSample, canvas.height / 2);
-        } else if (channel === "SIDE" && summary.side) {
-          drawChannel(ctx, canvas, summary.side, samplesPerPixel, startSample, canvas.height / 2);
-        } else if (channel === "LEFT" && summary.left) {
-          drawChannel(ctx, canvas, summary.left, samplesPerPixel, startSample, canvas.height / 2);
-        } else if (channel === "RIGHT" && summary.right) {
-          drawChannel(ctx, canvas, summary.right, samplesPerPixel, startSample, canvas.height / 2);
-        }
+          drawFourier(
+            ctx,
+            canvas,
+            summary.left,
+            timeElapsed,
+            canvas.height / 2,
+          );
 
+          drawFourier(
+            ctx,
+            canvas,
+            summary.right,
+            timeElapsed,
+            canvas.height / 2,
+            canvas.height / 2,
+          );
+          // Draw line splitting channels horizontally
+          ctx.strokeStyle = "gray";
+          ctx.beginPath();
+          ctx.moveTo(0, canvas.height / 2);
+          ctx.lineTo(canvas.width, canvas.height / 2);
+          ctx.stroke();
+        } else if (channel === "MID" && summary.mono) {
+          drawFourier(
+            ctx,
+            canvas,
+            summary.mono,
+            timeElapsed,
+            canvas.height / 2,
+          );
+        } else if (channel === "SIDE" && summary.side) {
+          drawFourier(
+            ctx,
+            canvas,
+            summary.side,
+            timeElapsed,
+            canvas.height / 2,
+          );
+        } else if (channel === "LEFT" && summary.left) {
+          drawFourier(
+            ctx,
+            canvas,
+            summary.left,
+            timeElapsed,
+            canvas.height / 2,
+          );
+        } else if (channel === "RIGHT" && summary.right) {
+          drawFourier(
+            ctx,
+            canvas,
+            summary.right,
+            timeElapsed,
+            canvas.height / 2,
+          );
+        }
       }
     };
 
@@ -126,8 +194,8 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       height={height}
       className="w-full"
       style={{
-        width: `${100}%`,
-        height: `${100 * displayRatio}%`,
+        width: `${displayRatioHorizontal * 100}%`,
+        height: `${displayRatioVertical * 100}%`,
       }}
     ></canvas>
   );

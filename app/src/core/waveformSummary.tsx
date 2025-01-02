@@ -1,4 +1,4 @@
-import FFT from 'fft.js';
+import FFT from "fft.js";
 const SAMPLE_RATE = 44100;
 const SAMPLE_BIN_SIZE = 2048;
 const HALF_SAMPLE_BIN_SIZE = Math.floor(SAMPLE_BIN_SIZE / 2);
@@ -8,13 +8,14 @@ type Frame = {
   start: number;
   end: number;
   data: number[];
-};  
+};
 
 export type SummarizedFrame = {
   max: number;
   min: number;
   avg: number;
   fft: number[];
+  magnitudes: number[];
 };
 
 export type Channels = {
@@ -25,13 +26,15 @@ export type Channels = {
 };
 
 function frameFromSlice(array: number[], start: number, end: number): Frame {
-  const data = Array.from(array.slice(start, end))
-  const fft1: number[] = new Array(Math.pow(2, Math.ceil(Math.log2(data.length)))).fill(0);
+  const data = Array.from(array.slice(start, end));
+  const fft1: number[] = new Array(
+    Math.pow(2, Math.ceil(Math.log2(data.length))),
+  ).fill(0);
   fft.realTransform(fft1, data);
   return {
     data: data,
     start: start,
-    end: end
+    end: end,
   };
 }
 
@@ -41,11 +44,14 @@ function interleavedFramesFromChannelData(data: number[]): Frame[] {
 
   for (let i = 0; i < interpolatedFrameCount; i++) {
     const start = i * HALF_SAMPLE_BIN_SIZE;
-    const end = Math.min((i * HALF_SAMPLE_BIN_SIZE) + SAMPLE_BIN_SIZE, data.length);
+    const end = Math.min(
+      i * HALF_SAMPLE_BIN_SIZE + SAMPLE_BIN_SIZE,
+      data.length,
+    );
     const frame = frameFromSlice(data, start, end);
     frames.push(frame);
   }
-  console.log('interleavedFrames:', frames);
+  console.log("interleavedFrames:", frames);
   return frames;
 }
 
@@ -60,11 +66,16 @@ function summarizeFrame(frame: Frame): SummarizedFrame {
     input[index] = value;
   });
   fft.realTransform(output, input);
+  const magnitudes = [];
+  for (let i = 0; i < output.length; i += 2) {
+    magnitudes.push(Math.sqrt(output[i] ** 2 + output[i + 1] ** 2));
+  }
   return {
     max: max,
     min: min,
     avg: avg,
-    fft: output
+    fft: output,
+    magnitudes: magnitudes,
   };
 }
 
@@ -81,9 +92,13 @@ function summarizeInterleavedFrames(frames: Frame[]): SummarizedFrame[] {
     thisFrame.max = (lastFrame.max + summarizedFrame.max) / 2;
     thisFrame.min = (lastFrame.min + summarizedFrame.min) / 2;
     thisFrame.avg = (lastFrame.avg + summarizedFrame.avg) / 2;
-    thisFrame.fft = lastFrame.fft.map((value, index) => (value + summarizedFrame.fft[index]) / 2);
+    thisFrame.fft = lastFrame.fft.map(
+      (value, index) => (value + summarizedFrame.fft[index]) / 2,
+    );
+    thisFrame.magnitudes = lastFrame.magnitudes.map(
+      (value, index) => (value + summarizedFrame.magnitudes[index]) / 2,
+    );
 
-  
     summarizedFrames.push(thisFrame);
     lastFrame = summarizedFrame;
     ndx++;
@@ -96,49 +111,52 @@ export async function generateWaveformSummary(
   file: File,
 ): Promise<Channels> {
   const arrayBuffer = await file.arrayBuffer();
-  console.debug('ArrayBuffer length:', arrayBuffer.byteLength);
+  console.debug("ArrayBuffer length:", arrayBuffer.byteLength);
 
   const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-  console.debug('AudioBuffer duration:', audioBuffer.duration);
-  console.debug('AudioBuffer number of channels:', audioBuffer.numberOfChannels);
 
   if (audioBuffer.numberOfChannels > 2) {
     throw new Error("Only mono and stereo files are supported");
   } else if (audioBuffer.numberOfChannels === 1) {
-    const interleavedFrames: Frame[] = interleavedFramesFromChannelData(Array.from(audioBuffer.getChannelData(0)));
-    console.debug('Interleaved frames length (mono):', interleavedFrames.length);
+    const interleavedFrames: Frame[] = interleavedFramesFromChannelData(
+      Array.from(audioBuffer.getChannelData(0)),
+    );
 
-    const mono: SummarizedFrame[] = summarizeInterleavedFrames(interleavedFrames);
-    console.debug('Summarized frames length (mono):', mono.length);
+    const mono: SummarizedFrame[] =
+      summarizeInterleavedFrames(interleavedFrames);
 
-    return {mono: mono};
+    return { mono: mono };
   } else {
-    const leftInterleaved: Frame[] = interleavedFramesFromChannelData(Array.from(audioBuffer.getChannelData(0)));
-    const rightInterleaved: Frame[] = interleavedFramesFromChannelData(Array.from(audioBuffer.getChannelData(1)));
-    console.debug('Interleaved frames length (left):', leftInterleaved.length);
-    console.debug('Interleaved frames length (right):', rightInterleaved.length);
+    const leftInterleaved: Frame[] = interleavedFramesFromChannelData(
+      Array.from(audioBuffer.getChannelData(0)),
+    );
+    const rightInterleaved: Frame[] = interleavedFramesFromChannelData(
+      Array.from(audioBuffer.getChannelData(1)),
+    );
 
     const left: SummarizedFrame[] = summarizeInterleavedFrames(leftInterleaved);
-    const right: SummarizedFrame[] = summarizeInterleavedFrames(rightInterleaved);
-    console.debug('Summarized frames length (left):', left.length);
-    console.debug('Summarized frames length (right):', right.length);
+    const right: SummarizedFrame[] =
+      summarizeInterleavedFrames(rightInterleaved);
 
     const midChannel: Float32Array = new Float32Array(leftInterleaved.length);
     const sideChannel: Float32Array = new Float32Array(leftInterleaved.length);
     midChannel.forEach((value, index) => {
-      midChannel[index] = (leftInterleaved[index].data[index] + rightInterleaved[index].data[index]) / 2;}
-    );
+      midChannel[index] =
+        (leftInterleaved[index].data[index] +
+          rightInterleaved[index].data[index]) /
+        2;
+    });
     sideChannel.forEach((value, index) => {
-      sideChannel[index] = (leftInterleaved[index].data[index] - rightInterleaved[index].data[index]) / 2;}
-    );
-    console.debug('Mid channel length:', midChannel.length);
-    console.debug('Side channel length:', sideChannel.length);
+      sideChannel[index] =
+        (leftInterleaved[index].data[index] -
+          rightInterleaved[index].data[index]) /
+        2;
+    });
 
     const mid: SummarizedFrame[] = summarizeInterleavedFrames(leftInterleaved);
-    const side: SummarizedFrame[] = summarizeInterleavedFrames(rightInterleaved);
-    console.debug('Summarized frames length (mid):', mid.length);
-    console.debug('Summarized frames length (side):', side.length);
+    const side: SummarizedFrame[] =
+      summarizeInterleavedFrames(rightInterleaved);
 
-    return {mono: mid, left: left, right: right, side: side};
+    return { mono: mid, left: left, right: right, side: side };
   }
 }

@@ -60,16 +60,22 @@ const Minimap: React.FC<MinimapProps> = ({
       summary: SummarizedFrame[],
       samplesPerPixel: number,
       startSample: number,
-      channelHeight: number
+      channelHeight: number,
     ) => {
       for (let i = 0; i < canvas.width; i++) {
-        const startIndex = Math.floor((i * samplesPerPixel) + startSample);
-        const endIndex = Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
+        const startIndex = Math.floor(i * samplesPerPixel + startSample);
+        const endIndex =
+          Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
         const slice = summary.slice(startIndex, endIndex);
         const min = Math.min(...slice.map((frame) => frame.min));
         const max = Math.max(...slice.map((frame) => frame.max));
         ctx.fillStyle = "rgba(255, 255, 255, 1)";
-        ctx.fillRect(i, channelHeight - max * channelHeight, 1, (max - min) * channelHeight);
+        ctx.fillRect(
+          i,
+          channelHeight - max * channelHeight,
+          1,
+          (max - min) * channelHeight,
+        );
       }
     };
 
@@ -86,16 +92,58 @@ const Minimap: React.FC<MinimapProps> = ({
         const samplesPerPixel = (endSample - startSample) / canvas.width;
 
         if (channel === "LR" && summary.left && summary.right) {
-          drawChannel(ctx, canvas, summary.left, samplesPerPixel, startSample, canvas.height / 4);
-          drawChannel(ctx, canvas, summary.right, samplesPerPixel, startSample, canvas.height / 4);
+          drawChannel(
+            ctx,
+            canvas,
+            summary.left,
+            samplesPerPixel,
+            startSample,
+            canvas.height / 4,
+          );
+          drawChannel(
+            ctx,
+            canvas,
+            summary.right,
+            samplesPerPixel,
+            startSample,
+            canvas.height / 4,
+          );
         } else if (channel === "MID" && summary.mono) {
-          drawChannel(ctx, canvas, summary.mono, samplesPerPixel, startSample, canvas.height / 2);
+          drawChannel(
+            ctx,
+            canvas,
+            summary.mono,
+            samplesPerPixel,
+            startSample,
+            canvas.height / 2,
+          );
         } else if (channel === "SIDE" && summary.side) {
-          drawChannel(ctx, canvas, summary.side, samplesPerPixel, startSample, canvas.height / 2);
+          drawChannel(
+            ctx,
+            canvas,
+            summary.side,
+            samplesPerPixel,
+            startSample,
+            canvas.height / 2,
+          );
         } else if (channel === "LEFT" && summary.left) {
-          drawChannel(ctx, canvas, summary.left, samplesPerPixel, startSample, canvas.height / 2);
+          drawChannel(
+            ctx,
+            canvas,
+            summary.left,
+            samplesPerPixel,
+            startSample,
+            canvas.height / 2,
+          );
         } else if (channel === "RIGHT" && summary.right) {
-          drawChannel(ctx, canvas, summary.right, samplesPerPixel, startSample, canvas.height / 2);
+          drawChannel(
+            ctx,
+            canvas,
+            summary.right,
+            samplesPerPixel,
+            startSample,
+            canvas.height / 2,
+          );
         }
 
         if (crosshair) {

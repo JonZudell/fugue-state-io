@@ -21,7 +21,6 @@ interface DisplayState {
   numberOfDisplayItems: number;
 }
 
-
 const initialState: DisplayState = {
   zoomStart: 0,
   zoomEnd: 1,
