@@ -40,8 +40,6 @@ export const selectZoomEnd = (state: { display: DisplayState }) =>
   state.display.zoomEnd;
 export const selectLayout = (state: { display: DisplayState }) =>
   state.display.layout;
-export const selectLayoutRatios = (state: { display: DisplayState }) =>
-  state.display.layoutRatios;
 export const selectMinimap = (state: { display: DisplayState }) =>
   state.display.minimap;
 export const selectVideoEnabled = (state: { display: DisplayState }) =>

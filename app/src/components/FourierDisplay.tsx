@@ -7,7 +7,19 @@ import {
 } from "../store/playbackSlice";
 import { useSelector } from "react-redux";
 import { FileState } from "../store/filesSlice";
-import { SummarizedFrame } from "../core/waveformSummary";
+import { ABins,
+  ASharpBins,
+  BBins,
+  CBins,
+  CSharpBins,
+  DBins,
+  DSharpBins,
+  EBins,
+  FBins,
+  FSharpBins,
+  GBins,
+  GSharpBins, SummarizedFrame } from "../core/waveformSummary";
+
 interface FourierDisplayProps {
   media?: FileState;
   width?: number;
@@ -97,13 +109,40 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       const pixelsPerMagnitude =
         canvas.width / channel[fourierIndex].magnitudes.length;
       for (let i = 0; i < canvas.width; i++) {
-        const magnitudeIndex = Math.floor((i / pixelsPerMagnitude) * 0.5);
-        console.log(fourierIndex);
+        const magnitudeIndex = Math.floor((i / pixelsPerMagnitude) * 0.125);
+        console.log(magnitudeIndex);
         const magnitude = Math.log10(
           channel[fourierIndex].magnitudes[magnitudeIndex] + 1,
         );
         const y = channelHeight - magnitude * channelHeight;
-        ctx.fillStyle = "white";
+        
+        if (CBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(239 68 68)"; // red-500
+        } else if (CSharpBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(107 114 128)"; // gray-500
+        } else if (DBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(249 115 22)"; // orange-500
+        } else if (DSharpBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(107 114 128)"; // gray-500
+        } else if (EBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(234 179 8)"; // yellow-500
+        } else if (FBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(34 197 94)"; // green-500
+        } else if (FSharpBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(107 114 128)"; // gray-500
+        } else if (GBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(59 130 246)"; // blue-500
+        } else if (GSharpBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(107 114 128)"; // gray-500
+        } else if (ABins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(79 70 229)"; // indigo-500
+        } else if (ASharpBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(107 114 128)"; // gray-500
+        } else if (BBins.includes(magnitudeIndex)) {
+          ctx.fillStyle = "rgb(139 92 246)"; // violet-500
+        } else {
+          ctx.fillStyle = "rgb(156 163 175)"; // gray-400
+        }
         ctx.fillRect(i, y + offset, 1, magnitude * channelHeight);
       }
     };

@@ -1,9 +1,9 @@
 import FFT from "fft.js";
 const SAMPLE_RATE = 44100;
-const SAMPLE_BIN_SIZE = 2048;
+const SAMPLE_BIN_SIZE = 4096;
 const HALF_SAMPLE_BIN_SIZE = Math.floor(SAMPLE_BIN_SIZE / 2);
 const fft = new FFT(SAMPLE_BIN_SIZE);
-
+const WINDOW_FUNCTION = "hamming";
 type Frame = {
   start: number;
   end: number;
@@ -24,6 +24,95 @@ export type Channels = {
   right?: SummarizedFrame[];
   side?: SummarizedFrame[];
 };
+function applyWindowFunction(data: number[], windowType: string): number[] {
+  const N = data.length;
+  switch (windowType) {
+    case 'hamming':
+      return data.map((value, n) => value * (0.54 - 0.46 * Math.cos((2 * Math.PI * n) / (N - 1))));
+    case 'hann':
+      return data.map((value, n) => value * (0.5 * (1 - Math.cos((2 * Math.PI * n) / (N - 1)))));
+    case 'blackman':
+      return data.map((value, n) => value * (0.42 - 0.5 * Math.cos((2 * Math.PI * n) / (N - 1)) + 0.08 * Math.cos((4 * Math.PI * n) / (N - 1))));
+    case 'rectangular':
+      return data; // No windowing
+    case 'bartlett':
+      return data.map((value, n) => value * (2 / (N - 1)) * ((N - 1) / 2 - Math.abs(n - (N - 1) / 2)));
+    default:
+      throw new Error('Unknown window type');
+  }
+}
+function getFrequencyBins(
+  frequencies: number[],
+  sampleRate: number,
+  fftSize: number,
+): number[] {
+  return frequencies.map((frequency) =>
+    Math.round((frequency * fftSize) / sampleRate),
+  );
+}
+export const ABins = getFrequencyBins(
+  [220, 440, 880, 1760, 3520, 7040, 14080],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+export const ASharpBins = getFrequencyBins(
+  [233.08, 466.16, 932.33, 1864.66, 3729.31, 7458.62, 14917.24],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+export const BBins = getFrequencyBins(
+  [246.94, 493.88, 987.77, 1975.53, 3951.07, 7902.13, 15804.26],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+export const CBins = getFrequencyBins(
+  [261.63, 523.25, 1046.5, 2093.0, 4186.0, 8392.0, 16784.0],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+export const CSharpBins = getFrequencyBins(
+  [277.18, 554.37, 1108.73, 2217.46, 4434.92, 8869.84, 17739.68],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+export const DBins = getFrequencyBins(
+  [293.66, 587.33, 1174.66, 2349.32, 4698.64, 9397.27, 18794.55],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+export const DSharpBins = getFrequencyBins(
+  [311.13, 622.25, 1244.51, 2489.02, 4978.03, 9956.06, 19912.12],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+export const EBins = getFrequencyBins(
+  [329.63, 659.26, 1318.51, 2637.02, 5274.04, 10548.08, 21096.16],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+export const FBins = getFrequencyBins(
+  [349.23, 698.46, 1396.91, 2793.83, 5587.65, 11175.30, 22350.61],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+
+export const FSharpBins = getFrequencyBins(
+  [369.99, 739.99, 1479.98, 2959.96, 5919.91, 11839.82, 23679.64],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+
+export const GBins = getFrequencyBins(
+  [392.0, 783.99, 1567.98, 3135.96, 6271.93, 12543.86],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
+
+export const GSharpBins = getFrequencyBins(
+  [415.30, 830.61, 1661.22, 3322.44, 6644.88, 13289.75, 26579.51],
+  SAMPLE_RATE,
+  SAMPLE_BIN_SIZE,
+);
 
 function frameFromSlice(array: number[], start: number, end: number): Frame {
   const data = Array.from(array.slice(start, end));
@@ -51,7 +140,6 @@ function interleavedFramesFromChannelData(data: number[]): Frame[] {
     const frame = frameFromSlice(data, start, end);
     frames.push(frame);
   }
-  console.log("interleavedFrames:", frames);
   return frames;
 }
 
@@ -62,7 +150,10 @@ function summarizeFrame(frame: Frame): SummarizedFrame {
   const avg = frame.data.reduce((a, b) => a + b, 0) / count;
   const input: number[] = new Array(SAMPLE_BIN_SIZE).fill(0);
   const output: number[] = new Array(SAMPLE_BIN_SIZE).fill(0);
-  frame.data.forEach((value, index) => {
+  // Apply windowing function before transforming
+  const windowedData = applyWindowFunction(frame.data, WINDOW_FUNCTION);
+
+  windowedData.forEach((value, index) => {
     input[index] = value;
   });
   fft.realTransform(output, input);
@@ -70,6 +161,7 @@ function summarizeFrame(frame: Frame): SummarizedFrame {
   for (let i = 0; i < output.length; i += 2) {
     magnitudes.push(Math.sqrt(output[i] ** 2 + output[i + 1] ** 2));
   }
+
   return {
     max: max,
     min: min,
@@ -111,7 +203,6 @@ export async function generateWaveformSummary(
   file: File,
 ): Promise<Channels> {
   const arrayBuffer = await file.arrayBuffer();
-  console.debug("ArrayBuffer length:", arrayBuffer.byteLength);
 
   const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
