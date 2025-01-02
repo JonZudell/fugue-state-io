@@ -7,25 +7,21 @@ import {
 } from "../store/playbackSlice";
 import { useSelector } from "react-redux";
 import { FileState } from "../store/filesSlice";
-interface MinimapProps {
+import { SummarizedFrame } from "../core/waveformSummary";
+interface FourierDisplayProps {
   media?: FileState;
   width?: number;
-  summary?: Summary;
   channel?: string;
-  startPercentage?: number;
-  endPercentage?: number;
   height?: number;
   displayRatio?: number;
   crosshair?: boolean;
 }
 
-const Minimap: React.FC<MinimapProps> = ({
+const FourierDisplay: React.FC<FourierDisplayProps> = ({
   media,
   channel = "MID",
-  startPercentage = 0,
-  endPercentage = 100,
   width = 1000,
-  height = 200,
+  height = 1000,
   crosshair = true,
   displayRatio = 1,
 }) => {
@@ -62,6 +58,16 @@ const Minimap: React.FC<MinimapProps> = ({
       startSample: number,
       channelHeight: number
     ) => {
+      const reducedFrames = [];
+      for (let i = 0; i < media?.summary; i++) {
+        const startIndex = Math.floor((i * samplesPerPixel) + startSample);
+        const endIndex = Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
+        const slice = summary.slice(startIndex, endIndex);
+        const min = Math.min(...slice.map((frame) => frame.min));
+        const max = Math.max(...slice.map((frame) => frame.max));
+        ctx.fillStyle = "rgba(255, 255, 255, 1)";
+        ctx.fillRect(i, channelHeight - max * channelHeight, 1, (max - min) * channelHeight);
+      }
       for (let i = 0; i < canvas.width; i++) {
         const startIndex = Math.floor((i * samplesPerPixel) + startSample);
         const endIndex = Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
@@ -98,23 +104,6 @@ const Minimap: React.FC<MinimapProps> = ({
           drawChannel(ctx, canvas, summary.right, samplesPerPixel, startSample, canvas.height / 2);
         }
 
-        if (crosshair) {
-          ctx.strokeStyle = "red";
-          ctx.lineWidth = 1;
-          const percentFinished = timeElapsed / media.duration;
-          const x = percentFinished * canvas.width;
-
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, canvas.height);
-          ctx.stroke();
-          ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-          ctx.lineWidth = 5;
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, canvas.height);
-          ctx.stroke();
-        }
       }
     };
 
@@ -122,8 +111,6 @@ const Minimap: React.FC<MinimapProps> = ({
   }, [
     timeElapsed,
     channel,
-    startPercentage,
-    endPercentage,
     media,
     width,
     height,
@@ -145,4 +132,4 @@ const Minimap: React.FC<MinimapProps> = ({
     ></canvas>
   );
 };
-export default Minimap;
+export default FourierDisplay;

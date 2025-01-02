@@ -10,7 +10,7 @@ type Frame = {
   data: number[];
 };  
 
-type SummarizedFrame = {
+export type SummarizedFrame = {
   max: number;
   min: number;
   avg: number;
@@ -27,7 +27,7 @@ export type Channels = {
 function frameFromSlice(array: number[], start: number, end: number): Frame {
   const data = Array.from(array.slice(start, end))
   const fft1: number[] = new Array(Math.pow(2, Math.ceil(Math.log2(data.length)))).fill(0);
-  fft.transform(fft1, data);
+  fft.realTransform(fft1, data);
   return {
     data: data,
     start: start,

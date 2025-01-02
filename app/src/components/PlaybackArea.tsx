@@ -25,6 +25,7 @@ import "./PlaybackArea.css";
 import WaveformVisualizer from "./WaveformVisualizer";
 import { AppDispatch } from "../store";
 import Minimap from "./Minimap";
+import FourierDisplay from "./FourierDisplay";
 interface PlaybackAreaProps {
   focused?: false;
   workspaceWidth: number;
@@ -111,16 +112,11 @@ const renderMediaComponent = (
       );
     case "fourier":
       return (
-        <div
-          className="spectrogram-wrapper"
-          style={{
-            maxWidth: `${workspaceWidth}px`,
-            width: `${workspaceWidth}px`,
-            maxHeight: `${workspaceHeight}px`,
-            height: `${workspaceHeight}px`,
-            backgroundColor: "white",
-          }}
-        ></div>
+        <FourierDisplay
+        media={media}
+        width={workspaceWidth}
+        height={workspaceHeight}
+        />
       );
     default:
       return null;

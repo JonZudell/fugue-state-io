@@ -3,7 +3,6 @@ playback
   speed
   eq
 menu
-  Display
-    FFT
-    Spectrogram
+  FFT
+  Spectrogram
   Flags
