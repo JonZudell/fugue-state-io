@@ -2,7 +2,6 @@ playback
   volume
   speed
   eq
+
 menu
-  FFT
-  Spectrogram
   Flags

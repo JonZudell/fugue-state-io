@@ -22,6 +22,7 @@ import {
   setLayout,
 } from "../store/displaySlice";
 import DisplayOrderSelect from "./DisplayOrderSelect";
+import { selectMedia } from "@/store/playbackSlice";
 
 interface DisplayMenuProps {
   focused?: boolean;
@@ -29,7 +30,7 @@ interface DisplayMenuProps {
 
 const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
   const dispatch = useDispatch<AppDispatch>();
-
+  const media = useSelector(selectMedia);
   const waveformEnabled = useSelector(selectWaveformEnabled);
   const videoEnabled = useSelector(selectVideoEnabled);
   const fourierEnabled = useSelector(selectFourierEnabled);
@@ -66,13 +67,13 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
         >
           <FontAwesomeIcon icon={faWaveSquare} className="h-6 w-6 m-2" />
         </div>
-        <div
+        { media && media.fileType.startsWith('video') && <div
           className={`tooltip  ${videoEnabled ? "border border-gray-900 bg-gray-700 rounded" : "border border-gray-800"}`}
           title="Video"
           onClick={() => dispatch(setVideoEnabled(!videoEnabled))}
         >
           <FontAwesomeIcon icon={faVideo} className="h-6 w-6 m-2" />
-        </div>
+        </div>}
         <div
           className={`tooltip  ${fourierEnabled ? "border border-gray-900 bg-gray-700 rounded" : "border border-gray-800"}`}
           title="Fourier Transform View"

@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { FileState } from "../store/filesSlice";
 import { generateWaveformSummary } from "@/core/waveformSummary";
+import { setVideoEnabled } from "./displaySlice";
 
 interface PlaybackState {
   media: FileState | null;
@@ -65,6 +66,9 @@ export const uploadFile = createAsyncThunk(
                 summary: waveform,
               };
               dispatch(setMedia(fileState));
+              if (file.type.includes("audio")) {
+                dispatch(setVideoEnabled(false));
+              }
               resolve(fileState);
             });
           };

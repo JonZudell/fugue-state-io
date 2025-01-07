@@ -67,64 +67,19 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
         const startSample = Math.floor((startPercentage / 100) * summaryLength);
         const endSample = Math.floor((endPercentage / 100) * summaryLength);
         const samplesPerPixel = (endSample - startSample) / canvas.width;
-        if (channel === "LR" && summary.left && summary.right) {
-          for (let i = 0; i < canvas.width; i++) {
-            const startIndex = Math.floor(i * samplesPerPixel + startSample);
-            const endIndex =
-              Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
-            const leftSlice = summary.left.slice(startIndex, endIndex);
-            const rightSlice = summary.right.slice(startIndex, endIndex);
-            const rightMin = Math.min(...rightSlice.map((frame) => frame.min));
-            const rightMax = Math.max(...rightSlice.map((frame) => frame.max));
-
-            const leftMin = Math.min(...leftSlice.map((frame) => frame.min));
-            const leftMax = Math.max(...leftSlice.map((frame) => frame.max));
-            ctx.fillStyle = "rgba(255, 255, 255, 1)";
-            ctx.fillRect(
-              i,
-              canvas.height / 4 - (leftMax * canvas.height) / 4,
-              1,
-              ((leftMax - leftMin) * canvas.height) / 4,
-            );
-            ctx.fillStyle = "rgba(255, 255, 255, 1)";
-            ctx.fillRect(
-              i,
-              canvas.height / 4 -
-                (rightMax * canvas.height) / 4 +
-                canvas.height / 2,
-              1,
-              ((rightMax - rightMin) * canvas.height) / 4,
-            );
+        const binsPerPixel = summary.mono[0].magnitudes.length / canvas.height;
+        for (let x = 0; x < canvas.width; x++) {
+          for (let y = 0; y < canvas.height; y++) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${summary.mono[Math.floor(x * samplesPerPixel)].magnitudes[Math.floor(y * binsPerPixel / 4)]})`;
+            ctx.fillRect(x, canvas.height - y - 1, 1, 1);
           }
-        } else {
-          return;
         }
-
-        if (crosshair) {
-          ctx.strokeStyle = "red";
-          ctx.lineWidth = 1;
-          const percentFinished = timeElapsed / media.duration;
-          const x = percentFinished - loopStart;
-          const diff = loopEnd - loopStart;
-          const x2 = (x / diff) * canvas.width;
-
-          ctx.beginPath();
-          ctx.moveTo(x2, 0);
-          ctx.lineTo(x2, canvas.height);
-          ctx.stroke();
-          ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-          ctx.lineWidth = 5;
-          ctx.beginPath();
-          ctx.moveTo(x2, 0);
-          ctx.lineTo(x2, canvas.height);
-          ctx.stroke();
-        }
+        
       }
     };
 
     drawWaveform();
   }, [
-    timeElapsed,
     channel,
     startPercentage,
     endPercentage,
@@ -137,6 +92,34 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   ]);
 
   return (
+    <>
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+    <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+        backgroundColor: "rgba(0, 0, 0, 0)",
+        overflow: "hidden",
+      }}
+    >{crosshair && (
+      <div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: `${((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage) * 100}%`,
+        width: "2px",
+        height: "100%",
+        backgroundColor: "red",
+        zIndex: 100,
+        opacity: 1,
+      }}
+      />
+    )}
+    </div>
     <canvas
       ref={canvasRef}
       width={width}
@@ -146,7 +129,10 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
         width: `${displayRatioHorizontal * 100}%`,
         height: `${displayRatioVertical * 100}%`,
       }}
-    ></canvas>
+    />
+    </div>
+    </>
+
   );
 };
 export default SpectrogramDisplay;

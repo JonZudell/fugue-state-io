@@ -145,24 +145,6 @@ const Minimap: React.FC<MinimapProps> = ({
             canvas.height / 2,
           );
         }
-
-        if (crosshair) {
-          ctx.strokeStyle = "red";
-          ctx.lineWidth = 1;
-          const percentFinished = timeElapsed / media.duration;
-          const x = percentFinished * canvas.width;
-
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, canvas.height);
-          ctx.stroke();
-          ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-          ctx.lineWidth = 5;
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, canvas.height);
-          ctx.stroke();
-        }
       }
     };
 
@@ -181,16 +163,47 @@ const Minimap: React.FC<MinimapProps> = ({
   ]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      className="w-full"
-      style={{
-        width: `${100}%`,
-        height: `${100 * displayRatio}%`,
-      }}
-    ></canvas>
+    <>
+      <div style={{ position: "relative", width: "100%", height: `${displayRatio * 100}%`, }}>
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: `100%`,
+            pointerEvents: "none",
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            overflow: "hidden",
+          }}
+        >
+          {crosshair && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: `${(timeElapsed / media!.duration) * 100}%`,
+                width: "2px",
+                height: `100%`,
+                backgroundColor: "red",
+                zIndex: 100,
+                opacity: 1,
+              }}
+            />
+          )}
+        </div>
+        <canvas
+          ref={canvasRef}
+          width={width}
+          height={height}
+          className="w-full"
+          style={{
+            width: `${100}%`,
+            height: `${100}%`,
+          }}
+        />
+      </div>
+    </>
   );
 };
 export default Minimap;

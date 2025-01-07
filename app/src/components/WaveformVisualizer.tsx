@@ -99,26 +99,6 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
         } else {
           return;
         }
-
-        if (crosshair) {
-          ctx.strokeStyle = "red";
-          ctx.lineWidth = 1;
-          const percentFinished = timeElapsed / media.duration;
-          const x = percentFinished - loopStart;
-          const diff = loopEnd - loopStart;
-          const x2 = (x / diff) * canvas.width;
-
-          ctx.beginPath();
-          ctx.moveTo(x2, 0);
-          ctx.lineTo(x2, canvas.height);
-          ctx.stroke();
-          ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-          ctx.lineWidth = 5;
-          ctx.beginPath();
-          ctx.moveTo(x2, 0);
-          ctx.lineTo(x2, canvas.height);
-          ctx.stroke();
-        }
       }
     };
 
@@ -137,16 +117,47 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   ]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      className="w-full"
-      style={{
-        width: `${displayRatioHorizontal * 100}%`,
-        height: `${displayRatioVertical * 100}%`,
-      }}
-    ></canvas>
+    <>
+      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            overflow: "hidden",
+          }}
+        >
+          {crosshair && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: `${((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage) * 100}%`,
+                width: "2px",
+                height: "100%",
+                backgroundColor: "red",
+                zIndex: 100,
+                opacity: 1,
+              }}
+            />
+          )}
+        </div>
+        <canvas
+          ref={canvasRef}
+          width={width}
+          height={height}
+          className="w-full"
+          style={{
+            width: `${displayRatioHorizontal * 100}%`,
+            height: `${displayRatioVertical * 100}%`,
+          }}
+        />
+      </div>
+    </>
   );
 };
 export default WaveformVisualizer;

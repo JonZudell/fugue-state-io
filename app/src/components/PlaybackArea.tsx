@@ -26,6 +26,7 @@ import WaveformVisualizer from "./WaveformVisualizer";
 import { AppDispatch } from "../store";
 import Minimap from "./Minimap";
 import FourierDisplay from "./FourierDisplay";
+import SpectrogramDisplay from "./SpectrogramDisplay";
 interface PlaybackAreaProps {
   focused?: false;
   workspaceWidth: number;
@@ -48,7 +49,7 @@ const miniMapDisabled = {
 const renderMediaComponent = (
   type: string,
   media: any,
-  videoRef: React.RefObject<HTMLVideoElement>,
+  videoRef2: React.RefObject<HTMLVideoElement>,
   workspaceWidth: number,
   workspaceHeight: number,
   minimapRatios: { minimap: number; remainder: number },
@@ -59,7 +60,7 @@ const renderMediaComponent = (
     case "video":
       return (
         <video
-          ref={videoRef}
+          ref={videoRef2}
           controls={false}
           className="video-element"
           loop={false}
@@ -106,9 +107,18 @@ const renderMediaComponent = (
             width: `${workspaceWidth}px`,
             maxHeight: `${workspaceHeight * minimapRatios.remainder}px`,
             height: `${workspaceHeight * minimapRatios.remainder}px`,
-            backgroundColor: "red",
           }}
-        ></div>
+        >
+          <SpectrogramDisplay
+            media={media}
+            startPercentage={loopStart * 100}
+            endPercentage={loopEnd * 100}
+            width={workspaceWidth}
+            height={workspaceHeight}
+            displayRatioVertical={1}
+            displayRatioHorizontal={1}
+          />
+        </div>
       );
     case "fourier":
       return (
@@ -161,6 +171,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const isDraggingRef = useRef(false);
   const isPlayingBeforeDragRef = useRef(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoRef2 = useRef<HTMLVideoElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -175,8 +186,13 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
     if (videoRef.current) {
       if (playing) {
         videoRef.current.play();
+        if (videoRef2.current) {
+          videoRef2.current.volume = 0;
+          videoRef2.current.play();}
       } else {
         videoRef.current.pause();
+        if (videoRef2.current) {
+          videoRef2.current.play();}
       }
     }
   }, [playing]);
@@ -192,6 +208,10 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           const newTimeElapsed = loopStart * media.duration;
           videoRef.current.currentTime = newTimeElapsed;
           videoRef.current.play();
+          if (videoRef2.current) {
+            videoRef2.current.volume = 0;
+            videoRef2.current.currentTime = newTimeElapsed;
+            videoRef2.current.play();}
           dispatch(setTimeElapsed(newTimeElapsed));
         } else if (
           media &&
@@ -200,17 +220,25 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
         ) {
           const newTimeElapsed = loopStart * media.duration;
           videoRef.current.currentTime = newTimeElapsed;
-          videoRef.current.play();
+          videoRef.current.play();          if (videoRef2.current) {
+            videoRef2.current.volume = 0;
+            videoRef2.current.currentTime = newTimeElapsed;
+            videoRef2.current.play();}
           dispatch(setTimeElapsed(newTimeElapsed));
         } else if (media && videoRef.current.currentTime >= media.duration) {
           const newTimeElapsed = media.duration;
           videoRef.current.currentTime = newTimeElapsed;
-          videoRef.current.pause();
+          videoRef.current.pause();          if (videoRef2.current) {
+            videoRef2.current.volume = 0;
+            videoRef2.current.currentTime = newTimeElapsed;
+            videoRef2.current.pause();}
         } else {
           dispatch(setTimeElapsed(videoRef.current.currentTime));
         }
       } else if (!playing && videoRef.current) {
         videoRef.current.currentTime = timeElapsed;
+        if (videoRef2.current) {
+        videoRef2.current.currentTime = timeElapsed;}
       }
     }, 10);
 
@@ -237,7 +265,20 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           endPercentage={loopEnd}
         ></Minimap>
       )}
-
+      {media && (
+        <video
+        ref={videoRef}
+        controls={false}
+        className="video-element"
+        loop={false}
+        style={{
+          display: "none",
+        }}
+      >
+        <source src={media.url} type={media.fileType} />
+        Your browser does not support the video tag.
+      </video>
+      )}
       {media && layout === "single" && (
         <>
           {order.map((item, index) => (
@@ -245,7 +286,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               {renderMediaComponent(
                 item,
                 media,
-                videoRef,
+                videoRef2,
                 workspaceWidth,
                 workspaceHeight,
                 minimapRatios,
@@ -270,7 +311,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 {renderMediaComponent(
                   item,
                   media,
-                  videoRef,
+                  videoRef2,
                   workspaceWidth * 0.5,
                   workspaceHeight,
                   minimapRatios,
@@ -295,7 +336,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 {renderMediaComponent(
                   item,
                   media,
-                  videoRef,
+                  videoRef2,
                   workspaceWidth,
                   workspaceHeight * 0.5,
                   minimapRatios,
@@ -318,7 +359,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
             {renderMediaComponent(
               order[0],
               media,
-              videoRef,
+              videoRef2,
               workspaceWidth,
               workspaceHeight * 0.5,
               minimapRatios,
@@ -332,7 +373,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 {renderMediaComponent(
                   order[1],
                   media,
-                  videoRef,
+                  videoRef2,
                   workspaceWidth * 0.5,
                   workspaceHeight * 0.5,
                   minimapRatios,
@@ -344,7 +385,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 {renderMediaComponent(
                   order[2],
                   media,
-                  videoRef,
+                  videoRef2,
                   workspaceWidth * 0.5,
                   workspaceHeight * 0.5,
                   minimapRatios,
@@ -369,7 +410,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 {renderMediaComponent(
                   order[0],
                   media,
-                  videoRef,
+                  videoRef2,
                   workspaceWidth * 0.5,
                   workspaceHeight * 0.5,
                   minimapRatios,
@@ -381,7 +422,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 {renderMediaComponent(
                   order[1],
                   media,
-                  videoRef,
+                  videoRef2,
                   workspaceWidth * 0.5,
                   workspaceHeight * 0.5,
                   minimapRatios,
@@ -395,7 +436,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
             {renderMediaComponent(
               order[2],
               media,
-              videoRef,
+              videoRef2,
               workspaceWidth,
               workspaceHeight * 0.5,
               minimapRatios,
@@ -418,7 +459,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               {renderMediaComponent(
                 order[0],
                 media,
-                videoRef,
+                videoRef2,
                 workspaceWidth * 0.5,
                 workspaceHeight * 0.5,
                 minimapRatios,
@@ -430,7 +471,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               {renderMediaComponent(
                 order[1],
                 media,
-                videoRef,
+                videoRef2,
                 workspaceWidth * 0.5,
                 workspaceHeight * 0.5,
                 minimapRatios,
@@ -443,7 +484,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
             {renderMediaComponent(
               order[2],
               media,
-              videoRef,
+              videoRef2,
               workspaceWidth * 0.5,
               workspaceHeight,
               minimapRatios,
@@ -466,7 +507,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
             {renderMediaComponent(
               order[0],
               media,
-              videoRef,
+              videoRef2,
               workspaceWidth * 0.5,
               workspaceHeight,
               minimapRatios,
@@ -479,7 +520,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               {renderMediaComponent(
                 order[1],
                 media,
-                videoRef,
+                videoRef2,
                 workspaceWidth * 0.5,
                 workspaceHeight * 0.5,
                 minimapRatios,
@@ -491,7 +532,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
               {renderMediaComponent(
                 order[2],
                 media,
-                videoRef,
+                2,
                 workspaceWidth * 0.5,
                 workspaceHeight * 0.5,
                 minimapRatios,
@@ -515,7 +556,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 {renderMediaComponent(
                   order[0],
                   media,
-                  videoRef,
+                  videoRef2,
                   workspaceWidth * 0.5,
                   workspaceHeight * 0.5,
                   minimapRatios,
@@ -527,7 +568,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 {renderMediaComponent(
                   order[1],
                   media,
-                  videoRef,
+                  videoRef2,
                   workspaceWidth * 0.5,
                   workspaceHeight * 0.5,
                   minimapRatios,
@@ -543,7 +584,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 {renderMediaComponent(
                   order[2],
                   media,
-                  videoRef,
+                  videoRef2,
                   workspaceWidth * 0.5,
                   workspaceHeight * 0.5,
                   minimapRatios,
@@ -555,7 +596,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
                 {renderMediaComponent(
                   order[3],
                   media,
-                  videoRef,
+                  videoRef2,
                   workspaceWidth * 0.5,
                   workspaceHeight * 0.5,
                   minimapRatios,
