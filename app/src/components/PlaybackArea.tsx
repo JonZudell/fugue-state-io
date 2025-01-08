@@ -13,6 +13,7 @@ import {
   setLoopStart,
   selectLooping,
   uploadFile,
+  selectVolume,
 } from "../store/playbackSlice";
 import {
   selectZoomStart,
@@ -163,7 +164,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const layout = useSelector(selectLayout);
   const minimap = useSelector(selectMinimap);
   const order = useSelector(selectOrder);
-
+  const volume = useSelector(selectVolume);
   const [minimapRatios, setMinimapRatios] = useState(
     minimap ? miniMapEnabled : miniMapDisabled,
   );
@@ -181,6 +182,13 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
       setMinimapRatios(miniMapDisabled);
     }
   }, [minimap]);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      const volumeLogScale = Math.log10(volume + 1) / 2; // Scale volume logarithmically
+      videoRef.current.volume = volumeLogScale;
+    }
+  }, [volume]);
 
   useEffect(() => {
     if (videoRef.current) {

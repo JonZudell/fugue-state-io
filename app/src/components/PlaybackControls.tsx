@@ -18,6 +18,7 @@ import {
   selectLooping,
 } from "../store/playbackSlice";
 import SpanSlider from "./SpanSlider";
+import VolumeSelector from "./VolumeSelector";
 interface PlaybackControlsProps {
   enabled?: boolean;
   timeElapsed: number;
@@ -99,9 +100,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         <div
           className={`flex items-center ${looping ? "looping" : "not-looping"}`}
         >
-          <button disabled={!enabled} className="mx-1" draggable="false">
-            <FontAwesomeIcon className="h-8 w-8" icon={faChevronLeft} />
-          </button>
           <button
             className="mx-1"
             onClick={togglePlay}
@@ -113,6 +111,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               icon={playing ? faPause : faPlay}
             />
           </button>
+          <VolumeSelector className="mx-1" enabled={enabled} />
           <button
             className="mx-1"
             onClick={handleToggleLooping}
@@ -124,6 +123,9 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               icon={faRepeat}
               style={{ color: looping ? "green" : "white" }}
             />
+          </button>
+          <button disabled={!enabled} className="mx-1" draggable="false">
+            <FontAwesomeIcon className="h-8 w-8" icon={faChevronLeft} />
           </button>
           <button disabled={!enabled} className="mx-1" draggable="false">
             <FontAwesomeIcon className="h-8 w-8" icon={faChevronRight} />
