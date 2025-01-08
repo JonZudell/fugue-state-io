@@ -15,18 +15,18 @@ type Story = StoryObj<typeof meta>;
 export const Example: Story = {
   render: () => (
     <Provider store={store}>
-      <PlaybackControls 
+      <PlaybackControls
         timeElapsed={0}
         width={0}
         height={0}
         loopStart={0}
-        setLoopStart={(start: number) => { } } 
-        isDraggingRef={undefined} 
-        isPlayingBeforeDragRef={undefined} 
-        videoRef={undefined} 
-        loopEnd={0} 
-        setLoopEnd={function (end: number): void {} }
-        />
+        setLoopStart={(start: number) => {}}
+        isDraggingRef={undefined}
+        isPlayingBeforeDragRef={undefined}
+        videoRef={undefined}
+        loopEnd={0}
+        setLoopEnd={function (end: number): void {}}
+      />
     </Provider>
   ),
 };

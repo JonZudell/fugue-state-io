@@ -164,7 +164,13 @@ const Minimap: React.FC<MinimapProps> = ({
 
   return (
     <>
-      <div style={{ position: "relative", width: "100%", height: `${displayRatio * 100}%`, }}>
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: `${displayRatio * 100}%`,
+        }}
+      >
         <div
           style={{
             position: "absolute",

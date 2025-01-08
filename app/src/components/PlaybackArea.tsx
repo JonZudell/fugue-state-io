@@ -14,6 +14,7 @@ import {
   selectLooping,
   uploadFile,
   selectVolume,
+  selectSpeed,
 } from "../store/playbackSlice";
 import {
   selectZoomStart,
@@ -165,6 +166,7 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const minimap = useSelector(selectMinimap);
   const order = useSelector(selectOrder);
   const volume = useSelector(selectVolume);
+  const speed = useSelector(selectSpeed);
   const [minimapRatios, setMinimapRatios] = useState(
     minimap ? miniMapEnabled : miniMapDisabled,
   );
@@ -192,15 +194,26 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
 
   useEffect(() => {
     if (videoRef.current) {
+      videoRef.current.playbackRate = speed;
+      if (videoRef2.current) {
+        videoRef2.current.playbackRate = speed;
+      }
+    }
+  }, [speed]);
+
+  useEffect(() => {
+    if (videoRef.current) {
       if (playing) {
         videoRef.current.play();
         if (videoRef2.current) {
           videoRef2.current.volume = 0;
-          videoRef2.current.play();}
+          videoRef2.current.play();
+        }
       } else {
         videoRef.current.pause();
         if (videoRef2.current) {
-          videoRef2.current.play();}
+          videoRef2.current.play();
+        }
       }
     }
   }, [playing]);
@@ -219,7 +232,8 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
           if (videoRef2.current) {
             videoRef2.current.volume = 0;
             videoRef2.current.currentTime = newTimeElapsed;
-            videoRef2.current.play();}
+            videoRef2.current.play();
+          }
           dispatch(setTimeElapsed(newTimeElapsed));
         } else if (
           media &&
@@ -228,25 +242,30 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
         ) {
           const newTimeElapsed = loopStart * media.duration;
           videoRef.current.currentTime = newTimeElapsed;
-          videoRef.current.play();          if (videoRef2.current) {
+          videoRef.current.play();
+          if (videoRef2.current) {
             videoRef2.current.volume = 0;
             videoRef2.current.currentTime = newTimeElapsed;
-            videoRef2.current.play();}
+            videoRef2.current.play();
+          }
           dispatch(setTimeElapsed(newTimeElapsed));
         } else if (media && videoRef.current.currentTime >= media.duration) {
           const newTimeElapsed = media.duration;
           videoRef.current.currentTime = newTimeElapsed;
-          videoRef.current.pause();          if (videoRef2.current) {
+          videoRef.current.pause();
+          if (videoRef2.current) {
             videoRef2.current.volume = 0;
             videoRef2.current.currentTime = newTimeElapsed;
-            videoRef2.current.pause();}
+            videoRef2.current.pause();
+          }
         } else {
           dispatch(setTimeElapsed(videoRef.current.currentTime));
         }
       } else if (!playing && videoRef.current) {
         videoRef.current.currentTime = timeElapsed;
         if (videoRef2.current) {
-        videoRef2.current.currentTime = timeElapsed;}
+          videoRef2.current.currentTime = timeElapsed;
+        }
       }
     }, 10);
 
@@ -275,17 +294,17 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
       )}
       {media && (
         <video
-        ref={videoRef}
-        controls={false}
-        className="video-element"
-        loop={false}
-        style={{
-          display: "none",
-        }}
-      >
-        <source src={media.url} type={media.fileType} />
-        Your browser does not support the video tag.
-      </video>
+          ref={videoRef}
+          controls={false}
+          className="video-element"
+          loop={false}
+          style={{
+            display: "none",
+          }}
+        >
+          <source src={media.url} type={media.fileType} />
+          Your browser does not support the video tag.
+        </video>
       )}
       {media && layout === "single" && (
         <>

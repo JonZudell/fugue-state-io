@@ -29,6 +29,8 @@ export const selectMedia = (state: { playback: { media: FileState } }) =>
   state.playback.media;
 export const selectVolume = (state: { playback: { volume: number } }) =>
   state.playback.volume;
+export const selectSpeed = (state: { playback: { speed: number } }) =>
+  state.playback.speed;
 export const selectPlaying = (state: { playback: { playing: boolean } }) =>
   state.playback.playing;
 export const selectTimeElapsed = (state: {

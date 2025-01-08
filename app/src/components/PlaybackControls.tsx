@@ -19,6 +19,7 @@ import {
 } from "../store/playbackSlice";
 import SpanSlider from "./SpanSlider";
 import VolumeSelector from "./VolumeSelector";
+import SpeedSelector from "./SpeedSelector";
 interface PlaybackControlsProps {
   enabled?: boolean;
   timeElapsed: number;
@@ -112,6 +113,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             />
           </button>
           <VolumeSelector className="mx-1" enabled={enabled} />
+          <SpeedSelector className="mx-1" enabled={enabled} />
           <button
             className="mx-1"
             onClick={handleToggleLooping}

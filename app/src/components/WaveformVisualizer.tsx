@@ -136,7 +136,7 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
               style={{
                 position: "absolute",
                 top: 0,
-                left: `${((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage) * 100}%`,
+                left: `${(((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage)) * 100}%`,
                 width: "2px",
                 height: "100%",
                 backgroundColor: "red",

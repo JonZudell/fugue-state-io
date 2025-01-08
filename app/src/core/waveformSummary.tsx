@@ -1,6 +1,6 @@
 import FFT from "fft.js";
 const SAMPLE_RATE = 44100;
-const SAMPLE_BIN_SIZE = 4096;
+const SAMPLE_BIN_SIZE = 2048;
 const HALF_SAMPLE_BIN_SIZE = Math.floor(SAMPLE_BIN_SIZE / 2);
 const fft = new FFT(SAMPLE_BIN_SIZE);
 const WINDOW_FUNCTION = "hamming";
@@ -27,18 +27,33 @@ export type Channels = {
 function applyWindowFunction(data: number[], windowType: string): number[] {
   const N = data.length;
   switch (windowType) {
-    case 'hamming':
-      return data.map((value, n) => value * (0.54 - 0.46 * Math.cos((2 * Math.PI * n) / (N - 1))));
-    case 'hann':
-      return data.map((value, n) => value * (0.5 * (1 - Math.cos((2 * Math.PI * n) / (N - 1)))));
-    case 'blackman':
-      return data.map((value, n) => value * (0.42 - 0.5 * Math.cos((2 * Math.PI * n) / (N - 1)) + 0.08 * Math.cos((4 * Math.PI * n) / (N - 1))));
-    case 'rectangular':
+    case "hamming":
+      return data.map(
+        (value, n) =>
+          value * (0.54 - 0.46 * Math.cos((2 * Math.PI * n) / (N - 1))),
+      );
+    case "hann":
+      return data.map(
+        (value, n) =>
+          value * (0.5 * (1 - Math.cos((2 * Math.PI * n) / (N - 1)))),
+      );
+    case "blackman":
+      return data.map(
+        (value, n) =>
+          value *
+          (0.42 -
+            0.5 * Math.cos((2 * Math.PI * n) / (N - 1)) +
+            0.08 * Math.cos((4 * Math.PI * n) / (N - 1))),
+      );
+    case "rectangular":
       return data; // No windowing
-    case 'bartlett':
-      return data.map((value, n) => value * (2 / (N - 1)) * ((N - 1) / 2 - Math.abs(n - (N - 1) / 2)));
+    case "bartlett":
+      return data.map(
+        (value, n) =>
+          value * (2 / (N - 1)) * ((N - 1) / 2 - Math.abs(n - (N - 1) / 2)),
+      );
     default:
-      throw new Error('Unknown window type');
+      throw new Error("Unknown window type");
   }
 }
 function getFrequencyBins(
@@ -49,6 +64,9 @@ function getFrequencyBins(
   return frequencies.map((frequency) =>
     Math.round((frequency * fftSize) / sampleRate),
   );
+}
+function getFrequencyForBin(bin: number, sampleRate: number, fftSize: number): number {
+  return (bin * sampleRate) / fftSize;
 }
 export const ABins = getFrequencyBins(
   [220, 440, 880, 1760, 3520, 7040, 14080],
@@ -91,7 +109,7 @@ export const EBins = getFrequencyBins(
   SAMPLE_BIN_SIZE,
 );
 export const FBins = getFrequencyBins(
-  [349.23, 698.46, 1396.91, 2793.83, 5587.65, 11175.30, 22350.61],
+  [349.23, 698.46, 1396.91, 2793.83, 5587.65, 11175.3, 22350.61],
   SAMPLE_RATE,
   SAMPLE_BIN_SIZE,
 );
@@ -109,10 +127,63 @@ export const GBins = getFrequencyBins(
 );
 
 export const GSharpBins = getFrequencyBins(
-  [415.30, 830.61, 1661.22, 3322.44, 6644.88, 13289.75, 26579.51],
+  [415.3, 830.61, 1661.22, 3322.44, 6644.88, 13289.75, 26579.51],
   SAMPLE_RATE,
   SAMPLE_BIN_SIZE,
 );
+
+const binColors = [
+  { bins: ABins, color: [239, 68, 68] }, // red-500
+  { bins: ASharpBins, color: [107, 114, 128] }, // gray-500
+  { bins: BBins, color: [249, 115, 22] }, // orange-500
+  { bins: CBins, color: [107, 114, 128] }, // gray-500
+  { bins: CSharpBins, color: [234, 179, 8] }, // yellow-500
+  { bins: DBins, color: [34, 197, 94] }, // green-500
+  { bins: DSharpBins, color: [107, 114, 128] }, // gray-500
+  { bins: EBins, color: [59, 130, 246] }, // blue-500
+  { bins: FBins, color: [107, 114, 128] }, // gray-500
+  { bins: FSharpBins, color: [79, 70, 229] }, // indigo-500
+  { bins: GBins, color: [107, 114, 128] }, // gray-500
+  { bins: GSharpBins, color: [139, 92, 246] }, // violet-500
+];
+const frequencyRanges = Array.from({ length: SAMPLE_BIN_SIZE }, (_, bin) => ({
+  bin,
+  frequency: getFrequencyForBin(bin, SAMPLE_RATE, SAMPLE_BIN_SIZE),
+  binColor: binColors.find((color) => color.bins.includes(bin))?.color,
+}));
+console.log(frequencyRanges);
+
+const indexesWithBinColor = frequencyRanges
+  .filter((range) => range.binColor !== undefined)
+  .map((range) => range.bin);
+
+for (let i = 0; i < SAMPLE_BIN_SIZE; i++) {
+  if (indexesWithBinColor.includes(i)) {
+    console.log(`Bin ${i} has a color`);
+  }
+}
+
+for (let i = 0; i < indexesWithBinColor[0]; i++) {
+  frequencyRanges[i].binColor = [156, 163, 175];
+}
+for (let i = 1; i < indexesWithBinColor.length; i++) {
+  const start = indexesWithBinColor[i - 1];
+  const end = indexesWithBinColor[i];
+  const startColor = frequencyRanges[start].binColor;
+  const endColor = frequencyRanges[end].binColor;
+  const color = new Array(3).fill(0);
+  const gradientWidth = end - start;
+  for (let j = start; j < end; j++) {
+    const ratio = (j - start) / gradientWidth;
+    color[0] = Math.round(startColor[0] * (1 - ratio) + endColor[0] * ratio);
+    color[1] = Math.round(startColor[1] * (1 - ratio) + endColor[1] * ratio);
+    color[2] = Math.round(startColor[2] * (1 - ratio) + endColor[2] * ratio);
+    frequencyRanges[j].binColor = [...color];
+  }
+}
+export function colorForBin(bin: number): number[] {
+  return frequencyRanges[bin].binColor ?? [156, 163, 175];
+}
 
 function frameFromSlice(array: number[], start: number, end: number): Frame {
   const data = Array.from(array.slice(start, end));

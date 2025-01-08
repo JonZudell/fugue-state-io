@@ -7,6 +7,7 @@ import {
 } from "../store/playbackSlice";
 import { useSelector } from "react-redux";
 import { FileState } from "../store/filesSlice";
+import { colorForBin } from "@/core/waveformSummary";
 interface SpectrogramDisplayProps {
   media?: FileState;
   width?: number;
@@ -70,11 +71,11 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
         const binsPerPixel = summary.mono[0].magnitudes.length / canvas.height;
         for (let x = 0; x < canvas.width; x++) {
           for (let y = 0; y < canvas.height; y++) {
-            ctx.fillStyle = `rgba(255, 255, 255, ${summary.mono[Math.floor(x * samplesPerPixel)].magnitudes[Math.floor(y * binsPerPixel / 4)]})`;
+            const color = colorForBin(Math.floor((y * binsPerPixel) / 8));
+            ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${summary.mono[Math.floor(x * samplesPerPixel) + startSample].magnitudes[Math.floor((y * binsPerPixel) / 8)]})`;
             ctx.fillRect(x, canvas.height - y - 1, 1, 1);
           }
         }
-        
       }
     };
 
@@ -93,46 +94,46 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
 
   return (
     <>
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
-    <div
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        backgroundColor: "rgba(0, 0, 0, 0)",
-        overflow: "hidden",
-      }}
-    >{crosshair && (
-      <div
-      style={{
-        position: "absolute",
-        top: 0,
-        left: `${((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage) * 100}%`,
-        width: "2px",
-        height: "100%",
-        backgroundColor: "red",
-        zIndex: 100,
-        opacity: 1,
-      }}
-      />
-    )}
-    </div>
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      className="w-full"
-      style={{
-        width: `${displayRatioHorizontal * 100}%`,
-        height: `${displayRatioVertical * 100}%`,
-      }}
-    />
-    </div>
+      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            pointerEvents: "none",
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            overflow: "hidden",
+          }}
+        >
+          {crosshair && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: `${(((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage)) * 100}%`,
+                width: "2px",
+                height: "100%",
+                backgroundColor: "red",
+                zIndex: 100,
+                opacity: 1,
+              }}
+            />
+          )}
+        </div>
+        <canvas
+          ref={canvasRef}
+          width={width}
+          height={height}
+          className="w-full"
+          style={{
+            width: `${displayRatioHorizontal * 100}%`,
+            height: `${displayRatioVertical * 100}%`,
+          }}
+        />
+      </div>
     </>
-
   );
 };
 export default SpectrogramDisplay;
