@@ -9,12 +9,12 @@ import {
   faChartColumn,
   faChartGantt,
   faCodeFork,
+  faWaveSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import { JSX, useState } from "react";
 import "./LeftMenu.css";
 import AssetManager from "./AssetManager";
 import DisplayMenu from "./DisplayMenu";
-import { on } from "events";
 
 interface LeftMenuProps {
   smallestSize?: number;
@@ -44,20 +44,26 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
     },
     {
       id: 3,
+      icon: faWaveSquare,
+      style: { transform: "rotate(0)" },
+      tabContent: <div>Waveform View Settings</div>,
+    },
+    {
+      id: 4,
       icon: faChartColumn,
       tabContent: <div>Fourier View Settings</div>,
     },
     {
-      id: 4,
+      id: 5,
       icon: faChartGantt,
       tabContent: <div>Spectrogram View Settings</div>,
     },
     {
-      id: 5,
+      id: 6,
       icon: faCodeFork,
       style: { transform: "rotate(90deg)" },
       tabContent: <div>Audio Channel Settings</div>,
-    }
+    },
   ],
   onWidthChange,
 }) => {
@@ -65,20 +71,14 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
   const [collapsed, setCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState(1);
   const [mouseDown, setMouseDown] = useState(false);
-  const [widthBeforeCollapse, setWidthBeforeCollapse] = useState(256);
+  const [widthBeforeCollapse, setWidthBeforeCollapse] = useState(256 + 60);
 
   const handleMouseMove = (e: MouseEvent) => {
     const newWidth = e.clientX;
-    if (newWidth > smallestSize) {
-      const adjustedWidth = newWidth > smallestSize ? newWidth : 0;
-      setWidth(adjustedWidth);
-      onWidthChange(adjustedWidth);
-      setCollapsed(false);
-    } else {
-      setWidth(60);
-      onWidthChange(60);
-      setCollapsed(true);
-    }
+    const adjustedWidth = newWidth > smallestSize ? newWidth : 0;
+    setWidth(adjustedWidth);
+    onWidthChange(adjustedWidth + 60);
+    setCollapsed(false);
   };
   const handleTabClick = (id: number) => {
     if (activeTab === id) {
@@ -97,22 +97,6 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
       onWidthChange(widthBeforeCollapse + 60);
       setActiveTab(id);
     }
-
-    // if (activeTab === id) {
-    //   if (collapsed) {
-    //     setCollapsed(false);
-    //     setWidth(widthBeforeCollapse);
-    //     onWidthChange(widthBeforeCollapse + 60);
-    //   } else {
-    //     setCollapsed(true);
-    //     setWidthBeforeCollapse(width);
-    //     onWidthChange(60);
-    //   }
-    // } else {
-    //   setCollapsed(false);
-    //   setWidthBeforeCollapse(width);
-    // }
-    // setActiveTab(id);
   };
   const handleMouseUp = () => {
     document.removeEventListener("mousemove", handleMouseMove);

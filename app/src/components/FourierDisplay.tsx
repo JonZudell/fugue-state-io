@@ -109,7 +109,9 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       const pixelsPerMagnitude =
         canvas.width / channel[fourierIndex].magnitudes.length;
       for (let i = 0; i < canvas.width; i++) {
-        const magnitudeIndex = Math.floor((i / pixelsPerMagnitude) / fourierScale);
+        const magnitudeIndex = Math.floor(
+          i / pixelsPerMagnitude / fourierScale,
+        );
         const magnitude = Math.log10(
           channel[fourierIndex].magnitudes[magnitudeIndex] + 1,
         );
@@ -198,9 +200,12 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       const pixelsPerMagnitude =
         canvas.width / summary.left[fourierIndex].magnitudes.length;
       const magnitudeIndex = Math.floor(
-        (cursorPosition / pixelsPerMagnitude) / fourierScale,
+        cursorPosition / pixelsPerMagnitude / fourierScale,
       );
-      if (magnitudeIndex >= 0 && magnitudeIndex < summary.left[fourierIndex].magnitudes.length) {
+      if (
+        magnitudeIndex >= 0 &&
+        magnitudeIndex < summary.left[fourierIndex].magnitudes.length
+      ) {
         const frequency = getFrequencyForBin(magnitudeIndex);
         const closestNote = getNoteForFrequency(frequency);
         setInfoString(`${frequency.toFixed(2)} Hz - ${closestNote}`);
@@ -208,7 +213,18 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
     } else {
       setInfoString(null);
     }
-  }, [timeElapsed, channel, media, width, height, crosshair, loopStart, loopEnd, cursorPosition, fourierScale]);
+  }, [
+    timeElapsed,
+    channel,
+    media,
+    width,
+    height,
+    crosshair,
+    loopStart,
+    loopEnd,
+    cursorPosition,
+    fourierScale,
+  ]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const canvas = canvasRef.current;
@@ -269,7 +285,10 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
             fontSize: "12px",
             zIndex: 101,
             width: "115px",
-            transform: mouseX > canvasRef.current!.width - 115 ? "translateX(-100%)" : "none",
+            transform:
+              mouseX > canvasRef.current!.width - 115
+                ? "translateX(-100%)"
+                : "none",
           }}
         >
           {infoString}

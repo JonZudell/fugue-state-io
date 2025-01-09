@@ -103,19 +103,26 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
             onClick={() => dispatch(setLayout("single"))}
           >
             <svg
-              className="h-20 w-34 m-1"
+              className="h-10 w-17 m-0.5"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 170 100"
+              viewBox="0 0 85 50"
               fill="none"
               stroke="currentColor"
-              strokeWidth="10"
+              strokeWidth="5"
             >
-              <rect x="5" y="5" width="160" height="90" rx="25" ry="25" />
+              <rect
+                x="2.5"
+                y="2.5"
+                width="80"
+                height="45"
+                rx="12.5"
+                ry="12.5"
+              />
               <text
-                x="77.5"
-                y="60"
-                strokeWidth={4}
-                fontSize="32"
+                x="38.75"
+                y="30"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
@@ -133,35 +140,42 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
             onClick={() => dispatch(setLayout("stacked"))}
           >
             <svg
-              className="h-20 w-34 m-1"
+              className="h-10 w-17 m-0.5"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 170 100"
+              viewBox="0 0 85 50"
               fill="none"
               stroke="currentColor"
-              strokeWidth="10"
+              strokeWidth="5"
             >
-              <rect x="5" y="5" width="160" height="90" rx="25" ry="25" />
+              <rect
+                x="2.5"
+                y="2.5"
+                width="80"
+                height="45"
+                rx="12.5"
+                ry="12.5"
+              />
               <text
-                x="77.5"
-                y="37.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="38.75"
+                y="18.75"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 1
               </text>
               <text
-                x="77.5"
-                y="82.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="38.75"
+                y="41.25"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 2
               </text>
-              <path d="M5 50h160" />
+              <path d="M2.5 25h80" />
             </svg>
           </div>
           <div
@@ -170,35 +184,42 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
             onClick={() => dispatch(setLayout("side-by-side"))}
           >
             <svg
-              className="h-20 w-34 m-1"
+              className="h-10 w-17 m-0.5"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 170 100"
+              viewBox="0 0 85 50"
               fill="none"
               stroke="currentColor"
-              strokeWidth="10"
+              strokeWidth="5"
             >
-              <rect x="5" y="5" width="160" height="90" rx="25" ry="25" />
+              <rect
+                x="2.5"
+                y="2.5"
+                width="80"
+                height="45"
+                rx="12.5"
+                ry="12.5"
+              />
               <text
-                x="42.5"
-                y="60"
-                strokeWidth={4}
-                fontSize="32"
+                x="21.25"
+                y="30"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 1
               </text>
               <text
-                x="117.5"
-                y="60"
-                strokeWidth={4}
-                fontSize="32"
+                x="58.75"
+                y="30"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 2
               </text>
-              <path d="M85 5v90" />
+              <path d="M42.5 2.5v45" />
             </svg>
           </div>
         </div>
@@ -211,46 +232,53 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
             onClick={() => dispatch(setLayout("stacked-bottom-side-by-side"))}
           >
             <svg
-              className="h-20 w-34 m-1"
+              className="h-10 w-17 m-0.5"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 170 100"
+              viewBox="0 0 85 50"
               fill="none"
               stroke="currentColor"
-              strokeWidth="10"
+              strokeWidth="5"
             >
-              <rect x="5" y="5" width="160" height="90" rx="25" ry="25" />
+              <rect
+                x="2.5"
+                y="2.5"
+                width="80"
+                height="45"
+                rx="12.5"
+                ry="12.5"
+              />
               <text
-                x="77"
-                y="37.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="38.5"
+                y="18.75"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 1
               </text>
               <text
-                x="42.5"
-                y="82.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="21.25"
+                y="41.25"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 2
               </text>
               <text
-                x="117.5"
-                y="82.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="58.75"
+                y="41.25"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 3
               </text>
-              <path d="M85 50v45" />
-              <path d="M5 50h160" />
+              <path d="M42.5 25v22.5" />
+              <path d="M2.5 25h80" />
             </svg>
           </div>
           <div
@@ -259,46 +287,53 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
             onClick={() => dispatch(setLayout("stacked-top-side-by-side"))}
           >
             <svg
-              className="h-20 w-34 m-1"
+              className="h-10 w-17 m-0.5"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 170 100"
+              viewBox="0 0 85 50"
               fill="none"
               stroke="currentColor"
-              strokeWidth="10"
+              strokeWidth="5"
             >
-              <rect x="5" y="5" width="160" height="90" rx="25" ry="25" />
+              <rect
+                x="2.5"
+                y="2.5"
+                width="80"
+                height="45"
+                rx="12.5"
+                ry="12.5"
+              />
               <text
-                x="42.5"
-                y="37.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="21.25"
+                y="18.75"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 1
               </text>
               <text
-                x="117.5"
-                y="37.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="58.75"
+                y="18.75"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 2
               </text>
               <text
-                x="77"
-                y="82.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="38.5"
+                y="41.25"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 3
               </text>
-              <path d="M85 5v45" />
-              <path d="M5 50h160" />
+              <path d="M42.5 2.5v22.5" />
+              <path d="M2.5 25h80" />
             </svg>
           </div>
           <div
@@ -307,46 +342,53 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
             onClick={() => dispatch(setLayout("side-by-side-right-stacked"))}
           >
             <svg
-              className="h-20 w-34 m-1"
+              className="h-10 w-17 m-0.5"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 170 100"
+              viewBox="0 0 85 50"
               fill="none"
               stroke="currentColor"
-              strokeWidth="10"
+              strokeWidth="5"
             >
-              <rect x="5" y="5" width="160" height="90" rx="25" ry="25" />
+              <rect
+                x="2.5"
+                y="2.5"
+                width="80"
+                height="45"
+                rx="12.5"
+                ry="12.5"
+              />
               <text
-                x="42.5"
-                y="60"
-                strokeWidth={4}
-                fontSize="32"
+                x="21.25"
+                y="30"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 1
               </text>
               <text
-                x="117.5"
-                y="37.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="58.75"
+                y="18.75"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 2
               </text>
               <text
-                x="117.5"
-                y="82.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="58.75"
+                y="41.25"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 3
               </text>
-              <path d="M85 5v90" />
-              <path d="M85 50h80" />
+              <path d="M42.5 2.5v45" />
+              <path d="M42.5 25h40" />
             </svg>
           </div>
           <div
@@ -355,46 +397,53 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
             onClick={() => dispatch(setLayout("side-by-side-left-stacked"))}
           >
             <svg
-              className="h-20 w-34 m-1"
+              className="h-10 w-17 m-0.5"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 170 100"
+              viewBox="0 0 85 50"
               fill="none"
               stroke="currentColor"
-              strokeWidth="10"
+              strokeWidth="5"
             >
-              <rect x="5" y="5" width="160" height="90" rx="25" ry="25" />
+              <rect
+                x="2.5"
+                y="2.5"
+                width="80"
+                height="45"
+                rx="12.5"
+                ry="12.5"
+              />
               <text
-                x="42.5"
-                y="37.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="21.25"
+                y="18.75"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 1
               </text>
               <text
-                x="42.5"
-                y="82.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="21.25"
+                y="41.25"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 2
               </text>
               <text
-                x="117.5"
-                y="60"
-                strokeWidth={4}
-                fontSize="32"
+                x="58.75"
+                y="30"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 3
               </text>
-              <path d="M85 5v90" />
-              <path d="M85 50h-80" />
+              <path d="M42.5 2.5v45" />
+              <path d="M42.5 25h-40" />
             </svg>
           </div>
         </div>
@@ -407,56 +456,63 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
             onClick={() => dispatch(setLayout("four"))}
           >
             <svg
-              className="h-20 w-34 m-1"
+              className="h-10 w-17 m-0.5"
               xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 170 100"
+              viewBox="0 0 85 50"
               fill="none"
               stroke="currentColor"
-              strokeWidth="10"
+              strokeWidth="5"
             >
-              <rect x="5" y="5" width="160" height="90" rx="25" ry="25" />
+              <rect
+                x="2.5"
+                y="2.5"
+                width="80"
+                height="45"
+                rx="12.5"
+                ry="12.5"
+              />
               <text
-                x="42.5"
-                y="37.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="21.25"
+                y="18.75"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 1
               </text>
               <text
-                x="117.5"
-                y="37.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="58.75"
+                y="18.75"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 2
               </text>
               <text
-                x="42.5"
-                y="82.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="21.25"
+                y="41.25"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 3
               </text>
               <text
-                x="117.5"
-                y="82.5"
-                strokeWidth={4}
-                fontSize="32"
+                x="58.75"
+                y="41.25"
+                strokeWidth={2}
+                fontSize="16"
                 fill="currentColor"
                 fontFamily="Consolas"
               >
                 4
               </text>
-              <path d="M85 5v90" />
-              <path d="M5 50h160" />
+              <path d="M42.5 2.5v45" />
+              <path d="M2.5 25h80" />
             </svg>
           </div>
         </div>

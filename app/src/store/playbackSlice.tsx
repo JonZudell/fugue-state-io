@@ -4,6 +4,7 @@ import { generateWaveformSummary } from "@/core/waveformSummary";
 import { setVideoEnabled } from "./displaySlice";
 
 interface PlaybackState {
+  audioContext: AudioContext | null;
   media: FileState | null;
   playing: boolean;
   looping: boolean;
@@ -15,6 +16,7 @@ interface PlaybackState {
 }
 
 const initialState: PlaybackState = {
+  audioContext: null,
   media: null,
   playing: false,
   looping: false,
@@ -27,6 +29,9 @@ const initialState: PlaybackState = {
 
 export const selectMedia = (state: { playback: { media: FileState } }) =>
   state.playback.media;
+export const selectAudioContext = (state: {
+  playback: { audioContext: AudioContext };
+}) => state.playback.audioContext;
 export const selectVolume = (state: { playback: { volume: number } }) =>
   state.playback.volume;
 export const selectSpeed = (state: { playback: { speed: number } }) =>
@@ -52,7 +57,7 @@ export const uploadFile = createAsyncThunk(
         if (e && e.target && e.target.result) {
           const base64String = (e.target.result as string).split(",")[1];
           const dataUrl = `data:${file.type};base64,${base64String}`;
-          console.log(file)
+          console.log(file);
           const audio = new Audio(dataUrl);
 
           audio.onloadedmetadata = function () {
@@ -88,6 +93,12 @@ const playbackSlice = createSlice({
   name: "playback",
   initialState,
   reducers: {
+    setAudioContext: (
+      state: PlaybackState,
+      action: PayloadAction<AudioContext>,
+    ) => {
+      state.audioContext = action.payload;
+    },
     setMedia: (state: PlaybackState, action: PayloadAction<FileState>) => {
       state.media = action.payload;
     },

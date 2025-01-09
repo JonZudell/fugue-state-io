@@ -21,9 +21,6 @@ export const Example: Story = {
         height={0}
         loopStart={0}
         setLoopStart={(start: number) => {}}
-        isDraggingRef={undefined}
-        isPlayingBeforeDragRef={undefined}
-        videoRef={undefined}
         loopEnd={0}
         setLoopEnd={function (end: number): void {}}
       />

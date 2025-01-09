@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import CommandBar from "./CommandBar";
 import FiledropOverlay from "./FiledropOverlay";
 import PlaybackArea from "./PlaybackArea";
@@ -8,6 +8,7 @@ import "./Workspace.css";
 import { setControlDown, setEscDown, setKDown } from "../store/commandSlice";
 import ShortcutLegend from "./ShortcutLegend";
 import LeftMenu from "./LeftMenu";
+import { selectLooping } from "../store/playbackSlice";
 interface WorkspaceProps {
   focused?: false;
 }
@@ -17,7 +18,8 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
   const workspaceRef = useRef<HTMLDivElement | null>(null);
   const [workspaceWidth, setWorkspaceWidth] = useState<number>(0);
   const [workspaceHeight, setWorkspaceHeight] = useState<number>(0);
-  const [leftMenuWidth, setLeftMenuWidth] = useState<number>(65 + 256);
+  const [leftMenuWidth, setLeftMenuWidth] = useState<number>(60 + 256);
+  const looping = useSelector(selectLooping);
 
   useLayoutEffect(() => {
     const updateWorkspaceDimensions = () => {
@@ -140,12 +142,12 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
           top: "26px",
           right: "0px",
           width: `${workspaceWidth}px`,
-          height: `${workspaceHeight - 85}px`,
+          height: `${looping ? workspaceHeight - 70 : workspaceHeight - 60}px`,
         }}
         leftMenuWidth={leftMenuWidth}
         workspaceWidth={workspaceWidth}
-        workspaceHeight={workspaceHeight - 85}
-        menuHeight={85}
+        workspaceHeight={looping ? workspaceHeight - 70 : workspaceHeight - 60}
+        menuHeight={looping ? 70 : 60}
       />
       <ShortcutLegend />
     </div>

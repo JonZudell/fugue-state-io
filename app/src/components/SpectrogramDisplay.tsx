@@ -7,7 +7,11 @@ import {
 } from "../store/playbackSlice";
 import { useSelector } from "react-redux";
 import { FileState } from "../store/filesSlice";
-import { colorForBin, getFrequencyForBin, getNoteForFrequency } from "../core/waveformSummary";
+import {
+  colorForBin,
+  getFrequencyForBin,
+  getNoteForFrequency,
+} from "../core/waveformSummary";
 import { selectSpectrogramScale } from "../store/displaySlice";
 interface SpectrogramDisplayProps {
   media?: FileState;
@@ -106,15 +110,33 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
     loopStart,
     loopEnd,
   ]);
-  
+
   useEffect(() => {
-    const binsPerPixel = media?.summary?.mono[0].magnitudes.length / (canvasRef.current?.height * 2);
+    const binsPerPixel =
+      media?.summary?.mono[0].magnitudes.length /
+      (canvasRef.current?.height * 2);
     if (binsPerPixel) {
-      frequencyRef.current = getFrequencyForBin(Math.floor((canvasRef.current?.height * 2 - mouseY) * binsPerPixel / spectrogramScale));
+      frequencyRef.current = getFrequencyForBin(
+        Math.floor(
+          ((canvasRef.current?.height * 2 - mouseY) * binsPerPixel) /
+            spectrogramScale,
+        ),
+      );
       const note = getNoteForFrequency(frequencyRef.current);
       setInfoString(`${frequencyRef.current.toFixed(2)}Hz - ${note}`);
     }
-  }, [cursorPosition, endPercentage, frequencyRef, height, media, mouseY, setInfoString, startPercentage, timeElapsed, width]);
+  }, [
+    cursorPosition,
+    endPercentage,
+    frequencyRef,
+    height,
+    media,
+    mouseY,
+    setInfoString,
+    startPercentage,
+    timeElapsed,
+    width,
+  ]);
 
   return (
     <>
@@ -163,7 +185,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
                   opacity: 1,
                 }}
               />
-                <span
+              <span
                 style={{
                   position: "absolute",
                   top: `${mouseY < 40 ? mouseY + 20 : mouseY - 40}px`,
@@ -175,9 +197,9 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
                   zIndex: 101,
                   width: "115px",
                 }}
-                >
+              >
                 {infoString}
-                </span>
+              </span>
             </div>
           )}
         </div>
