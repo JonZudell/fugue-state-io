@@ -1,16 +1,12 @@
+ui tweaks
+  volume
+  speed
+  span slider
 qol
   replace current media
 
-
 playback
-  volume
-  mute
-  speed
   eq
-
-menu
-  Flags
 
 ideal implementation
   layout splits instead of playback area
-  chroma features

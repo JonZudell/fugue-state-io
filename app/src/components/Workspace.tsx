@@ -17,7 +17,7 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
   const workspaceRef = useRef<HTMLDivElement | null>(null);
   const [workspaceWidth, setWorkspaceWidth] = useState<number>(0);
   const [workspaceHeight, setWorkspaceHeight] = useState<number>(0);
-  const [leftMenuWidth, setLeftMenuWidth] = useState<number>(73 + 256);
+  const [leftMenuWidth, setLeftMenuWidth] = useState<number>(65 + 256);
 
   useLayoutEffect(() => {
     const updateWorkspaceDimensions = () => {

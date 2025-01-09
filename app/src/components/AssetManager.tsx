@@ -38,7 +38,7 @@ const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
           textAlign: "center",
         }}
       >
-        <FontAwesomeIcon icon={faFileUpload} className="w-8 h-8 unselectable" />
+        <FontAwesomeIcon icon={faFileUpload} className="w-6 h-6 unselectable" />
         <p className="unselectable">Drag to upload!</p>
         <p className="unselectable">-or-</p>
         <input

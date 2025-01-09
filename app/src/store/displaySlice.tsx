@@ -6,7 +6,9 @@ interface DisplayState {
   videoEnabled: boolean;
   waveformEnabled: boolean;
   spectrogramEnabled: boolean;
+  spectrogramScale: number;
   fourierEnabled: boolean;
+  fourierScale: number;
   layout:
     | "single"
     | "stacked"
@@ -27,7 +29,9 @@ const initialState: DisplayState = {
   videoEnabled: true,
   waveformEnabled: true,
   spectrogramEnabled: false,
+  spectrogramScale: 4,
   fourierEnabled: false,
+  fourierScale: 4,
   layout: "stacked",
   order: ["video", "waveform"],
   minimap: true,
@@ -50,6 +54,10 @@ export const selectSpectrogramEnabled = (state: { display: DisplayState }) =>
   state.display.spectrogramEnabled;
 export const selectFourierEnabled = (state: { display: DisplayState }) =>
   state.display.fourierEnabled;
+export const selectSpectrogramScale = (state: { display: DisplayState }) =>
+  state.display.spectrogramScale;
+export const selectFourierScale = (state: { display: DisplayState }) =>
+  state.display.fourierScale;
 export const selectOrder = (state: { display: DisplayState }) =>
   state.display.order;
 

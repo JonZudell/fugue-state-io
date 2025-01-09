@@ -3,17 +3,18 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faGear,
   faUser,
-  faMusic,
   IconDefinition,
   faDisplay,
-  faTimeline,
   faFileWaveform,
-  faFlag,
+  faChartColumn,
+  faChartGantt,
+  faCodeFork,
 } from "@fortawesome/free-solid-svg-icons";
 import { JSX, useState } from "react";
 import "./LeftMenu.css";
 import AssetManager from "./AssetManager";
 import DisplayMenu from "./DisplayMenu";
+import { on } from "events";
 
 interface LeftMenuProps {
   smallestSize?: number;
@@ -43,56 +44,101 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
     },
     {
       id: 3,
-      icon: faFlag,
-      style: { transform: "rotate(0)" },
-      tabContent: <div>Timeline</div>,
+      icon: faChartColumn,
+      tabContent: <div>Fourier View Settings</div>,
     },
+    {
+      id: 4,
+      icon: faChartGantt,
+      tabContent: <div>Spectrogram View Settings</div>,
+    },
+    {
+      id: 5,
+      icon: faCodeFork,
+      style: { transform: "rotate(90deg)" },
+      tabContent: <div>Audio Channel Settings</div>,
+    }
   ],
   onWidthChange,
 }) => {
   const [width, setWidth] = useState(256);
+  const [collapsed, setCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState(1);
   const [mouseDown, setMouseDown] = useState(false);
+  const [widthBeforeCollapse, setWidthBeforeCollapse] = useState(256);
 
   const handleMouseMove = (e: MouseEvent) => {
     const newWidth = e.clientX;
-    const adjustedWidth = newWidth > smallestSize ? newWidth : 0;
-    setWidth(adjustedWidth);
-    if (onWidthChange) {
-      const totalWidth = newWidth > smallestSize ? newWidth + 74 : 68;
-      onWidthChange(totalWidth);
+    if (newWidth > smallestSize) {
+      const adjustedWidth = newWidth > smallestSize ? newWidth : 0;
+      setWidth(adjustedWidth);
+      onWidthChange(adjustedWidth);
+      setCollapsed(false);
+    } else {
+      setWidth(60);
+      onWidthChange(60);
+      setCollapsed(true);
     }
   };
+  const handleTabClick = (id: number) => {
+    if (activeTab === id) {
+      if (collapsed) {
+        setCollapsed(false);
+        setWidth(widthBeforeCollapse);
+        onWidthChange(widthBeforeCollapse + 60);
+      } else {
+        setCollapsed(true);
+        setWidthBeforeCollapse(width);
+        onWidthChange(60);
+      }
+    } else {
+      setCollapsed(false);
+      setWidth(widthBeforeCollapse);
+      onWidthChange(widthBeforeCollapse + 60);
+      setActiveTab(id);
+    }
 
+    // if (activeTab === id) {
+    //   if (collapsed) {
+    //     setCollapsed(false);
+    //     setWidth(widthBeforeCollapse);
+    //     onWidthChange(widthBeforeCollapse + 60);
+    //   } else {
+    //     setCollapsed(true);
+    //     setWidthBeforeCollapse(width);
+    //     onWidthChange(60);
+    //   }
+    // } else {
+    //   setCollapsed(false);
+    //   setWidthBeforeCollapse(width);
+    // }
+    // setActiveTab(id);
+  };
   const handleMouseUp = () => {
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
     setMouseDown(false);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleMouseDown = (e: React.MouseEvent) => {
     setMouseDown(true);
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
   };
 
-  const handleTabClick = (id: number) => {
-    setActiveTab(id);
-  };
   return (
     <>
-      <div className="menu-height bg-gray-800 w-16 float-left flex flex-col justify-between">
+      <div className="menu-height bg-gray-800 w-14 float-left flex flex-col justify-between">
         <ul>
           {initialState.map((item) => (
             <li
               key={item.id}
-              className={`icon-button  icon-button:hover ${activeTab === item.id ? "active" : ""}`}
+              className={`icon-button  icon-button:hover ${activeTab === item.id && !collapsed ? "active" : ""}`}
               onClick={() => handleTabClick(item.id)}
             >
               <FontAwesomeIcon
                 style={item.style}
-                className={`w-8 h-8 ${activeTab === item.id ? "offset-margin" : "m-4"}`}
+                className={`w-6 h-6 ${activeTab === item.id && !collapsed ? "offset-margin" : "m-4"}`}
                 icon={item.icon}
               />
             </li>
@@ -100,10 +146,10 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
         </ul>
         <ul className="menu-bottom">
           <li className="icon-button icon-button:hover">
-            <FontAwesomeIcon className="w-8 h-8 m-4" icon={faUser} />
+            <FontAwesomeIcon className="w-6 h-6 m-4" icon={faUser} />
           </li>
           <li className="icon-button icon-button:hover">
-            <FontAwesomeIcon className="w-8 h-8 m-4" icon={faGear} />
+            <FontAwesomeIcon className="w-6 h-6 m-4" icon={faGear} />
           </li>
         </ul>
       </div>
@@ -114,7 +160,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
         onDragStart={(e) => e.preventDefault()}
       />
       <div>
-        {width > smallestSize ? (
+        {width > smallestSize && !collapsed ? (
           <div
             style={{ width: `${Math.max(width, smallestSize / 2)}px` }}
             className="drawer bg-gray-800 h-screen float-left flex flex-col justify-between undraggable"
@@ -125,7 +171,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
         ) : null}
         <div
           style={{
-            width: width > smallestSize ? "4px" : "0px",
+            width: width > smallestSize ? "0px" : "0px",
             cursor: "ew-resize",
           }}
           className={`bg-gray-800 h-screen float-left clickable-area menu-height`}

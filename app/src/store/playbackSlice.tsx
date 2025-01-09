@@ -52,7 +52,9 @@ export const uploadFile = createAsyncThunk(
         if (e && e.target && e.target.result) {
           const base64String = (e.target.result as string).split(",")[1];
           const dataUrl = `data:${file.type};base64,${base64String}`;
+          console.log(file)
           const audio = new Audio(dataUrl);
+
           audio.onloadedmetadata = function () {
             const duration = audio.duration;
             const audioContext = new (window.AudioContext ||

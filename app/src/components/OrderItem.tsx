@@ -3,6 +3,8 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBarsStaggered,
+  faChartColumn,
+  faChartGantt,
   faChartSimple,
   faVideo,
   faWaveSquare,
@@ -19,8 +21,8 @@ interface OrderItemProps {
 const IconMap = {
   waveform: faWaveSquare,
   video: faVideo,
-  fourier: faChartSimple,
-  spectrogram: faBarsStaggered,
+  fourier: faChartColumn,
+  spectrogram: faChartGantt,
 };
 
 const OrderItem: React.FC<OrderItemProps> = ({

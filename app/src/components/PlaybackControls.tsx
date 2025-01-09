@@ -126,12 +126,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               style={{ color: looping ? "green" : "white" }}
             />
           </button>
-          <button disabled={!enabled} className="mx-1" draggable="false">
-            <FontAwesomeIcon className="h-8 w-8" icon={faChevronLeft} />
-          </button>
-          <button disabled={!enabled} className="mx-1" draggable="false">
-            <FontAwesomeIcon className="h-8 w-8" icon={faChevronRight} />
-          </button>
           <div className="flex-grow">
             <div className={`flex flex-col ${looping ? "visible" : "hidden"}`}>
               <div className="flex justify-between">

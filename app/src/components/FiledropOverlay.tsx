@@ -83,7 +83,7 @@ const FiledropOverlay: React.FC = () => {
             textAlign: "center",
           }}
         >
-          <FontAwesomeIcon icon={faFileUpload} className="w-8 h-8" />
+          <FontAwesomeIcon icon={faFileUpload} className="w-6 h-6" />
           <p>Drop to upload file!</p>
         </div>
       </div>

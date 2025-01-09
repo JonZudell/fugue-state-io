@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   selectLoopEnd,
   selectLoopStart,
@@ -8,21 +8,12 @@ import {
 import { useSelector } from "react-redux";
 import { FileState } from "../store/filesSlice";
 import {
-  ABins,
-  ASharpBins,
-  BBins,
-  CBins,
   colorForBin,
-  CSharpBins,
-  DBins,
-  DSharpBins,
-  EBins,
-  FBins,
-  FSharpBins,
-  GBins,
-  GSharpBins,
   SummarizedFrame,
+  getFrequencyForBin,
+  getNoteForFrequency,
 } from "../core/waveformSummary";
+import { selectFourierScale } from "../store/displaySlice";
 
 interface FourierDisplayProps {
   media?: FileState;
@@ -47,6 +38,11 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
   const timeElapsed = useSelector(selectTimeElapsed);
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
+  const [cursorPosition, setCursorPosition] = useState<number | null>(null);
+  const fourierScale = useSelector(selectFourierScale);
+  const frequencyRef = useRef<number | null>(null);
+  const [mouseX, setMouseX] = useState<number | null>(null);
+  const [infoString, setInfoString] = useState<string | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -113,8 +109,7 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       const pixelsPerMagnitude =
         canvas.width / channel[fourierIndex].magnitudes.length;
       for (let i = 0; i < canvas.width; i++) {
-        const magnitudeIndex = Math.floor((i / pixelsPerMagnitude) * 0.125);
-        console.log(magnitudeIndex);
+        const magnitudeIndex = Math.floor((i / pixelsPerMagnitude) / fourierScale);
         const magnitude = Math.log10(
           channel[fourierIndex].magnitudes[magnitudeIndex] + 1,
         );
@@ -193,28 +188,94 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
     };
 
     drawWaveform();
-  }, [
-    timeElapsed,
-    channel,
-    media,
-    width,
-    height,
-    crosshair,
-    loopStart,
-    loopEnd,
-  ]);
+
+    if (cursorPosition !== null && media && media.summary) {
+      const { summary } = media;
+      const fourierIndex = Math.min(
+        Math.floor(summary.left.length * (timeElapsed / media.duration)),
+        summary.left.length - 1,
+      );
+      const pixelsPerMagnitude =
+        canvas.width / summary.left[fourierIndex].magnitudes.length;
+      const magnitudeIndex = Math.floor(
+        (cursorPosition / pixelsPerMagnitude) / fourierScale,
+      );
+      if (magnitudeIndex >= 0 && magnitudeIndex < summary.left[fourierIndex].magnitudes.length) {
+        const frequency = getFrequencyForBin(magnitudeIndex);
+        const closestNote = getNoteForFrequency(frequency);
+        setInfoString(`${frequency.toFixed(2)} Hz - ${closestNote}`);
+      }
+    } else {
+      setInfoString(null);
+    }
+  }, [timeElapsed, channel, media, width, height, crosshair, loopStart, loopEnd, cursorPosition, fourierScale]);
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) {
+      return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    setCursorPosition(x);
+    setMouseX(x);
+  };
+
+  const handleMouseLeave = () => {
+    setCursorPosition(null);
+    frequencyRef.current = null;
+    setMouseX(null);
+  };
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      className="w-full"
-      style={{
-        width: `${displayRatioHorizontal * 100}%`,
-        height: `${displayRatioVertical * 100}%`,
-      }}
-    ></canvas>
+    <div
+      style={{ position: "relative", width: "100%", height: "100%" }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
+        className="w-full"
+        style={{
+          width: `${displayRatioHorizontal * 100}%`,
+          height: `${displayRatioVertical * 100}%`,
+        }}
+      />
+      {crosshair && mouseX !== null && (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: `${mouseX}px`,
+            width: "2px",
+            height: "100%",
+            backgroundColor: "red",
+            zIndex: 100,
+            opacity: 1,
+          }}
+        />
+      )}
+      {infoString && (
+        <span
+          style={{
+            position: "absolute",
+            top: "10px",
+            left: `${mouseX}px`,
+            color: "white",
+            backgroundColor: "black",
+            padding: "2px 5px",
+            fontSize: "12px",
+            zIndex: 101,
+            width: "115px",
+            transform: mouseX > canvasRef.current!.width - 115 ? "translateX(-100%)" : "none",
+          }}
+        >
+          {infoString}
+        </span>
+      )}
+    </div>
   );
 };
 export default FourierDisplay;

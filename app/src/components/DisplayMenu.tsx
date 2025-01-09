@@ -5,6 +5,9 @@ import { AppDispatch } from "../store";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBarsStaggered,
+  faChartBar,
+  faChartColumn,
+  faChartGantt,
   faChartSimple,
   faVideo,
   faWaveSquare,
@@ -81,14 +84,14 @@ const DisplayMenu: React.FC<DisplayMenuProps> = ({ focused = false }) => {
           title="Fourier Transform View"
           onClick={() => dispatch(setFourierEnabled(!fourierEnabled))}
         >
-          <FontAwesomeIcon icon={faChartSimple} className="h-6 w-6 m-2" />
+          <FontAwesomeIcon icon={faChartColumn} className="h-6 w-6 m-2" />
         </div>
         <div
           className={`tooltip  ${spectrogramEnabled ? "border border-gray-900 bg-gray-700 rounded" : "border border-gray-800"}`}
           title="Spectrogram"
           onClick={() => dispatch(setSpectrogramEnabled(!spectrogramEnabled))}
         >
-          <FontAwesomeIcon icon={faBarsStaggered} className="h-6 w-6 m-2" />
+          <FontAwesomeIcon icon={faChartGantt} className="h-6 w-6 m-2" />
         </div>
       </div>
       <h2 className=" text-lg">Render Layout</h2>
