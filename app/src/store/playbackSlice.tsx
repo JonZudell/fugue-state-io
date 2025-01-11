@@ -61,6 +61,9 @@ export const uploadFile = createAsyncThunk(
   async ({ file, worker }: { file: File; worker: Worker }, { dispatch }) => {
     return new Promise<FileState>(async (resolve, reject) => {
       dispatch(setProcessing(true));
+      if (!file.type.startsWith("video")) {
+        dispatch(setVideoEnabled(false));
+      }
       const audioContext = new AudioContext();
       const audioBuffer = await audioContext.decodeAudioData(
         await file.arrayBuffer(),
