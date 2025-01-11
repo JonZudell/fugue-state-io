@@ -11,7 +11,7 @@ import {
   faCodeFork,
   faWaveSquare,
 } from "@fortawesome/free-solid-svg-icons";
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import "./LeftMenu.css";
 import AssetManager from "./AssetManager";
 import DisplayMenu from "./DisplayMenu";
@@ -25,16 +25,18 @@ interface LeftMenuProps {
     tabContent: JSX.Element;
   }>;
   onWidthChange?: (width: number) => void;
+  worker?: Worker | null;
 }
 
 const LeftMenu: React.FC<LeftMenuProps> = ({
   smallestSize = 128,
+  worker,
   initialState = [
     {
       id: 1,
       icon: faFileWaveform,
       style: { transform: "rotate(0)" },
-      tabContent: <AssetManager />,
+      tabContent: <AssetManager worker={worker} />,
     },
     {
       id: 2,
@@ -73,6 +75,9 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
   const [mouseDown, setMouseDown] = useState(false);
   const [widthBeforeCollapse, setWidthBeforeCollapse] = useState(256 + 60);
 
+  useEffect(() => {
+    onWidthChange(256 + 60);
+  }, []);
   const handleMouseMove = (e: MouseEvent) => {
     const newWidth = e.clientX;
     const adjustedWidth = newWidth > smallestSize ? newWidth : 0;

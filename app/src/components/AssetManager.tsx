@@ -10,18 +10,25 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 interface AssetManagerProps {
   focused?: boolean;
+  worker?: Worker | null;
 }
 
-const AssetManager: React.FC<AssetManagerProps> = ({ focused = false }) => {
+const AssetManager: React.FC<AssetManagerProps> = ({
+  focused = false,
+  worker,
+}) => {
   const dispatch = useDispatch<AppDispatch>();
 
   //const assets = useSelector(selectActiveFiles);
   const files = useSelector(selectFiles);
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
+    console.log("Files selected for upload:", files);
     if (files) {
       Array.from(files).forEach((file) => {
-        dispatch(uploadFile(file));
+        if (worker) {
+          dispatch(uploadFile({ file, worker }));
+        }
       });
     }
   };

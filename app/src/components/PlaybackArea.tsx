@@ -12,13 +12,10 @@ import {
   setLoopEnd,
   setLoopStart,
   selectLooping,
-  uploadFile,
   selectVolume,
   selectSpeed,
 } from "../store/playbackSlice";
 import {
-  selectZoomStart,
-  selectZoomEnd,
   selectLayout,
   selectMinimap,
   selectOrder,
@@ -29,6 +26,7 @@ import { AppDispatch } from "../store";
 import Minimap from "./Minimap";
 import FourierDisplay from "./FourierDisplay";
 import SpectrogramDisplay from "./SpectrogramDisplay";
+import { FileState } from "../store/filesSlice";
 interface PlaybackAreaProps {
   focused?: false;
   workspaceWidth: number;
@@ -50,7 +48,7 @@ const miniMapDisabled = {
 
 const renderMediaComponent = (
   type: string,
-  media: any,
+  media: FileState,
   videoRef2: React.RefObject<HTMLVideoElement>,
   workspaceWidth: number,
   workspaceHeight: number,
@@ -160,8 +158,6 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
   const looping = useSelector(selectLooping);
-  const zoomStart = useSelector(selectZoomStart);
-  const zoomEnd = useSelector(selectZoomEnd);
   const layout = useSelector(selectLayout);
   const minimap = useSelector(selectMinimap);
   const order = useSelector(selectOrder);
@@ -271,14 +267,6 @@ const PlaybackArea: React.FC<PlaybackAreaProps> = ({
 
     return () => clearInterval(interval);
   }, [playing, dispatch, timeElapsed, media, loopEnd, looping, loopStart]);
-
-  useEffect(() => {
-    if (media && videoRef.current) {
-      if (media) {
-        dispatch(uploadFile(media)); // Dispatch the media object without videoRef
-      }
-    }
-  }, [media, videoRef, dispatch]);
 
   return (
     <div className={`playback`} ref={containerRef} style={style}>

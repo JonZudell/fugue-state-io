@@ -26,14 +26,14 @@ interface DisplayState {
 const initialState: DisplayState = {
   zoomStart: 0,
   zoomEnd: 1,
-  videoEnabled: true,
+  videoEnabled: false,
   waveformEnabled: true,
   spectrogramEnabled: false,
   spectrogramScale: 4,
-  fourierEnabled: false,
+  fourierEnabled: true,
   fourierScale: 4,
   layout: "stacked",
-  order: ["video", "waveform"],
+  order: ["fourier", "waveform"],
   minimap: true,
   numberOfDisplayItems: 2,
 };
@@ -84,8 +84,10 @@ const displaySlice = createSlice({
       state.videoEnabled = action.payload;
       if (action.payload) {
         state.numberOfDisplayItems = state.numberOfDisplayItems + 1;
+        state.order.push("video");
       } else {
         state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
+        state.order = state.order.filter((item) => item !== "video");
       }
       if (
         state.numberOfDisplayItems === 0 ||
@@ -98,11 +100,6 @@ const displaySlice = createSlice({
         state.layout = "stacked-bottom-side-by-side";
       } else if (state.numberOfDisplayItems === 4) {
         state.layout = "four";
-      }
-      if (action.payload) {
-        state.order.push("video");
-      } else {
-        state.order = state.order.filter((item) => item !== "video");
       }
     },
     setWaveformEnabled: (

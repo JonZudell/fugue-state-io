@@ -21,9 +21,7 @@ const VolumeSelector: React.FC<SpanSliderProps> = ({ className, enabled }) => {
   const [thumbValue, setThumbValue] = useState(volume);
 
   return (
-    <div
-      className={`${className} flex items-center`}
-    >
+    <div className={`${className} flex items-center`}>
       <div className="h-6 w-6">
         <FontAwesomeIcon
           className={

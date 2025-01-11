@@ -13,6 +13,8 @@ interface PlaybackState {
   volume: number;
   loopStart: number;
   loopEnd: number;
+  processing: boolean;
+  mode: "mono" | "stereo";
 }
 
 const initialState: PlaybackState = {
@@ -25,6 +27,8 @@ const initialState: PlaybackState = {
   volume: 1,
   loopStart: 0,
   loopEnd: 1,
+  processing: false,
+  mode: "stereo",
 };
 
 export const selectMedia = (state: { playback: { media: FileState } }) =>
@@ -47,44 +51,77 @@ export const selectLoopEnd = (state: { playback: { loopEnd: number } }) =>
   state.playback.loopEnd;
 export const selectLooping = (state: { playback: { looping: boolean } }) =>
   state.playback.looping;
-
+export const selectProcessing = (state: {
+  playback: { processing: boolean };
+}) => state.playback.processing;
+export const selectMode = (state: { playback: { mode: "mono" | "stereo" } }) =>
+  state.playback.mode;
 export const uploadFile = createAsyncThunk(
   "playback/uploadFile",
-  async (file: File, { dispatch }) => {
-    return new Promise<FileState>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        if (e && e.target && e.target.result) {
-          const base64String = (e.target.result as string).split(",")[1];
-          const dataUrl = `data:${file.type};base64,${base64String}`;
-          console.log(file);
-          const audio = new Audio(dataUrl);
-
-          audio.onloadedmetadata = function () {
-            const duration = audio.duration;
-            const audioContext = new (window.AudioContext ||
-              window.AudioContext)();
-
-            generateWaveformSummary(audioContext, file).then((waveform) => {
-              const fileState: FileState = {
-                name: file.name,
-                fileType: file.type,
-                encoding: base64String,
-                url: dataUrl,
-                duration: duration,
-                summary: waveform,
-              };
-              dispatch(setMedia(fileState));
-              if (file.type.includes("audio")) {
-                dispatch(setVideoEnabled(false));
-              }
-              resolve(fileState);
-            });
-          };
-        }
+  async ({ file, worker }: { file: File; worker: Worker }, { dispatch }) => {
+    return new Promise<FileState>(async (resolve, reject) => {
+      dispatch(setProcessing(true));
+      const audioContext = new AudioContext();
+      const audioBuffer = await audioContext.decodeAudioData(
+        await file.arrayBuffer(),
+      );
+      const isStereo = audioBuffer.numberOfChannels > 1;
+      console.log(`Audio buffer is ${isStereo ? "stereo" : "mono"}`);
+      const media: FileState = {
+        name: file.name,
+        fileType: file.type,
+        url: (() => {
+          try {
+            return URL.createObjectURL(new Blob([file], { type: file.type }));
+          } catch (error) {
+            console.error("Failed to create object URL", error);
+            return "";
+          }
+        })(),
+        duration: audioBuffer.duration,
+        summary: { left: null, right: null, mono: null, side: null },
       };
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+
+      dispatch(setMedia(media));
+      if (isStereo) {
+        console.log("Generating stereo summary");
+        const leftChannel = audioBuffer.getChannelData(0);
+        const rightChannel = audioBuffer.getChannelData(1);
+        const monoChannel = new Float32Array(leftChannel.length);
+        const sideChannel = new Float32Array(leftChannel.length);
+        for (let i = 0; i < leftChannel.length; i++) {
+          monoChannel[i] = (leftChannel[i] + rightChannel[i]) / 2;
+        }
+        for (let i = 0; i < leftChannel.length; i++) {
+          sideChannel[i] = leftChannel[i] - rightChannel[i] / 2;
+        }
+        worker.postMessage({
+          type: "SUMMARIZE",
+          arrayBuffer: monoChannel.buffer,
+          channel: "mono",
+        });
+        worker.postMessage({
+          type: "SUMMARIZE",
+          arrayBuffer: sideChannel.buffer,
+          channel: "side",
+        });
+        worker.postMessage({
+          type: "SUMMARIZE",
+          arrayBuffer: leftChannel.buffer,
+          channel: "left",
+        });
+        worker.postMessage({
+          type: "SUMMARIZE",
+          arrayBuffer: rightChannel.buffer,
+          channel: "right",
+        });
+      } else {
+        worker.postMessage({
+          type: "SUMMARIZE",
+          arrayBuffer: audioBuffer.getChannelData(0).buffer,
+          channel: "mono",
+        });
+      }
     });
   },
 );
@@ -101,6 +138,27 @@ const playbackSlice = createSlice({
     },
     setMedia: (state: PlaybackState, action: PayloadAction<FileState>) => {
       state.media = action.payload;
+    },
+    setChannelSummary: (
+      state: PlaybackState,
+      action: PayloadAction<{ summary: Float32Array; channel: keyof Channels }>,
+    ) => {
+      (state.media.summary as any)[action.payload.channel] =
+        action.payload.summary;
+      if (state.mode === "stereo") {
+        if (
+          state.media.summary.left &&
+          state.media.summary.right &&
+          state.media.summary.mono &&
+          state.media.summary.side
+        ) {
+          state.processing = false;
+        } else {
+          console.log("Still processing");
+        }
+      } else {
+        state.processing = false;
+      }
     },
     setVolume: (state: PlaybackState, action: PayloadAction<number>) => {
       state.volume = Math.min(Math.max(0, action.payload), 1);
@@ -141,6 +199,15 @@ const playbackSlice = createSlice({
         state.loopEnd = 1;
       }
     },
+    setProcessing: (state: PlaybackState, action: PayloadAction<boolean>) => {
+      state.processing = action.payload;
+    },
+    setMode: (
+      state: PlaybackState,
+      action: PayloadAction<"mono" | "stereo">,
+    ) => {
+      state.mode = action.payload;
+    },
     restartPlayback: (state: PlaybackState) => {
       if (state.media) {
         state.timeElapsed = state.loopStart * state.media.duration;
@@ -164,6 +231,9 @@ export const {
   setLoopStart,
   setLoopEnd,
   setLooping,
+  setProcessing,
+  setMode,
+  setChannelSummary,
   restartPlayback,
 } = playbackSlice.actions;
 export default playbackSlice.reducer;

@@ -3,7 +3,6 @@ import { Channels } from "../core/waveformSummary";
 export interface FileState {
   name: string;
   fileType: string;
-  encoding: string;
   url: string;
   duration: number;
   summary?: Channels;

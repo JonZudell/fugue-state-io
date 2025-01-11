@@ -74,52 +74,52 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         style={{ height: looping ? height - 20 : height - 10, width: width }}
       >
         {media && (
-            <div className="items-center h-full flex flex-col justify-center">
+          <div className="items-center h-full flex flex-col justify-center">
             <div className={`flex items-center justify-between w-full`}>
               <div className={`flex flex-col`}>
-              <div className="flex justify-between">
+                <div className="flex justify-between">
+                  <span style={{ userSelect: "none" }}>
+                    {new Date(timeElapsed * 1000).toISOString().substr(12, 7)}
+                  </span>
+                </div>
+              </div>
+              <div className="flex">
+                <VolumeSelector className="mx-1" enabled={enabled} />
+                <button
+                  className="mx-1"
+                  onClick={togglePlay}
+                  disabled={!enabled}
+                  draggable="false"
+                >
+                  <FontAwesomeIcon
+                    className="h-6 w-6"
+                    icon={playing ? faPause : faPlay}
+                  />
+                </button>
+                <button
+                  className="mx-1"
+                  onClick={handleToggleLooping}
+                  disabled={!enabled}
+                  draggable="false"
+                >
+                  <FontAwesomeIcon
+                    className="h-6 w-6"
+                    icon={faRepeat}
+                    style={{ color: looping ? "green" : "white" }}
+                  />
+                </button>
+                <SpeedSelector className="mx-1" enabled={enabled} />
+              </div>
+              <div className="flex">
                 <span style={{ userSelect: "none" }}>
-                {new Date(timeElapsed * 1000).toISOString().substr(12, 7)}
+                  -
+                  {new Date((media.duration - timeElapsed) * 1000)
+                    .toISOString()
+                    .substr(12, 7)}
                 </span>
               </div>
-              </div>
-              <div className="flex">
-              <VolumeSelector className="mx-1" enabled={enabled} />
-              <button
-                className="mx-1"
-                onClick={togglePlay}
-                disabled={!enabled}
-                draggable="false"
-              >
-                <FontAwesomeIcon
-                className="h-6 w-6"
-                icon={playing ? faPause : faPlay}
-                />
-              </button>
-              <button
-                className="mx-1"
-                onClick={handleToggleLooping}
-                disabled={!enabled}
-                draggable="false"
-              >
-                <FontAwesomeIcon
-                className="h-6 w-6"
-                icon={faRepeat}
-                style={{ color: looping ? "green" : "white" }}
-                />
-              </button>
-              <SpeedSelector className="mx-1" enabled={enabled} />
-              </div>
-              <div className="flex">
-              <span style={{ userSelect: "none" }}>
-                -
-                {new Date((media.duration - timeElapsed) * 1000)
-                .toISOString()
-                .substr(12, 7)}
-              </span>
-              </div>
             </div>
-            </div>
+          </div>
         )}
       </div>
     </>

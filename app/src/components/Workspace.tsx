@@ -4,22 +4,65 @@ import { useDispatch, useSelector } from "react-redux";
 import CommandBar from "./CommandBar";
 import FiledropOverlay from "./FiledropOverlay";
 import PlaybackArea from "./PlaybackArea";
+import SummarizeWorker from "../workers/summarize.worker.js";
 import "./Workspace.css";
 import { setControlDown, setEscDown, setKDown } from "../store/commandSlice";
 import ShortcutLegend from "./ShortcutLegend";
 import LeftMenu from "./LeftMenu";
-import { selectLooping } from "../store/playbackSlice";
+import {
+  selectLooping,
+  selectProcessing,
+  selectMedia,
+  selectMode,
+  setChannelSummary,
+  setProcessing,
+} from "../store/playbackSlice";
 interface WorkspaceProps {
   focused?: false;
 }
 
 const Workspace: React.FC<WorkspaceProps> = ({}) => {
   const dispatch = useDispatch();
+  const workerRef = useRef<Worker | null>(null);
+  const [ready, setReady] = useState(false);
   const workspaceRef = useRef<HTMLDivElement | null>(null);
   const [workspaceWidth, setWorkspaceWidth] = useState<number>(0);
   const [workspaceHeight, setWorkspaceHeight] = useState<number>(0);
   const [leftMenuWidth, setLeftMenuWidth] = useState<number>(60 + 256);
   const looping = useSelector(selectLooping);
+  const processing = useSelector(selectProcessing);
+  const media = useSelector(selectMedia);
+  const mode = useSelector(selectMode);
+  useEffect(() => {
+    workerRef.current = new SummarizeWorker();
+    if (workerRef.current) {
+      workerRef.current.onmessage = (event) => {
+        if (event.data.type === "READY") {
+          setReady(true);
+        } else if (event.data.type === "MESSAGE_RECIEVED") {
+          console.log("Received message", event.data);
+        } else if (event.data.type === "SUMMARIZED") {
+          console.log("Received summary", event.data);
+          if (mode === "stereo") {
+            dispatch(
+              setChannelSummary({
+                summary: event.data.summary,
+                channel: event.data.channel,
+              }),
+            );
+          } else {
+          }
+        }
+      };
+      workerRef.current.postMessage({ type: "CHECK_READY" });
+    }
+
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+    };
+  }, [workerRef, dispatch, mode]);
 
   useLayoutEffect(() => {
     const updateWorkspaceDimensions = () => {
@@ -35,7 +78,7 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
     return () => {
       window.removeEventListener("resize", updateWorkspaceDimensions);
     };
-  }, [leftMenuWidth]);
+  }, [leftMenuWidth, workspaceRef, media, processing]);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey) {
@@ -129,28 +172,48 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
   }, [dispatch]);
 
   return (
-    <div ref={workspaceRef} className={`workspace w-full h-full`}>
-      <FiledropOverlay />
-      <LeftMenu onWidthChange={setLeftMenuWidth} />
-      <CommandBar
-        leftMenuWidth={leftMenuWidth}
-        workspaceWidth={workspaceWidth}
-      />
-      <PlaybackArea
-        style={{
-          position: "absolute",
-          top: "26px",
-          right: "0px",
-          width: `${workspaceWidth}px`,
-          height: `${looping ? workspaceHeight - 70 : workspaceHeight - 60}px`,
-        }}
-        leftMenuWidth={leftMenuWidth}
-        workspaceWidth={workspaceWidth}
-        workspaceHeight={looping ? workspaceHeight - 70 : workspaceHeight - 60}
-        menuHeight={looping ? 70 : 60}
-      />
-      <ShortcutLegend />
-    </div>
+    <>
+      {ready ? (
+        <div ref={workspaceRef} className="workspace w-full h-full">
+          <FiledropOverlay />
+          <LeftMenu
+            onWidthChange={setLeftMenuWidth}
+            worker={workerRef.current}
+          />
+          <CommandBar
+            leftMenuWidth={leftMenuWidth}
+            workspaceWidth={workspaceWidth}
+          />
+
+          {!processing ? (
+            <PlaybackArea
+              style={{
+                position: "absolute",
+                top: "26px",
+                right: "0px",
+                width: `${workspaceWidth}px`,
+                height: `${looping ? workspaceHeight - 70 : workspaceHeight - 60}px`,
+              }}
+              leftMenuWidth={leftMenuWidth}
+              workspaceWidth={workspaceWidth}
+              workspaceHeight={
+                looping ? workspaceHeight - 70 : workspaceHeight - 60
+              }
+              menuHeight={looping ? 70 : 60}
+            />
+          ) : (
+            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-dashed border-white-900"></div>
+            </div>
+          )}
+          <ShortcutLegend />
+        </div>
+      ) : (
+        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-dashed border-white-900"></div>
+        </div>
+      )}
+    </>
   );
 };
 export default Workspace;

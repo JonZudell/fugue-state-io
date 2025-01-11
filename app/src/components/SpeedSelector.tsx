@@ -1,18 +1,13 @@
 "use client";
-import { useState} from "react";
-import {
-  selectSpeed,
-  setSpeed,
-} from "../store/playbackSlice";
+import { useState } from "react";
+import { selectSpeed, setSpeed } from "../store/playbackSlice";
 import { useSelector, useDispatch } from "react-redux";
 interface SpeedSelectorProps {
   className?: string;
   enabled?: boolean;
 }
 
-const SpeedSelector: React.FC<SpeedSelectorProps> = ({
-  className,
-}) => {
+const SpeedSelector: React.FC<SpeedSelectorProps> = ({ className }) => {
   const dispatch = useDispatch();
   const speed = useSelector(selectSpeed);
   const [thumbValue, setThumbValue] = useState(speed);
