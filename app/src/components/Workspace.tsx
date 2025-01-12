@@ -16,6 +16,8 @@ import {
   selectMode,
   setChannelSummary,
   setProcessing,
+  setProgress,
+  selectProgress,
 } from "../store/playbackSlice";
 interface WorkspaceProps {
   focused?: false;
@@ -26,6 +28,7 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
   const workerRef = useRef<Worker | null>(null);
   const [ready, setReady] = useState(false);
   const workspaceRef = useRef<HTMLDivElement | null>(null);
+  const progess = useSelector(selectProgress);
   const [workspaceWidth, setWorkspaceWidth] = useState<number>(0);
   const [workspaceHeight, setWorkspaceHeight] = useState<number>(0);
   const [leftMenuWidth, setLeftMenuWidth] = useState<number>(60 + 256);
@@ -41,6 +44,9 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
           setReady(true);
         } else if (event.data.type === "MESSAGE_RECIEVED") {
           console.log("Received message", event.data);
+        } else if (event.data.type === "CHANNEL_PROGRESS") {
+          console.log("Received progress", event.data);
+          dispatch(setProgress({ channel: event.data.channel, progress: event.data.progress }));
         } else if (event.data.type === "SUMMARIZED") {
           console.log("Received summary", event.data);
           if (mode === "stereo") {
@@ -201,11 +207,38 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
               }
               menuHeight={looping ? 70 : 60}
             />
-          ) : (
-            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-dashed border-white-900"></div>
+          ) : (<div className="flex flex-col items-center">
+          {progess.map((entry, index) => (
+            <div
+              key={index}
+              style={{
+              width: `${workspaceWidth * 0.8}px`,
+              margin: "10px 0",
+              backgroundColor: "#e0e0e0",
+              borderRadius: "5px",
+              overflow: "hidden",
+              }}
+            >
+              <div
+              style={{
+                padding: "5px",
+                backgroundColor: "#f0f0f0",
+                borderBottom: "1px solid #ccc",
+              }}
+              >
+              {entry.channel}
+              </div>
+              <div
+              style={{
+                width: `${entry.progress * workspaceWidth * 0.8}px`,
+                height: "30px",
+                backgroundColor: "#76c7c0",
+                transition: "width 0.5s ease-in-out",
+              }}
+              ></div>
             </div>
-          )}
+          ))}
+          </div>)}
           <ShortcutLegend />
         </div>
       ) : (

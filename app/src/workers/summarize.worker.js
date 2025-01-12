@@ -35,49 +35,6 @@ function applyWindowFunction(data, windowType) {
       throw new Error("Unknown window type");
   }
 }
-function calculateMultiplicationsRadix4FFT(N) {
-  try {
-    if (N <= 1) return 0;
-
-    // Ensure the input length is a power of 4
-    if ((N & (N - 1)) !== 0 || (N & 0x55555555) !== N) {
-      throw new Error("Input length must be a power of 4");
-    }
-
-    // Calculate the number of stages
-    const log4N = Math.log2(N) / 2;
-
-    // Calculate the total number of multiplication operations
-    const totalMultiplications = (3 * N * log4N) / 2;
-
-    return totalMultiplications;
-  } catch (error) {
-    console.error("Error in calculateMultiplicationsRadix4FFT:", error);
-    throw error;
-  }
-}
-
-function calculateAdditionsRadix4FFT(N) {
-  try {
-    if (N <= 1) return 0;
-
-    // Ensure the input length is a power of 4
-    if ((N & (N - 1)) !== 0 || (N & 0x55555555) !== N) {
-      throw new Error("Input length must be a power of 4");
-    }
-
-    // Calculate the number of stages
-    const log4N = Math.log2(N) / 2;
-
-    // Calculate the total number of addition operations
-    const totalAdditions = (3 * N * log4N) / 4;
-
-    return totalAdditions;
-  } catch (error) {
-    console.error("Error in calculateAdditionsRadix4FFT:", error);
-    throw error;
-  }
-}
 
 function radix_4_fft(input) {
   try {
@@ -199,10 +156,11 @@ function summarizeFrame(frame) {
   }
 }
 
-function summarizeInterleavedFrames(frames, postMessage) {
+function summarizeInterleavedFrames(frames, channel, postMessage) {
   try {
     console.log("Summarizing frames", frames);
     let lastFrame = summarizeFrame(frames[0]);
+    postMessage({ type: "CHANNEL_PROGRESS", channel: channel, progress: 0 });
 
     const summarizedFrames = [];
 
@@ -224,6 +182,9 @@ function summarizeInterleavedFrames(frames, postMessage) {
 
       summarizedFrames.push(thisFrame);
       lastFrame = summarizedFrame;
+      if (ndx % 100 === 0) {
+        postMessage({ type: "CHANNEL_PROGRESS", channel: channel, progress: ndx / frames.length });
+      }
       ndx++;
     }
     return summarizedFrames;
@@ -238,8 +199,9 @@ function process(arrayBuffer, channel, postMessage) {
     console.log("Processing arrayBuffer:", arrayBuffer, channel);
     const frames = interleavedFramesFromChannelData(arrayBuffer);
     console.log("Interleaved frames:", frames, channel);
-    const summarizedFrames = summarizeInterleavedFrames(frames, postMessage);
+    const summarizedFrames = summarizeInterleavedFrames(frames, channel, postMessage);
     console.log("Summarized frames:", summarizedFrames, channel);
+    postMessage({ type: "CHANNEL_PROGRESS", channel: channel, progress: 1 });
     postMessage({
       type: "SUMMARIZED",
       summary: summarizedFrames,

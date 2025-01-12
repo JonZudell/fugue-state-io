@@ -81,6 +81,9 @@ const displaySlice = createSlice({
       state.minimap = action.payload;
     },
     setVideoEnabled: (state: DisplayState, action: PayloadAction<boolean>) => {
+      if (action.payload === state.videoEnabled) {
+        return;
+      }
       state.videoEnabled = action.payload;
       if (action.payload) {
         state.numberOfDisplayItems = state.numberOfDisplayItems + 1;

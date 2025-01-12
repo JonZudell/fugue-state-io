@@ -1,7 +1,10 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { FileState } from "../store/filesSlice";
-import { generateWaveformSummary } from "@/core/waveformSummary";
 import { setVideoEnabled } from "./displaySlice";
+interface Progress {
+  channel: keyof Channels;
+  progress: number;
+}
 
 interface PlaybackState {
   audioContext: AudioContext | null;
@@ -15,6 +18,7 @@ interface PlaybackState {
   loopEnd: number;
   processing: boolean;
   mode: "mono" | "stereo";
+  progess: Progress[];
 }
 
 const initialState: PlaybackState = {
@@ -29,6 +33,7 @@ const initialState: PlaybackState = {
   loopEnd: 1,
   processing: false,
   mode: "stereo",
+  progess: [],
 };
 
 export const selectMedia = (state: { playback: { media: FileState } }) =>
@@ -51,6 +56,8 @@ export const selectLoopEnd = (state: { playback: { loopEnd: number } }) =>
   state.playback.loopEnd;
 export const selectLooping = (state: { playback: { looping: boolean } }) =>
   state.playback.looping;
+export const selectProgress = (state: { playback: { progess: Progress[] } }) =>
+  state.playback.progess;
 export const selectProcessing = (state: {
   playback: { processing: boolean };
 }) => state.playback.processing;
@@ -98,6 +105,12 @@ export const uploadFile = createAsyncThunk(
         for (let i = 0; i < leftChannel.length; i++) {
           sideChannel[i] = leftChannel[i] - rightChannel[i] / 2;
         }
+        const framesNeeded = (((leftChannel.length / 2048) - 1) * 8) * 4;
+        console.log(`Frames needed: ${framesNeeded}`);
+        dispatch(setProgress({ channel: "mono", progress: 0 }));
+        dispatch(setProgress({ channel: "side", progress: 0 }));
+        dispatch(setProgress({ channel: "left", progress: 0 }));
+        dispatch(setProgress({ channel: "right", progress: 0 }));
         worker.postMessage({
           type: "SUMMARIZE",
           arrayBuffer: monoChannel.buffer,
@@ -119,6 +132,8 @@ export const uploadFile = createAsyncThunk(
           channel: "right",
         });
       } else {
+        const framesNeeded = audioBuffer.getChannelData(0).length / 2048 - 1;
+        dispatch(setProgress({ channel: "mono", progress: 0 }));
         worker.postMessage({
           type: "SUMMARIZE",
           arrayBuffer: audioBuffer.getChannelData(0).buffer,
@@ -141,6 +156,19 @@ const playbackSlice = createSlice({
     },
     setMedia: (state: PlaybackState, action: PayloadAction<FileState>) => {
       state.media = action.payload;
+    },
+    setProgress: (
+      state: PlaybackState,
+      action: PayloadAction<{ channel: keyof Channels; progress: number }>,
+    ) => {
+      const progressIndex = state.progess.findIndex(
+        (progress) => progress.channel === action.payload.channel,
+      );
+      if (progressIndex === -1) {
+        state.progess.push(action.payload);
+      } else {
+        state.progess[progressIndex] = action.payload;
+      }
     },
     setChannelSummary: (
       state: PlaybackState,
@@ -237,6 +265,7 @@ export const {
   setProcessing,
   setMode,
   setChannelSummary,
-  restartPlayback,
+  setProgress,
+  restartPlayback
 } = playbackSlice.actions;
 export default playbackSlice.reducer;
