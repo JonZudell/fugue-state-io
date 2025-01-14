@@ -19,6 +19,7 @@ import {
   setProgress,
   selectProgress,
 } from "../store/playbackSlice";
+import { AppSidebar } from "./app-sidebar";
 interface WorkspaceProps {
   focused?: false;
 }
@@ -46,7 +47,12 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
           console.log("Received message", event.data);
         } else if (event.data.type === "CHANNEL_PROGRESS") {
           console.log("Received progress", event.data);
-          dispatch(setProgress({ channel: event.data.channel, progress: event.data.progress }));
+          dispatch(
+            setProgress({
+              channel: event.data.channel,
+              progress: event.data.progress,
+            }),
+          );
         } else if (event.data.type === "SUMMARIZED") {
           console.log("Received summary", event.data);
           if (mode === "stereo") {
@@ -182,10 +188,6 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
       {ready ? (
         <div ref={workspaceRef} className="workspace w-full h-full">
           <FiledropOverlay />
-          <LeftMenu
-            onWidthChange={setLeftMenuWidth}
-            worker={workerRef.current}
-          />
           <CommandBar
             leftMenuWidth={leftMenuWidth}
             workspaceWidth={workspaceWidth}
@@ -207,38 +209,40 @@ const Workspace: React.FC<WorkspaceProps> = ({}) => {
               }
               menuHeight={looping ? 70 : 60}
             />
-          ) : (<div className="flex flex-col items-center">
-          {progess.map((entry, index) => (
-            <div
-              key={index}
-              style={{
-              width: `${workspaceWidth * 0.8}px`,
-              margin: "10px 0",
-              backgroundColor: "#e0e0e0",
-              borderRadius: "5px",
-              overflow: "hidden",
-              }}
-            >
-              <div
-              style={{
-                padding: "5px",
-                backgroundColor: "#f0f0f0",
-                borderBottom: "1px solid #ccc",
-              }}
-              >
-              {entry.channel}
-              </div>
-              <div
-              style={{
-                width: `${entry.progress * workspaceWidth * 0.8}px`,
-                height: "30px",
-                backgroundColor: "#76c7c0",
-                transition: "width 0.5s ease-in-out",
-              }}
-              ></div>
+          ) : (
+            <div className="flex flex-col items-center">
+              {progess.map((entry, index) => (
+                <div
+                  key={index}
+                  style={{
+                    width: `${workspaceWidth * 0.8}px`,
+                    margin: "10px 0",
+                    backgroundColor: "#e0e0e0",
+                    borderRadius: "5px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      padding: "5px",
+                      backgroundColor: "#f0f0f0",
+                      borderBottom: "1px solid #ccc",
+                    }}
+                  >
+                    {entry.channel}
+                  </div>
+                  <div
+                    style={{
+                      width: `${entry.progress * workspaceWidth * 0.8}px`,
+                      height: "30px",
+                      backgroundColor: "#76c7c0",
+                      transition: "width 0.5s ease-in-out",
+                    }}
+                  ></div>
+                </div>
+              ))}
             </div>
-          ))}
-          </div>)}
+          )}
           <ShortcutLegend />
         </div>
       ) : (

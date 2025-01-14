@@ -1,215 +1,46 @@
+import FourierDisplay from "@/components/FourierDisplay";
+import WaveformVisualizer from "@/components/WaveformVisualizer";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface DisplayState {
-  zoomStart: number;
-  zoomEnd: number;
-  videoEnabled: boolean;
-  waveformEnabled: boolean;
-  spectrogramEnabled: boolean;
-  spectrogramScale: number;
-  fourierEnabled: boolean;
-  fourierScale: number;
-  layout:
-    | "single"
-    | "stacked"
-    | "side-by-side"
-    | "stacked-top-side-by-side"
-    | "stacked-bottom-side-by-side"
-    | "side-by-side-left-stacked"
-    | "side-by-side-right-stacked"
-    | "four";
-  order: ("waveform" | "video" | "spectrogram" | "fourier")[];
+export interface ComponentTree {
+  direction?: "horizontal" | "vertical";
+  components: (React.ReactNode | ComponentTree)[];
+}
+
+export interface DisplayState {
   minimap: boolean;
-  numberOfDisplayItems: number;
+  root: ComponentTree;
 }
 
 const initialState: DisplayState = {
-  zoomStart: 0,
-  zoomEnd: 1,
-  videoEnabled: false,
-  waveformEnabled: true,
-  spectrogramEnabled: false,
-  spectrogramScale: 4,
-  fourierEnabled: true,
-  fourierScale: 4,
-  layout: "stacked",
-  order: ["fourier", "waveform"],
   minimap: true,
-  numberOfDisplayItems: 2,
+  root: { direction: "horizontal", components: [] },
 };
 
-export const selectZoomStart = (state: { display: DisplayState }) =>
-  state.display.zoomStart;
-export const selectZoomEnd = (state: { display: DisplayState }) =>
-  state.display.zoomEnd;
-export const selectLayout = (state: { display: DisplayState }) =>
-  state.display.layout;
-export const selectMinimap = (state: { display: DisplayState }) =>
-  state.display.minimap;
-export const selectVideoEnabled = (state: { display: DisplayState }) =>
-  state.display.videoEnabled;
-export const selectWaveformEnabled = (state: { display: DisplayState }) =>
-  state.display.waveformEnabled;
-export const selectSpectrogramEnabled = (state: { display: DisplayState }) =>
-  state.display.spectrogramEnabled;
-export const selectFourierEnabled = (state: { display: DisplayState }) =>
-  state.display.fourierEnabled;
-export const selectSpectrogramScale = (state: { display: DisplayState }) =>
-  state.display.spectrogramScale;
-export const selectFourierScale = (state: { display: DisplayState }) =>
-  state.display.fourierScale;
-export const selectOrder = (state: { display: DisplayState }) =>
-  state.display.order;
+export const selectDisplay = (state: { display: DisplayState }) =>
+  state.display;
 
 const displaySlice = createSlice({
   name: "display",
   initialState,
   reducers: {
-    setZoomStart: (state: DisplayState, action: PayloadAction<number>) => {
-      state.zoomStart = action.payload;
-    },
-    setZoomEnd: (state: DisplayState, action: PayloadAction<number>) => {
-      state.zoomEnd = action.payload;
-    },
-    setLayout: (
+    appendToComponentTree: (
       state: DisplayState,
-      action: PayloadAction<DisplayState["layout"]>,
-    ) => {
-      state.layout = action.payload;
-    },
-    setMinimap: (state: DisplayState, action: PayloadAction<boolean>) => {
-      state.minimap = action.payload;
-    },
-    setVideoEnabled: (state: DisplayState, action: PayloadAction<boolean>) => {
-      if (action.payload === state.videoEnabled) {
-        return;
-      }
-      state.videoEnabled = action.payload;
-      if (action.payload) {
-        state.numberOfDisplayItems = state.numberOfDisplayItems + 1;
-        state.order.push("video");
-      } else {
-        state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
-        state.order = state.order.filter((item) => item !== "video");
-      }
-      if (
-        state.numberOfDisplayItems === 0 ||
-        state.numberOfDisplayItems === 1
-      ) {
-        state.layout = "single";
-      } else if (state.numberOfDisplayItems === 2) {
-        state.layout = "stacked";
-      } else if (state.numberOfDisplayItems === 3) {
-        state.layout = "stacked-bottom-side-by-side";
-      } else if (state.numberOfDisplayItems === 4) {
-        state.layout = "four";
-      }
-    },
-    setWaveformEnabled: (
+      action: PayloadAction<{ node: React.ReactNode; indices: number[] }>,
+    ) => {},
+    removeFromComponentTree: (
       state: DisplayState,
-      action: PayloadAction<boolean>,
-    ) => {
-      state.waveformEnabled = action.payload;
-      if (action.payload) {
-        state.numberOfDisplayItems = state.numberOfDisplayItems + 1;
-      } else {
-        state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
-      }
-      if (
-        state.numberOfDisplayItems === 0 ||
-        state.numberOfDisplayItems === 1
-      ) {
-        state.layout = "single";
-      } else if (state.numberOfDisplayItems === 2) {
-        state.layout = "stacked";
-      } else if (state.numberOfDisplayItems === 3) {
-        state.layout = "stacked-bottom-side-by-side";
-      } else if (state.numberOfDisplayItems === 4) {
-        state.layout = "four";
-      }
-
-      if (action.payload) {
-        state.order.push("waveform");
-      } else {
-        state.order = state.order.filter((item) => item !== "waveform");
-      }
-    },
-    setSpectrogramEnabled: (
+      action: PayloadAction<{ indices: number[] }>,
+    ) => {},
+    swapElements: (
       state: DisplayState,
-      action: PayloadAction<boolean>,
-    ) => {
-      state.spectrogramEnabled = action.payload;
-      if (action.payload) {
-        state.numberOfDisplayItems = state.numberOfDisplayItems + 1;
-      } else {
-        state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
-      }
-      if (
-        state.numberOfDisplayItems === 0 ||
-        state.numberOfDisplayItems === 1
-      ) {
-        state.layout = "single";
-      } else if (state.numberOfDisplayItems === 2) {
-        state.layout = "stacked";
-      } else if (state.numberOfDisplayItems === 3) {
-        state.layout = "stacked-bottom-side-by-side";
-      } else if (state.numberOfDisplayItems === 4) {
-        state.layout = "four";
-      }
-
-      if (action.payload) {
-        state.order.push("spectrogram");
-      } else {
-        state.order = state.order.filter((item) => item !== "spectrogram");
-      }
-    },
-    setFourierEnabled: (
-      state: DisplayState,
-      action: PayloadAction<boolean>,
-    ) => {
-      state.fourierEnabled = action.payload;
-      if (action.payload) {
-        state.numberOfDisplayItems = state.numberOfDisplayItems + 1;
-      } else {
-        state.numberOfDisplayItems = state.numberOfDisplayItems - 1;
-      }
-      if (
-        state.numberOfDisplayItems === 0 ||
-        state.numberOfDisplayItems === 1
-      ) {
-        state.layout = "single";
-      } else if (state.numberOfDisplayItems === 2) {
-        state.layout = "stacked";
-      } else if (state.numberOfDisplayItems === 3) {
-        state.layout = "stacked-bottom-side-by-side";
-      } else if (state.numberOfDisplayItems === 4) {
-        state.layout = "four";
-      }
-
-      if (action.payload) {
-        state.order.push("fourier");
-      } else {
-        state.order = state.order.filter((item) => item !== "fourier");
-      }
-    },
-    setOrder: (
-      state: DisplayState,
-      action: PayloadAction<DisplayState["order"]>,
-    ) => {
-      state.order = action.payload;
+      action: PayloadAction<{ first: number[]; second: number[] }>,
+    ) => {},
+    setRoot: (state: DisplayState, action: PayloadAction<ComponentTree>) => {
+      state.root = action.payload;
     },
   },
 });
 
-export const {
-  setZoomStart,
-  setZoomEnd,
-  setLayout,
-  setMinimap,
-  setVideoEnabled,
-  setWaveformEnabled,
-  setSpectrogramEnabled,
-  setFourierEnabled,
-  setOrder,
-} = displaySlice.actions;
+export const { appendToComponentTree, setRoot } = displaySlice.actions;
 export default displaySlice.reducer;

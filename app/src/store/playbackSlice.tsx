@@ -105,7 +105,7 @@ export const uploadFile = createAsyncThunk(
         for (let i = 0; i < leftChannel.length; i++) {
           sideChannel[i] = leftChannel[i] - rightChannel[i] / 2;
         }
-        const framesNeeded = (((leftChannel.length / 2048) - 1) * 8) * 4;
+        const framesNeeded = (leftChannel.length / 2048 - 1) * 8 * 4;
         console.log(`Frames needed: ${framesNeeded}`);
         dispatch(setProgress({ channel: "mono", progress: 0 }));
         dispatch(setProgress({ channel: "side", progress: 0 }));
@@ -266,6 +266,6 @@ export const {
   setMode,
   setChannelSummary,
   setProgress,
-  restartPlayback
+  restartPlayback,
 } = playbackSlice.actions;
 export default playbackSlice.reducer;

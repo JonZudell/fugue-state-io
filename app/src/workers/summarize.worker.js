@@ -183,7 +183,11 @@ function summarizeInterleavedFrames(frames, channel, postMessage) {
       summarizedFrames.push(thisFrame);
       lastFrame = summarizedFrame;
       if (ndx % 100 === 0) {
-        postMessage({ type: "CHANNEL_PROGRESS", channel: channel, progress: ndx / frames.length });
+        postMessage({
+          type: "CHANNEL_PROGRESS",
+          channel: channel,
+          progress: ndx / frames.length,
+        });
       }
       ndx++;
     }
@@ -199,7 +203,11 @@ function process(arrayBuffer, channel, postMessage) {
     console.log("Processing arrayBuffer:", arrayBuffer, channel);
     const frames = interleavedFramesFromChannelData(arrayBuffer);
     console.log("Interleaved frames:", frames, channel);
-    const summarizedFrames = summarizeInterleavedFrames(frames, channel, postMessage);
+    const summarizedFrames = summarizeInterleavedFrames(
+      frames,
+      channel,
+      postMessage,
+    );
     console.log("Summarized frames:", summarizedFrames, channel);
     postMessage({ type: "CHANNEL_PROGRESS", channel: channel, progress: 1 });
     postMessage({
