@@ -23,6 +23,8 @@ export const None: Story = {
       <AppRootWithDispatch
           direction="vertical"
           components={[]}
+          type="root"
+          path={[]}
         />
       </SidebarProvider>
     </Provider>
@@ -34,6 +36,8 @@ export const Vertical: Story = {
       <SidebarProvider>
         <AppRootWithDispatch
           direction="vertical"
+          type="root"
+          path={[]}
           components={[
             <div
               key="blue"
@@ -61,6 +65,8 @@ export const Horizontal: Story = {
     <Provider store={store}>
       <SidebarProvider>
         <AppRootWithDispatch
+          type="root"
+          path={[]}
           direction="horizontal"
           components={[
             <div
@@ -117,6 +123,8 @@ export const Nested: Story = {
 const AppRootWithDispatch: React.FC<{
   direction: "vertical" | "horizontal";
   components: ReactNode[];
+  type?: "root";
+  path: number[];
 }> = (root) => {
   const dispatch = useDispatch();
   dispatch(setRoot(root));

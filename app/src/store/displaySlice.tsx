@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import React from "react";
 
 export interface ComponentTree {
-  path?: number[];
+  path: number[];
   type: "root" | "display" | "waveform" | "fourier" | "spectrogram";
   direction?: "horizontal" | "vertical";
   components: (React.ReactNode | ComponentTree)[];
@@ -15,7 +15,7 @@ export interface DisplayState {
 
 const initialState: DisplayState = {
   minimap: true,
-  root: { direction: "horizontal", type: "root", components: [] },
+  root: { direction: "horizontal", type: "root", components: [], path: [] },
 };
 
 export const selectRoot = (state: { display: DisplayState }) => state.display.root;

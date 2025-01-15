@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { DisplaySelector } from "@/components/ui/display-selector";
-import { Sidebar } from "@/components/ui/sidebar";
+import { DisplayList } from "@/components/ui/display-list";
+import { DisplayTreeSelect } from "@/components/ui/display-tree-select";
 export function DisplayMenu() {
   
   return (
     <div className="flex flex-col flex-1 m-2">
-      <DisplaySelector />
+      <DisplayList />
+      <DisplayTreeSelect />
     </div>
   );
 }
