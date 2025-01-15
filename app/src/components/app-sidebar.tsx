@@ -8,14 +8,10 @@ import {
   Command,
   Frame,
   GalleryVerticalEnd,
-  Map,
-  PieChart,
   Settings2,
   SquareTerminal,
 } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import { MenuSwitcher } from "@/components/menu-switcher";
 import {
@@ -26,7 +22,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { SubTrigger } from "@radix-ui/react-dropdown-menu"; // Add this import
+import { DisplayMenu } from "./ui/display-menu";
 
 // This is sample data.
 const data = {
@@ -144,21 +140,17 @@ const data = {
     },
   ],
 };
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { isMobile, state, openMobile, setOpenMobile, activeMenu } =
-    useSidebar();
+  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+  const [activeMenu, setActiveMenu] = React.useState("display");
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <MenuSwitcher menus={data.menus} />
       </SidebarHeader>
       <SidebarContent>
-        {activeMenu === "Display" && (
-          <>
-            <NavMain items={data.navMain} />
-            <NavProjects projects={data.projects} />
-          </>
-        )}
+        {activeMenu === "display" && state === "expanded" && <DisplayMenu />}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

@@ -1,6 +1,7 @@
-ui tweaks
-  volume
-  speed
+ui rewrite shadcn
+  display-menu
+    select / sort displays
+    select associated catalan number
   
 qol
   replace current media

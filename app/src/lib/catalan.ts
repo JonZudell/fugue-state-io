@@ -1,4 +1,4 @@
-class TreeNode {
+export class TreeNode {
   val: number;
   direction: "vertical" | "horizontal";
   children: TreeNode[];
@@ -26,7 +26,7 @@ function catalanNumber(n: number): number {
   return catalan[n];
 }
 
-function getNthCatalanTree(n: number, index: number): TreeNode | null {
+export function getNthCatalanTree(n: number, index: number): TreeNode | null {
   if (n === 0) return null;
   if (index >= catalanNumber(n)) throw new Error("Index out of bounds");
 
@@ -34,7 +34,12 @@ function getNthCatalanTree(n: number, index: number): TreeNode | null {
   return buildTree(1, n, index, directions);
 }
 
-function buildTree(start: number, end: number, index: number, directions: ("vertical" | "horizontal")[]): TreeNode | null {
+export function buildTree(
+  start: number,
+  end: number,
+  index: number,
+  directions: ("vertical" | "horizontal")[],
+): TreeNode | null {
   if (start > end) return null;
 
   let count = 0;
@@ -50,10 +55,14 @@ function buildTree(start: number, end: number, index: number, directions: ("vert
 
         const root = new TreeNode(i, direction);
         const leftChild = buildTree(start, i - 1, leftIndex, directions);
-        if (leftChild) {root.children.push(leftChild)};
+        if (leftChild) {
+          root.children.push(leftChild);
+        }
 
         const rightChild = buildTree(i + 1, end, rightIndex, directions);
-        if (rightChild) {root.children.push(rightChild)};
+        if (rightChild) {
+          root.children.push(rightChild);
+        }
         return root;
       }
       count += totalCount;
@@ -62,9 +71,3 @@ function buildTree(start: number, end: number, index: number, directions: ("vert
 
   return null;
 }
-
-// Example usage:
-const n = 3;
-const index = 2;
-const nthTree = getNthCatalanTree(n, index);
-console.log(`The ${index + 1}-th Catalan tree for n = ${n} is`, nthTree);

@@ -14,7 +14,7 @@ interface Display {
 
 const Display: React.FC<Display> = ({ direction, components }) => {
   return (
-    <ResizablePanelGroup direction={direction} >
+    <ResizablePanelGroup direction={direction}>
       <ResizablePanel>
         {components.length === 0 ? (
           <div
@@ -28,10 +28,7 @@ const Display: React.FC<Display> = ({ direction, components }) => {
             No Displays Set
           </div>
         ) : (
-          <ResizablePanelGroup
-            direction={direction}
-            className="h-full w-full"
-          >
+          <ResizablePanelGroup direction={direction} className="h-full w-full">
             {components.map((component, index) => (
               <Fragment key={index}>
                 {index !== 0 && <ResizableHandle withHandle={true} />}

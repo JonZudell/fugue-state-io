@@ -10,7 +10,7 @@ import { setRoot } from "@/store/displaySlice";
 
 const meta = {
   component: AppRoot,
-} satisfies Meta<typeof Display>;
+} satisfies Meta<typeof AppRoot>;
 
 export default meta;
 
@@ -20,7 +20,10 @@ export const None: Story = {
   render: (args) => (
     <Provider store={store}>
       <SidebarProvider>
-        <AppRoot />
+      <AppRootWithDispatch
+          direction="vertical"
+          components={[]}
+        />
       </SidebarProvider>
     </Provider>
   ),
@@ -40,6 +43,11 @@ export const Vertical: Story = {
             <div
               key="red"
               style={{ flex: 1, backgroundColor: "red" }}
+              className="w-full h-full"
+            />,
+            <div
+              key="yellow"
+              style={{ flex: 1, backgroundColor: "yellow" }}
               className="w-full h-full"
             />,
           ]}

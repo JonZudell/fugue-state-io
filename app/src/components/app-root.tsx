@@ -3,16 +3,16 @@ import { useSelector } from "react-redux";
 import { AppSidebar } from "./app-sidebar";
 import { ResizablePanelGroup, ResizablePanel } from "./ui/resizable";
 import Display from "./display";
-import { selectDisplay, DisplayState } from "@/store/displaySlice";
+import { selectRoot, ComponentTree } from "@/store/displaySlice";
 const AppRoot: React.FC = ({}) => {
-  const display: DisplayState = useSelector(selectDisplay);
+  const root: ComponentTree = useSelector(selectRoot);
   return (
     <ResizablePanelGroup direction="horizontal">
       <AppSidebar />
       <ResizablePanel>
         <Display
-          direction={display.root.direction ?? "horizontal"}
-          components={display.root.components}
+          direction={root.direction ?? "horizontal"}
+          components={root.components}
         />
       </ResizablePanel>
     </ResizablePanelGroup>
