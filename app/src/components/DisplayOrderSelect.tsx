@@ -22,14 +22,14 @@ import {
   setLayout,
   selectOrder,
   setOrder,
-} from "../store/displaySlice";
+} from "../store/display-slice";
 import OrderItem from "./OrderItem";
 
-interface DisplayOrderSelectProps {
+interface DisplayLayoutSelectProps {
   focused?: boolean;
 }
 
-const DisplayOrderSelect: React.FC<DisplayOrderSelectProps> = ({
+const DisplayLayoutSelect: React.FC<DisplayLayoutSelectProps> = ({
   focused = false,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -76,4 +76,4 @@ const DisplayOrderSelect: React.FC<DisplayOrderSelectProps> = ({
   );
 };
 
-export default DisplayOrderSelect;
+export default DisplayLayoutSelect;

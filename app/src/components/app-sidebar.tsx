@@ -144,18 +144,18 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
   const [activeMenu, setActiveMenu] = React.useState("display");
-  return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <MenuSwitcher menus={data.menus} />
-      </SidebarHeader>
-      <SidebarContent>
-        {activeMenu === "display" && state === "expanded" && <DisplayMenu />}
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+  return ( props.hidden ? null :
+  <Sidebar collapsible="icon" {...props}>
+    <SidebarHeader>
+      <MenuSwitcher menus={data.menus} />
+    </SidebarHeader>
+    <SidebarContent>
+      {activeMenu === "display" && state === "expanded" && <DisplayMenu />}
+    </SidebarContent>
+    <SidebarFooter>
+      <NavUser user={data.user} />
+    </SidebarFooter>
+    <SidebarRail />
+  </Sidebar>
   );
 }

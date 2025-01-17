@@ -1,6 +1,6 @@
 "use client";
 import { useState, useLayoutEffect, useEffect, useRef } from "react";
-import { selectVolume, setVolume } from "../store/playbackSlice";
+import { selectVolume, setVolume } from "../store/playback-slice";
 import { useSelector, useDispatch } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {

@@ -23,7 +23,7 @@ import {
   setFourierEnabled,
   setSpectrogramEnabled,
   setLayout,
-} from "../store/displaySlice";
+} from "../store/display-slice";
 import DisplayOrderSelect from "./DisplayOrderSelect";
 import { selectMedia } from "@/store/playbackSlice";
 

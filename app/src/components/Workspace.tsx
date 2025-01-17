@@ -18,7 +18,7 @@ import {
   setProcessing,
   setProgress,
   selectProgress,
-} from "../store/playbackSlice";
+} from "../store/playback-slice";
 import { AppSidebar } from "./app-sidebar";
 interface WorkspaceProps {
   focused?: false;

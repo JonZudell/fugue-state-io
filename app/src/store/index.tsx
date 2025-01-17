@@ -1,8 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 import filesReducer from "./filesSlice";
-import playbackReducer from "./playbackSlice";
+import playbackReducer from "./playback-slice";
 import commandReducer from "./commandSlice";
-import displayReducer from "./displaySlice";
+import displayReducer from "./display-slice";
 
 import logger from "redux-logger";
 

@@ -4,7 +4,7 @@ import {
   selectLoopEnd,
   selectLoopStart,
   selectTimeElapsed,
-} from "../store/playbackSlice";
+} from "../store/playback-slice";
 import { useSelector } from "react-redux";
 import { FileState } from "../store/filesSlice";
 import {
@@ -13,7 +13,6 @@ import {
   getFrequencyForBin,
   getNoteForFrequency,
 } from "../core/waveformSummary";
-import { selectFourierScale } from "../store/displaySlice";
 
 interface FourierDisplayProps {
   media?: FileState;
@@ -39,7 +38,6 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
-  const fourierScale = useSelector(selectFourierScale);
   const frequencyRef = useRef<number | null>(null);
   const [mouseX, setMouseX] = useState<number | null>(null);
   const [infoString, setInfoString] = useState<string | null>(null);
@@ -110,7 +108,7 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         canvas.width / channel[fourierIndex].magnitudes.length;
       for (let i = 0; i < canvas.width; i++) {
         const magnitudeIndex = Math.floor(
-          i / pixelsPerMagnitude / fourierScale,
+          i / pixelsPerMagnitude,
         );
         const magnitude = Math.log10(
           channel[fourierIndex].magnitudes[magnitudeIndex] + 1,
@@ -200,7 +198,7 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       const pixelsPerMagnitude =
         canvas.width / summary.left[fourierIndex].magnitudes.length;
       const magnitudeIndex = Math.floor(
-        cursorPosition / pixelsPerMagnitude / fourierScale,
+        cursorPosition / pixelsPerMagnitude,
       );
       if (
         magnitudeIndex >= 0 &&
@@ -223,7 +221,6 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
     loopStart,
     loopEnd,
     cursorPosition,
-    fourierScale,
   ]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {

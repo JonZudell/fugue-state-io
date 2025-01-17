@@ -19,9 +19,21 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export function DisplayItem({ values, placeholder, empty }: { values: string[], placeholder: string, empty: string}) {
+export function DisplayItem({
+  value,
+  onChange,
+  values,
+  placeholder,
+  empty,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  values: string[];
+  placeholder: string;
+  empty: string;
+}) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
+  // const [value, setValue] = React.useState("");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -50,7 +62,7 @@ export function DisplayItem({ values, placeholder, empty }: { values: string[], 
                   value={v}
                   onSelect={(currentValue) => {
                     setOpen(false);
-                    setValue(currentValue);
+                    onChange(currentValue);
                   }}
                 >
                   {v}

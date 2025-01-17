@@ -4,7 +4,7 @@ import {
   selectLoopEnd,
   selectLoopStart,
   selectTimeElapsed,
-} from "../store/playbackSlice";
+} from "../store/playback-slice";
 import { useSelector } from "react-redux";
 import { FileState } from "../store/filesSlice";
 interface MinimapProps {

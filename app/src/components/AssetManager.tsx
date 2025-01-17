@@ -2,7 +2,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectFiles } from "../store/filesSlice";
-import { uploadFile } from "../store/playbackSlice";
+import { uploadFile } from "../store/playback-slice";
 import { Key } from "react";
 import { AppDispatch } from "../store";
 import CollapseMenu from "./CollapseMenu";

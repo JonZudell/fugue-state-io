@@ -6,10 +6,7 @@ const MenuItem = React.forwardRef<
 >(({ className, inset, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
     ref={ref}
-    className={cn(
-      inset && "pl-8",
-      className,
-    )}
+    className={cn(inset && "pl-8", className)}
     {...props}
   />
 ));

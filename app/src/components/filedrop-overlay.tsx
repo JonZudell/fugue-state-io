@@ -1,15 +1,15 @@
 "use client";
-import { uploadFile } from "../store/playbackSlice";
+import { uploadFile } from "../store/playback-slice";
 import { AppDispatch } from "../store";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 interface FiledropOverlay {
-  focused?: false;
+  worker: Worker;
 }
 
-const FiledropOverlay: React.FC = () => {
+const FiledropOverlay: React.FC<FiledropOverlay> = ({worker}) => {
   const [isDragging, setIsDragging] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -43,11 +43,15 @@ const FiledropOverlay: React.FC = () => {
       document.removeEventListener("drop", handleDrop);
     };
   }, [dispatch]);
-
-  if (!isDragging) {
-    return null;
-  }
-
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    console.log("Files selected for upload:", files);
+    if (files) {
+      Array.from(files).forEach((file) => {
+        dispatch(uploadFile({ file, worker }));
+      });
+    }
+  };
   return (
     <div
       className="scrim flex"
@@ -74,6 +78,9 @@ const FiledropOverlay: React.FC = () => {
           textAlign: "center",
         }}
       >
+        <h1>Welcome to</h1>
+        <h2>fugue-state.io</h2>
+        <h3>Upload Files</h3>
         <div
           className="upload-placeholder"
           style={{
@@ -83,11 +90,26 @@ const FiledropOverlay: React.FC = () => {
             textAlign: "center",
           }}
         >
-          <FontAwesomeIcon icon={faFileUpload} className="w-6 h-6" />
-          <p>Drop to upload file!</p>
+        <FontAwesomeIcon icon={faFileUpload} className="w-6 h-6 unselectable" />
+        <p className="unselectable">Drag to upload!</p>
+        <p className="unselectable">-or-</p>
+        <input
+          type="file"
+          onChange={handleFileUpload}
+          className="upload-button text-gray-400"
+          multiple
+          style={{ display: "none" }}
+          id="file-upload"
+        />
+        <label
+          htmlFor="file-upload"
+          className="cursor-pointer text-blue-500 unselectable"
+        >
+          Click to upload files
+        </label>
+      </div>
         </div>
       </div>
-    </div>
   );
 };
 

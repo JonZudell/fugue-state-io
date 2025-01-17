@@ -6,7 +6,7 @@ import { Provider } from "react-redux";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppRoot from "@/components/app-root";
 import { useDispatch } from "react-redux";
-import { setRoot } from "@/store/displaySlice";
+import { setLayout, setOrder } from "@/store/display-slice";
 
 const meta = {
   component: AppRoot,
@@ -20,113 +20,39 @@ export const None: Story = {
   render: (args) => (
     <Provider store={store}>
       <SidebarProvider>
-      <AppRootWithDispatch
-          direction="vertical"
-          components={[]}
-          type="root"
-          path={[]}
+        <AppRootWithDispatch layout="none" order={[]} />
+      </SidebarProvider>
+    </Provider>
+  ),
+};
+export const SideBySide: Story = {
+  render: (args) => (
+    <Provider store={store}>
+      <SidebarProvider>
+        <AppRootWithDispatch
+          layout="side-by-side"
+          order={["waveform", "fourier"]}
         />
       </SidebarProvider>
     </Provider>
   ),
 };
-export const Vertical: Story = {
+export const Stacked: Story = {
   render: (args) => (
     <Provider store={store}>
       <SidebarProvider>
-        <AppRootWithDispatch
-          direction="vertical"
-          type="root"
-          path={[]}
-          components={[
-            <div
-              key="blue"
-              style={{ flex: 1, backgroundColor: "blue" }}
-              className="w-full h-full"
-            />,
-            <div
-              key="red"
-              style={{ flex: 1, backgroundColor: "red" }}
-              className="w-full h-full"
-            />,
-            <div
-              key="yellow"
-              style={{ flex: 1, backgroundColor: "yellow" }}
-              className="w-full h-full"
-            />,
-          ]}
-        />
-      </SidebarProvider>
-    </Provider>
-  ),
-};
-export const Horizontal: Story = {
-  render: (args) => (
-    <Provider store={store}>
-      <SidebarProvider>
-        <AppRootWithDispatch
-          type="root"
-          path={[]}
-          direction="horizontal"
-          components={[
-            <div
-              key="blue"
-              style={{ flex: 1, backgroundColor: "blue" }}
-              className="w-full h-full"
-            />,
-            <div
-              key="red"
-              style={{ flex: 1, backgroundColor: "red" }}
-              className="w-full h-full"
-            />,
-          ]}
-        />
-      </SidebarProvider>
-    </Provider>
-  ),
-};
-export const Nested: Story = {
-  render: (args) => (
-    <Provider store={store}>
-      <SidebarProvider>
-        <AppRootWithDispatch
-          direction="horizontal"
-          components={[
-            <div
-              key="blue"
-              style={{ flex: 1, backgroundColor: "blue" }}
-              className="w-full h-full"
-            />,
-            <Display
-              key="right"
-              direction="vertical"
-              components={[
-                <div
-                  key="red"
-                  style={{ flex: 1, backgroundColor: "red" }}
-                  className="w-full h-full"
-                />,
-                <div
-                  key="red"
-                  style={{ flex: 1, backgroundColor: "yellow" }}
-                  className="w-full h-full"
-                />,
-              ]}
-            />,
-          ]}
-        />
+        <AppRootWithDispatch layout="stacked" order={["waveform", "fourier"]} />
       </SidebarProvider>
     </Provider>
   ),
 };
 
 const AppRootWithDispatch: React.FC<{
-  direction: "vertical" | "horizontal";
-  components: ReactNode[];
-  type?: "root";
-  path: number[];
-}> = (root) => {
+  layout: string;
+  order: ("waveform" | "fourier" | "spectrogram" | "video")[];
+}> = ({ order, layout }) => {
   const dispatch = useDispatch();
-  dispatch(setRoot(root));
+  dispatch(setLayout(layout));
+  dispatch(setOrder(order));
   return <AppRoot />;
 };

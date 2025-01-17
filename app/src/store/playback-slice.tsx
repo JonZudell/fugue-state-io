@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import { FileState } from "../store/filesSlice";
-import { setVideoEnabled } from "./displaySlice";
+import { FileState } from "./filesSlice";
+import { setVideoEnabled } from "./display-slice";
 interface Progress {
   channel: keyof Channels;
   progress: number;
@@ -132,7 +132,6 @@ export const uploadFile = createAsyncThunk(
           channel: "right",
         });
       } else {
-        const framesNeeded = audioBuffer.getChannelData(0).length / 2048 - 1;
         dispatch(setProgress({ channel: "mono", progress: 0 }));
         worker.postMessage({
           type: "SUMMARIZE",

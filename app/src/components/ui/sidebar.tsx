@@ -18,6 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { on } from "events";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -55,6 +56,7 @@ const SidebarProvider = React.forwardRef<
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
     activeMenu?: string;
+    onStateChange?: (open: boolean) => void; // Add this prop
   }
 >(
   (
@@ -66,6 +68,7 @@ const SidebarProvider = React.forwardRef<
       className,
       style,
       children,
+      onStateChange, // Add this prop
       ...props
     },
     ref,
@@ -86,10 +89,15 @@ const SidebarProvider = React.forwardRef<
           _setOpen(openState);
         }
 
+        // Notify state change
+        if (onStateChange) {
+          onStateChange(openState);
+        }
+
         // This sets the cookie to keep the sidebar state.
         document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
       },
-      [setOpenProp, open],
+      [setOpenProp, open, onStateChange],
     );
 
     // Helper to toggle the sidebar.
@@ -166,6 +174,7 @@ const Sidebar = React.forwardRef<
     side?: "left" | "right";
     variant?: "sidebar" | "floating" | "inset";
     collapsible?: "offcanvas" | "icon" | "none";
+    onStateChange?: () => void;
   }
 >(
   (
@@ -173,6 +182,7 @@ const Sidebar = React.forwardRef<
       side = "left",
       variant = "sidebar",
       collapsible = "offcanvas",
+      onStateChange,
       className,
       children,
       ...props
@@ -180,6 +190,12 @@ const Sidebar = React.forwardRef<
     ref,
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+    React.useEffect(() => {
+      if (onStateChange) {
+        console.log("on statechange")
+      onStateChange()
+      }
+    }, [state, onStateChange, isMobile, openMobile, setOpenMobile]);
 
     if (collapsible === "none") {
       return (
@@ -279,6 +295,7 @@ const SidebarTrigger = React.forwardRef<
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
+        
       }}
       {...props}
     >

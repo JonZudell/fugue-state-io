@@ -14,14 +14,14 @@ import {
   selectLooping,
   selectVolume,
   selectSpeed,
-} from "../store/playbackSlice";
+} from "../store/playback-slice";
 import {
   selectLayout,
   selectMinimap,
   selectOrder,
-} from "../store/displaySlice";
+} from "../store/display-slice";
 import "./PlaybackArea.css";
-import WaveformVisualizer from "./WaveformVisualizer";
+import WaveformVisualizer from "./waveform-visualizer";
 import { AppDispatch } from "../store";
 import Minimap from "./Minimap";
 import FourierDisplay from "./FourierDisplay";

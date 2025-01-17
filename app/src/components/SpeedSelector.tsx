@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { selectSpeed, setSpeed } from "../store/playbackSlice";
+import { selectSpeed, setSpeed } from "../store/playback-slice";
 import { useSelector, useDispatch } from "react-redux";
 interface SpeedSelectorProps {
   className?: string;

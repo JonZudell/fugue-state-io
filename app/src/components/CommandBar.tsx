@@ -13,10 +13,7 @@ interface CommandBarProps {
   workspaceWidth: number;
   leftMenuWidth: number;
 }
-const CommandBar: React.FC<CommandBarProps> = ({
-  workspaceWidth,
-  leftMenuWidth,
-}) => {
+const CommandBar: React.FC<CommandBarProps> = ({}) => {
   const dispatch = useDispatch();
   const controlDown = useSelector(selectControlDown);
   const isCommandFocused = useSelector(selectIsCommandFocused);
@@ -66,12 +63,7 @@ const CommandBar: React.FC<CommandBarProps> = ({
           onBlur={() => dispatch(setIsCommandFocused(false))}
         />
       </div>
-      {isCommandFocused && (
-        <CommandDropdown
-          offset={leftMenuWidth + workspaceWidth / 2}
-          width={commandInputWidth}
-        />
-      )}
+      {isCommandFocused && <CommandDropdown width={commandInputWidth} />}
     </div>
   );
 };

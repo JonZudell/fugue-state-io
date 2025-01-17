@@ -10,7 +10,7 @@ import {
   setTimeElapsed,
   setLooping,
   selectLooping,
-} from "../store/playbackSlice";
+} from "../store/playback-slice";
 import SpanSlider from "./SpanSlider";
 import VolumeSelector from "./VolumeSelector";
 import SpeedSelector from "./SpeedSelector";

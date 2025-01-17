@@ -2,34 +2,90 @@
 
 import * as React from "react";
 import { DisplayItem } from "./display-item";
-import { appendToComponentTree, selectRoot, ComponentTree } from "@/store/displaySlice";
+import { selectOrder, setOrder } from "@/store/display-slice";
 import { useSelector, useDispatch } from "react-redux";
-import { recurseTree } from "@/lib/tree";
-
-
+import { Button } from "./button";
+import { ChevronDown, ChevronUp, Trash } from "lucide-react";
 
 export function DisplayList() {
-  const displayOptions = ["waveform", "spectrogram", "fourier"];
-
-  const root = useSelector(selectRoot);
+  const displayOptions = [
+    "waveform",
+    "spectrogram",
+    "fourier",
+    "none",
+    "video",
+  ];
   const dispatch = useDispatch();
-  const addDisplay = (value: string) => {
-    dispatch(appendToComponentTree(<div></div>));
+  const order = useSelector(selectOrder);
+  const addDisplay = (type: string) => {
+    dispatch(setOrder([...order, type]));
+  };
+  const onChange = (value: string, index: number) => {
+    const newOrder = [...order];
+    newOrder[index] = value;
+    dispatch(setOrder(newOrder));
+  };
+  const removeDisplay = (index: number) => {
+    const newOrder = [...order];
+    newOrder.splice(index, 1);
+    dispatch(setOrder(newOrder));
+  };
+  const moveDisplay = (index: number, direction: number) => {
+    const newOrder = [...order];
+    const newIndex = index + direction;
+    if (newIndex >= 0 && newIndex < newOrder.length) {
+      const temp = newOrder[index];
+      newOrder[index] = newOrder[newIndex];
+      newOrder[newIndex] = temp;
+      dispatch(setOrder(newOrder));
+    }
   };
   return (
     <div className="flex flex-col flex-1">
-        {recurseTree(root, []).map((componentTree, index) => (
-          <DisplayItem
-            key={index}
-            values={displayOptions}
-            placeholder={"Select Display Type"}
-            empty={"Select Display Type"}
-          />
-        ))}
-
+      {order.map((type, index) => (
+        <React.Fragment key={index}>
+          <div className="flex flex-col flex-1">
+            <DisplayItem
+              values={displayOptions}
+              value={type}
+              onChange={(value) => onChange(value, index)}
+              placeholder={"Select Display Type"}
+              empty={"Select Display Type"}
+            />
+            <div className="flex justify-between">
+              <Button
+                className="mt-2 justify-between border border-black w-1/3 mr-1"
+                variant={"default"}
+                role={"button"}
+                onClick={() => moveDisplay(index, -1)}
+                disabled={index === 0}
+              >
+                <ChevronUp />
+              </Button>
+              <Button
+                className="mt-2 justify-between border border-black w-1/3 ml-1 mr-1"
+                variant={"default"}
+                role={"button"}
+                onClick={() => moveDisplay(index, 1)}
+                disabled={index === order.length - 1}
+              >
+                <ChevronDown />
+              </Button>
+              <Button
+                className="mt-2 justify-between border border-black w-1/3 ml-1"
+                variant={"destructive"}
+                role={"button"}
+                onClick={() => removeDisplay(index)}
+              >
+                <Trash />
+              </Button>
+            </div>
+          </div>
+        </React.Fragment>
+      ))}
       <button
         className="border-2 border-black border-dashed mt-2 rounded"
-        onClick={() => addDisplay("waveform")}
+        onClick={() => addDisplay("none")}
       >
         +
       </button>
