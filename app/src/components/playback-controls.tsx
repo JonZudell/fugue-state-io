@@ -1,5 +1,5 @@
 "use client";
-import "./PlaybackControls.css";
+import "./playback-controls.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPause, faPlay, faRepeat } from "@fortawesome/free-solid-svg-icons";
 import { useSelector, useDispatch } from "react-redux";
@@ -7,37 +7,28 @@ import {
   setPlaying,
   selectPlaying,
   selectMedia,
-  setTimeElapsed,
   setLooping,
+  setLoopStart,
+  setLoopEnd,
   selectLooping,
-} from "../store/playback-slice";
-import SpanSlider from "./SpanSlider";
+  selectTimeElapsed,
+  selectLoopStart,
+  selectLoopEnd,
+} from "@/store/playback-slice";
+import SpanSlider from "./span-slider";
 import VolumeSelector from "./VolumeSelector";
 import SpeedSelector from "./SpeedSelector";
 import Slider from "./Slider";
+import { PauseCircle, PlayCircle, Repeat, Repeat1 } from "lucide-react";
 interface PlaybackControlsProps {
   enabled?: boolean;
-  timeElapsed: number;
   width: number;
   height: number;
-  videoRef: React.RefObject<HTMLVideoElement | null>;
   loopStart: number;
-  setLoopStart: (start: number) => void;
-  loopEnd: number;
-  setLoopEnd: (end: number) => void;
-  onTimeElapsedChange?: (time: number) => void;
-  onMouseDown?: () => void;
-  onMouseUp?: () => void;
-  className?: string;
 }
 
 const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   enabled = true,
-  timeElapsed,
-  loopStart,
-  setLoopStart,
-  loopEnd,
-  setLoopEnd,
   height,
   width,
 }) => {
@@ -45,21 +36,24 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const media = useSelector(selectMedia);
   const playing = useSelector(selectPlaying);
   const looping = useSelector(selectLooping);
+  const loopStart = useSelector(selectLoopStart);
+  const loopEnd = useSelector(selectLoopEnd);
+  const timeElapsed = useSelector(selectTimeElapsed);
 
   const togglePlay = () => {
     dispatch(setPlaying(!playing));
   };
 
   const handleSpanSliderChange = (start: number, finish: number) => {
-    setLoopStart(start);
-    setLoopEnd(finish);
-  };
-  const formatTime = (percent: number, duration: number) => {
-    const date = new Date(percent * duration * 1000);
-    return date.toISOString().substr(12, 7);
+    dispatch(setLoopStart(start));
+    dispatch(setLoopEnd(finish));
   };
 
   const handleToggleLooping = () => {
+    if (looping) {
+      dispatch(setLoopStart(0));
+      dispatch(setLoopEnd(media.duration));
+    }
     dispatch(setLooping(!looping));
   };
 
@@ -70,8 +64,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       )}
       <Slider />
       <div
-        className="playback-controls bg-gray-800 text-white px-4 items-center"
-        style={{ height: looping ? height - 20 : height - 10, width: width }}
+        className="playback-controls bg-gray-800 text-white px-4 items-center z-100"
+        style={{ height: height, width: width }}
       >
         {media && (
           <div className="items-center h-full flex flex-col justify-center">
@@ -91,10 +85,11 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
                   disabled={!enabled}
                   draggable="false"
                 >
-                  <FontAwesomeIcon
-                    className="h-6 w-6"
-                    icon={playing ? faPause : faPlay}
-                  />
+                  {playing ? (
+                    <PauseCircle className="h-6 w-6" />
+                  ) : (
+                    <PlayCircle className="h-6 w-6" />
+                  )}
                 </button>
                 <button
                   className="mx-1"
@@ -102,11 +97,11 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
                   disabled={!enabled}
                   draggable="false"
                 >
-                  <FontAwesomeIcon
-                    className="h-6 w-6"
-                    icon={faRepeat}
-                    style={{ color: looping ? "green" : "white" }}
-                  />
+                 {looping ? (
+                  <Repeat className="h-6 w-6" />
+                ) : (
+                  <Repeat1 className="h-6 w-6" />
+                )}
                 </button>
                 <SpeedSelector className="mx-1" enabled={enabled} />
               </div>

@@ -55,14 +55,6 @@
   height: 100%;
   background-color: #000000;
 }
-.playback-controls {
-  float: left;
-}
-
-.flex-grow {
-  flex-grow: 1;
-}
-
 .time-info {
   display: flex;
   justify-content: space-between;

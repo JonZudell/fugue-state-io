@@ -9,7 +9,7 @@ interface FiledropOverlay {
   worker: Worker;
 }
 
-const FiledropOverlay: React.FC<FiledropOverlay> = ({worker}) => {
+const FiledropOverlay: React.FC<FiledropOverlay> = ({ worker }) => {
   const [isDragging, setIsDragging] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -90,26 +90,29 @@ const FiledropOverlay: React.FC<FiledropOverlay> = ({worker}) => {
             textAlign: "center",
           }}
         >
-        <FontAwesomeIcon icon={faFileUpload} className="w-6 h-6 unselectable" />
-        <p className="unselectable">Drag to upload!</p>
-        <p className="unselectable">-or-</p>
-        <input
-          type="file"
-          onChange={handleFileUpload}
-          className="upload-button text-gray-400"
-          multiple
-          style={{ display: "none" }}
-          id="file-upload"
-        />
-        <label
-          htmlFor="file-upload"
-          className="cursor-pointer text-blue-500 unselectable"
-        >
-          Click to upload files
-        </label>
-      </div>
+          <FontAwesomeIcon
+            icon={faFileUpload}
+            className="w-6 h-6 unselectable"
+          />
+          <p className="unselectable">Drag to upload!</p>
+          <p className="unselectable">-or-</p>
+          <input
+            type="file"
+            onChange={handleFileUpload}
+            className="upload-button text-gray-400"
+            multiple
+            style={{ display: "none" }}
+            id="file-upload"
+          />
+          <label
+            htmlFor="file-upload"
+            className="cursor-pointer text-blue-500 unselectable"
+          >
+            Click to upload files
+          </label>
         </div>
       </div>
+    </div>
   );
 };
 

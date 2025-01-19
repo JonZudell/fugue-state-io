@@ -44,10 +44,11 @@ const displaySlice = createSlice({
     },
     setVideoEnabled: (state: DisplayState, action: PayloadAction<boolean>) => {
       state.videoEnabled = action.payload;
-    }
+    },
   },
 });
 
-export const { setLayout, setMinimap, setOrder, setVideoEnabled } = displaySlice.actions;
+export const { setLayout, setMinimap, setOrder, setVideoEnabled } =
+  displaySlice.actions;
 
 export default displaySlice.reducer;

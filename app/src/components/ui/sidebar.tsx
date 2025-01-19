@@ -192,8 +192,8 @@ const Sidebar = React.forwardRef<
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
     React.useEffect(() => {
       if (onStateChange) {
-        console.log("on statechange")
-      onStateChange()
+        console.log("on statechange");
+        onStateChange();
       }
     }, [state, onStateChange, isMobile, openMobile, setOpenMobile]);
 
@@ -295,7 +295,6 @@ const SidebarTrigger = React.forwardRef<
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();
-        
       }}
       {...props}
     >

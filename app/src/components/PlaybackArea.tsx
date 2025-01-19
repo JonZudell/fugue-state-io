@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import PlaybackControls from "./PlaybackControls";
+import PlaybackControls from "./playback-controls";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectPlaying,
@@ -24,8 +24,8 @@ import "./PlaybackArea.css";
 import WaveformVisualizer from "./waveform-visualizer";
 import { AppDispatch } from "../store";
 import Minimap from "./Minimap";
-import FourierDisplay from "./FourierDisplay";
-import SpectrogramDisplay from "./SpectrogramDisplay";
+import FourierDisplay from "./fourier-display";
+import SpectrogramDisplay from "./spectrogram-display";
 import { FileState } from "../store/filesSlice";
 interface PlaybackAreaProps {
   focused?: false;

@@ -12,7 +12,7 @@ export default function Home() {
       <SidebarProvider>
         <AppRoot setReady={setReady} hidden={!ready} />
         {!ready && (
-          <div className="w-full h-screen flex items-center justify-center bg-gray-700">
+          <div className="w-full h-screen flex items-center justify-center bg-black">
             <LoaderPinwheel className="animate-spin text-white" size={64} />
           </div>
         )}

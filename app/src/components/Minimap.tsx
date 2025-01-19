@@ -3,37 +3,34 @@ import { useEffect, useRef } from "react";
 import {
   selectLoopEnd,
   selectLoopStart,
+  selectMedia,
   selectTimeElapsed,
 } from "../store/playback-slice";
 import { useSelector } from "react-redux";
 import { FileState } from "../store/filesSlice";
 interface MinimapProps {
-  media?: FileState;
-  width?: number;
-  summary?: Summary;
+  width: number;
   channel?: string;
   startPercentage?: number;
   endPercentage?: number;
-  height?: number;
+  height: number;
   displayRatio?: number;
   crosshair?: boolean;
 }
 
 const Minimap: React.FC<MinimapProps> = ({
-  media,
   channel = "MID",
   startPercentage = 0,
   endPercentage = 100,
-  width = 1000,
-  height = 200,
+  width,
+  height ,
   crosshair = true,
-  displayRatio = 1,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timeElapsed = useSelector(selectTimeElapsed);
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
-
+  const media = useSelector(selectMedia);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
@@ -168,7 +165,7 @@ const Minimap: React.FC<MinimapProps> = ({
         style={{
           position: "relative",
           width: "100%",
-          height: `${displayRatio * 100}%`,
+          height: `${height}px`,
         }}
       >
         <div

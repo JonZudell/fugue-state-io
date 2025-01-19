@@ -4,39 +4,43 @@ import {
   selectLoopEnd,
   selectLoopStart,
   selectTimeElapsed,
-} from "../store/playback-slice";
+} from "@/store/playback-slice";
 import { useSelector } from "react-redux";
-import { FileState } from "../store/filesSlice";
+import { FileState } from "@/store/filesSlice";
 import {
   colorForBin,
   getFrequencyForBin,
   getNoteForFrequency,
-} from "../core/waveformSummary";
+} from "@/lib/dsp";
 interface SpectrogramDisplayProps {
   media?: FileState;
+  width?: number;
   channel?: string;
-  menuResize?: boolean;
   startPercentage?: number;
   endPercentage?: number;
+  height?: number;
+  displayRatio?: number;
   crosshair?: boolean;
+  displayRatioVertical?: number;
+  displayRatioHorizontal?: number;
 }
 
 const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   media,
   channel = "LR",
-  menuResize = false,
   startPercentage = 0,
   endPercentage = 100,
+  width = 1000,
+  height = 200,
+  displayRatioVertical = 1,
+  displayRatioHorizontal = 1,
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const divRef = useRef<HTMLDivElement>(null);
   const timeElapsed = useSelector(selectTimeElapsed);
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
   const [mouseY, setMouseY] = useState<number | null>(null);
-  const [width, setWidth] = useState<number>(100);
-  const [height, setHeight] = useState<number>(100);
 
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [infoString, setInfoString] = useState<string | null>(null);
@@ -63,11 +67,11 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
     // Set canvas width to container width
     const container = canvas.parentElement;
     if (container) {
-      canvas.width = container.offsetWidth;
-      canvas.height = container.offsetHeight; // Set height to half of container
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight / 2; // Set height to half of container
     }
 
-    //clear canvas
+    // clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const drawWaveform = () => {
@@ -130,33 +134,19 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
     timeElapsed,
     width,
   ]);
-  const handleResize = () => {
-    if (divRef.current) {
-      setWidth(divRef.current.offsetWidth);
-      setHeight(divRef.current.offsetHeight);
-    }
-  };
-  useLayoutEffect(() => {
-    handleResize();
-  }, [menuResize]);
-  useLayoutEffect(() => {
-    window.addEventListener("resize", handleResize);
-    handleResize();
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
   return (
     <>
       <div
-        ref={divRef}
-        style={{  width: "100%", height: "100%", maxHeight: "100%", overflow: "hidden" }}
+        style={{ position: "relative", width: "100%", height: "100%" }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
         <div
           style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
             width: "100%",
             height: "100%",
             pointerEvents: "none",
@@ -167,6 +157,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
           {crosshair && (
             <div
               style={{
+                position: "absolute",
                 top: 0,
                 left: `${(((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage)) * 100}%`,
                 width: "2px",
@@ -212,7 +203,11 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
           ref={canvasRef}
           width={width}
           height={height}
-          className="w-full h-full"
+          className="w-full"
+          style={{
+            width: `${displayRatioHorizontal * 100}%`,
+            height: `${displayRatioVertical * 100}%`,
+          }}
         />
       </div>
     </>

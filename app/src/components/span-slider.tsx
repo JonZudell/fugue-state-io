@@ -1,6 +1,6 @@
 "use client";
 import { useState, useLayoutEffect, useEffect, useRef } from "react";
-import "./SpanSlider.css";
+import "./span-slider.css";
 import { selectLooping } from "../store/playback-slice";
 import { useSelector } from "react-redux";
 interface SpanSliderProps {
