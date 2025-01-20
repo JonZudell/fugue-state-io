@@ -54,6 +54,41 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
     setMouseY(null);
   };
 
+  const drawWaveform = () => {
+    if (media && media.summary && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        return;
+      }
+
+      const { summary } = media;
+      const summaryLength = summary.mono.length;
+      const startSample = Math.floor((startPercentage / 100) * summaryLength);
+      const endSample = Math.floor((endPercentage / 100) * summaryLength);
+      const samplesPerPixel = (endSample - startSample) / canvas.width;
+      const binsPerPixel = summary.mono[0].magnitudes.length / canvas.height;
+
+      const imageData = ctx.createImageData(canvas.width, canvas.height);
+      const data = imageData.data;
+
+      for (let x = 0; x < canvas.width; x++) {
+        for (let y = 0; y < canvas.height; y++) {
+          const color = colorForBin(Math.floor((y * binsPerPixel) / 8));
+          console.log(samplesPerPixel, startSample, x, y);
+          const alpha = summary.mono[Math.floor(x * samplesPerPixel) + startSample].magnitudes[Math.floor((y * binsPerPixel/ 8))];
+          const index = (x + (canvas.height - y - 1) * canvas.width) * 4;
+          data[index] = color[0];
+          data[index + 1] = color[1];
+          data[index + 2] = color[2];
+          data[index + 3] = alpha * 255;
+        }
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+    }
+  };
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
@@ -73,28 +108,6 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
 
     // clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const drawWaveform = () => {
-      if (media && media.summary && canvas) {
-        if (!ctx) {
-          return;
-        }
-
-        const { summary } = media;
-        const summaryLength = summary.mono.length;
-        const startSample = Math.floor((startPercentage / 100) * summaryLength);
-        const endSample = Math.floor((endPercentage / 100) * summaryLength);
-        const samplesPerPixel = (endSample - startSample) / canvas.width;
-        const binsPerPixel = summary.mono[0].magnitudes.length / canvas.height;
-        for (let x = 0; x < canvas.width; x++) {
-          for (let y = 0; y < canvas.height; y++) {
-            const color = colorForBin(Math.floor((y * binsPerPixel) / 8));
-            ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${summary.mono[Math.floor(x * samplesPerPixel) + startSample].magnitudes[Math.floor((y * binsPerPixel))]})`;
-            ctx.fillRect(x, canvas.height - y - 1, 1, 1);
-          }
-        }
-      }
-    };
 
     drawWaveform();
   }, [
@@ -116,7 +129,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
     if (binsPerPixel) {
       frequencyRef.current = getFrequencyForBin(
         Math.floor(
-          ((canvasRef.current?.height * 2 - mouseY) * binsPerPixel)
+          ((canvasRef.current?.height * 2 - mouseY) * binsPerPixel / 8)
         ),
       );
       const note = getNoteForFrequency(frequencyRef.current);
