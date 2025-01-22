@@ -19,6 +19,10 @@ interface PlaybackState {
   processing: boolean;
   mode: "mono" | "stereo";
   progess: Progress[];
+  notationList: string[];
+  timingCallbacks: ((ev: any) => void)[];
+  changedSelection: {start: number, end: number};
+  noteTimings: { [key: string]: number };
 }
 
 const initialState: PlaybackState = {
@@ -34,10 +38,23 @@ const initialState: PlaybackState = {
   processing: false,
   mode: "stereo",
   progess: [],
+  notationList: [],
+  timingCallbacks: [],
+  changedSelection: {start: 0, end: 0},
+  noteTimings: {},
 };
 
 export const selectMedia = (state: { playback: { media: FileState } }) =>
   state.playback.media;
+export const selectTimingCallbacks = (state: {
+  playback: { timingCallbacks: ((ev: any) => void)[] };
+}) => state.playback.timingCallbacks;
+export const selectNoteTimings = (state: {
+  playback: { noteTimings: { [key: string]: number } };
+}) => state.playback.noteTimings;
+export const selectChangedSelection = (state: {
+  playback: { changedSelection: { start: number; end: number } };
+}) => state.playback.changedSelection;
 export const selectAudioContext = (state: {
   playback: { audioContext: AudioContext };
 }) => state.playback.audioContext;
@@ -63,6 +80,10 @@ export const selectProcessing = (state: {
 }) => state.playback.processing;
 export const selectMode = (state: { playback: { mode: "mono" | "stereo" } }) =>
   state.playback.mode;
+export const selectNotationList = (state: {
+  playback: { notationList: string[] };
+}) => state.playback.notationList;
+
 export const uploadFile = createAsyncThunk(
   "playback/uploadFile",
   async ({ file, worker }: { file: File; worker: Worker }, { dispatch }) => {
@@ -153,6 +174,24 @@ const playbackSlice = createSlice({
     ) => {
       state.audioContext = action.payload;
     },
+    setNotationList: (
+      state: PlaybackState,
+      action: PayloadAction<string[]>,
+    ) => {
+      state.notationList = action.payload;
+    },
+    setChangedSelection: (
+      state: PlaybackState,
+      action: PayloadAction<{ start: number; end: number }>,
+    ) => {
+      state.changedSelection = action.payload;
+    },
+    setSelectedNoteTimes: (
+      state: PlaybackState,
+      action: PayloadAction<{ [key: string]: number }>,
+    ) => {
+      state.noteTimings = action.payload;
+    },
     setMedia: (state: PlaybackState, action: PayloadAction<FileState>) => {
       state.media = action.payload;
     },
@@ -168,6 +207,12 @@ const playbackSlice = createSlice({
       } else {
         state.progess[progressIndex] = action.payload;
       }
+    },
+    setTimingCallbacks: (
+      state: PlaybackState,
+      action: PayloadAction<((ev: any) => void)[]>,
+    ) => {
+      state.timingCallbacks = action.payload;
     },
     setChannelSummary: (
       state: PlaybackState,
@@ -266,5 +311,7 @@ export const {
   setChannelSummary,
   setProgress,
   restartPlayback,
+  setNotationList,
+  setTimingCallbacks
 } = playbackSlice.actions;
 export default playbackSlice.reducer;

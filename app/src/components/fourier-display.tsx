@@ -181,7 +181,7 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
   const handleMouseEnter = () => {
     setCursorPosition(null);
     frequencyRef.current = null;
-  }
+  };
 
   useEffect(() => {
     if (cursorPosition !== null && media && media.summary) {
@@ -196,46 +196,80 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       if (channel === "LR" && media.summary.left && media.summary.right) {
         const { summary } = media;
         const summaryLength = summary.mono.length;
-        const startSample = 0
+        const startSample = 0;
         const endSample = summaryLength;
-        const topSample = Math.floor((cursorPosition / canvas.width) * (endSample - startSample));
-        const topBin = Math.floor((cursorPosition / canvas.width) * summary.left[0].magnitudes.length / 8);
+        const topSample = Math.floor(
+          (cursorPosition / canvas.width) * (endSample - startSample),
+        );
+        const topBin = Math.floor(
+          ((cursorPosition / canvas.width) *
+            summary.left[0].magnitudes.length) /
+            8,
+        );
         const topFrequency = getFrequencyForBin(topBin, media.sampleRate);
         const topNote = getNoteForFrequency(topFrequency);
-        const topMagnitude = summary.left[startSample + topSample].magnitudes[topBin];
-        setTopInfoString(`Frequency: ${topFrequency.toFixed(2)}Hz, Note: ${topNote}, Magnitude: ${topMagnitude.toFixed(2)}`);
-        const bottomSample = Math.floor((cursorPosition / canvas.width) * (endSample - startSample));
-        const bottomBin = Math.floor((cursorPosition / canvas.width) * summary.right[0].magnitudes.length / 8);
+        const topMagnitude =
+          summary.left[startSample + topSample].magnitudes[topBin];
+        setTopInfoString(
+          `Frequency: ${topFrequency.toFixed(2)}Hz, Note: ${topNote}, Magnitude: ${topMagnitude.toFixed(2)}`,
+        );
+        const bottomSample = Math.floor(
+          (cursorPosition / canvas.width) * (endSample - startSample),
+        );
+        const bottomBin = Math.floor(
+          ((cursorPosition / canvas.width) *
+            summary.right[0].magnitudes.length) /
+            8,
+        );
         const bottomFrequency = getFrequencyForBin(bottomBin, media.sampleRate);
         const bottomNote = getNoteForFrequency(bottomFrequency);
-        const bottomMagnitude = summary.right[startSample + bottomSample].magnitudes[bottomBin];
-        setBottomInfoString(`Frequency: ${bottomFrequency.toFixed(2)}Hz, Note: ${bottomNote}, Magnitude: ${bottomMagnitude.toFixed(2)}`);
+        const bottomMagnitude =
+          summary.right[startSample + bottomSample].magnitudes[bottomBin];
+        setBottomInfoString(
+          `Frequency: ${bottomFrequency.toFixed(2)}Hz, Note: ${bottomNote}, Magnitude: ${bottomMagnitude.toFixed(2)}`,
+        );
       } else if (channel === "MID" && media.summary.mono) {
         const { summary } = media;
         const summaryLength = summary.mono.length;
         const startSample = Math.floor((0 / 100) * summaryLength);
         const endSample = Math.floor((100 / 100) * summaryLength);
         const x = cursorPosition;
-        const xSample = Math.floor((x / canvas.width) * (endSample - startSample));
-        const bin = Math.floor((cursorPosition / canvas.width) * summary.mono[0].magnitudes.length / 8);
+        const xSample = Math.floor(
+          (x / canvas.width) * (endSample - startSample),
+        );
+        const bin = Math.floor(
+          ((cursorPosition / canvas.width) *
+            summary.mono[0].magnitudes.length) /
+            8,
+        );
         const frequency = getFrequencyForBin(bin, media.sampleRate);
         const note = getNoteForFrequency(frequency);
         const time = (xSample / media.sampleRate).toFixed(2);
         const magnitude = summary.mono[startSample + xSample].magnitudes[bin];
-        setTopInfoString(`Time: ${time}s, Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`);
+        setTopInfoString(
+          `Time: ${time}s, Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
+        );
       } else if (channel === "SIDE" && media.summary.side) {
         const { summary } = media;
         const summaryLength = summary.side.length;
         const startSample = Math.floor((0 / 100) * summaryLength);
         const endSample = Math.floor((100 / 100) * summaryLength);
         const x = cursorPosition;
-        const xSample = Math.floor((x / canvas.width) * (endSample - startSample));
-        const bin = Math.floor((cursorPosition / canvas.width) * summary.side[0].magnitudes.length / 8);
+        const xSample = Math.floor(
+          (x / canvas.width) * (endSample - startSample),
+        );
+        const bin = Math.floor(
+          ((cursorPosition / canvas.width) *
+            summary.side[0].magnitudes.length) /
+            8,
+        );
         const frequency = getFrequencyForBin(bin, media.sampleRate);
         const note = getNoteForFrequency(frequency);
         const time = (xSample / media.sampleRate).toFixed(2);
         const magnitude = summary.side[startSample + xSample].magnitudes[bin];
-        setTopInfoString(`Time: ${time}s, Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`);
+        setTopInfoString(
+          `Time: ${time}s, Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
+        );
       }
     } else {
       setTopInfoString(null);
@@ -275,26 +309,26 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
           />
           <div
             style={{
-            position: "absolute",
-            top: "0",
-            left: `${mouseX + ((topInfoString?.length || 0) * 10) > width ? mouseX - ((topInfoString?.length || 0) * 10) : mouseX}px`,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            color: "white",
-            padding: "2px 5px",
-            width: `${(topInfoString?.length || 0) * 10}px`,
+              position: "absolute",
+              top: "0",
+              left: `${mouseX + (topInfoString?.length || 0) * 10 > width ? mouseX - (topInfoString?.length || 0) * 10 : mouseX}px`,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              color: "white",
+              padding: "2px 5px",
+              width: `${(topInfoString?.length || 0) * 10}px`,
             }}
           >
             <span>{topInfoString}</span>
           </div>
           <div
             style={{
-            position: "absolute",
-            top: `${height / 2 + "px"}`,
-            left: `${mouseX + ((bottomInfoString?.length || 0) * 10) > width ? mouseX - ((bottomInfoString?.length || 0) * 10) : mouseX}px`,
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            color: "white",
-            padding: "2px 5px",
-            width: `${(bottomInfoString?.length || 0) * 10}px`,
+              position: "absolute",
+              top: `${height / 2 + "px"}`,
+              left: `${mouseX + (bottomInfoString?.length || 0) * 10 > width ? mouseX - (bottomInfoString?.length || 0) * 10 : mouseX}px`,
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              color: "white",
+              padding: "2px 5px",
+              width: `${(bottomInfoString?.length || 0) * 10}px`,
             }}
           >
             <span>{bottomInfoString}</span>

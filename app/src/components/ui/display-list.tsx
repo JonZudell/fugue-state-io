@@ -14,6 +14,7 @@ export function DisplayList() {
     "fourier",
     "none",
     "video",
+    "notation",
   ];
   const dispatch = useDispatch();
   const order = useSelector(selectOrder);

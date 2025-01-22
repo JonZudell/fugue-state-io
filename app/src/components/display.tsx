@@ -4,7 +4,7 @@ import { Fragment, useEffect, useRef } from "react";
 import CommandBar from "./CommandBar";
 import FourierDisplay from "./fourier-display";
 import SpectrogramDisplay from "./spectrogram-display";
-import WaveformVisualizer from "./waveform-visualizer";
+import WaveformDisplay from "./waveform-display";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectLoopEnd,
@@ -19,6 +19,7 @@ import {
   setTimeElapsed,
 } from "@/store/playback-slice";
 import { Panel, PanelGroup } from "react-resizable-panels";
+import NotationDisplay from "./notation-display";
 
 interface Display {
   order: string[];
@@ -40,7 +41,7 @@ const renderMediaComponent = (
   switch (type) {
     case "none":
       return (
-        <div style={{ width: "100%", height: "100%" }} key={key}>
+        <div style={{ width: width, height: height }} key={key}>
           <div
             style={{
               display: "flex",
@@ -75,7 +76,7 @@ const renderMediaComponent = (
       );
     case "waveform":
       return (
-        <WaveformVisualizer
+        <WaveformDisplay
           key={key}
           media={media}
           startPercentage={loopStart * 100}
@@ -99,16 +100,15 @@ const renderMediaComponent = (
       return (
         <FourierDisplay key={key} media={media} width={width} height={height} />
       );
+    case "notation":
+      return (
+        <NotationDisplay width={width} height={height} />
+      )
     default:
       return null;
   }
 };
-const Display: React.FC<Display> = ({
-  order,
-  layout,
-  width,
-  height,
-}) => {
+const Display: React.FC<Display> = ({ order, layout, width, height }) => {
   const media = useSelector(selectMedia);
   const dispatch = useDispatch();
   const playing = useSelector(selectPlaying);
@@ -156,7 +156,7 @@ const Display: React.FC<Display> = ({
   useEffect(() => {
     const interval = setInterval(() => {
       console.log("interval");
-      
+
       if (playing && videoRef.current) {
         console.log("playing");
         if (
@@ -201,18 +201,30 @@ const Display: React.FC<Display> = ({
         }
       } else if (!playing && videoRef.current) {
         videoRef.current.currentTime = timeElapsed;
-        if (videoRef2.current) {
+      }
+
+      if (videoRef2.current) {
+        if (Math.abs(videoRef2.current.currentTime - timeElapsed) > 0.1) {
           videoRef2.current.currentTime = timeElapsed;
+            if (!playing && !videoRef2.current.paused) {
+              videoRef2.current.pause();
+            }
         }
       }
     }, 10);
 
     return () => clearInterval(interval);
   }, [playing, dispatch, timeElapsed, media, loopEnd, looping, loopStart]);
+
+  useEffect(() => {
+    if (videoRef2.current) {
+      videoRef2.current.volume = 0;
+      videoRef2.current.playbackRate = speed;
+      videoRef2.current.loop = false;
+    }
+  }, [videoRef2.current, speed]);
   return (
-    <div
-      style={{ width: width + "px", height: height + "px" }}
-    >
+    <div style={{ width: width + "px", height: height + "px" }}>
       <video
         ref={videoRef}
         controls={false}
@@ -221,10 +233,10 @@ const Display: React.FC<Display> = ({
         style={{
           display: "none",
         }}
-        >
+      >
         <source src={media.url} type={media.fileType} />
         Your browser does not support the video tag.
-        </video>
+      </video>
       {layout === "none" && (
         <PanelGroup
           direction="horizontal"
@@ -244,7 +256,8 @@ const Display: React.FC<Display> = ({
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                height: "100%",
+                width: width + "px",
+                height: height + "px",
               }}
             >
               No Display settings
@@ -283,16 +296,15 @@ const Display: React.FC<Display> = ({
         </PanelGroup>
       )}
       {layout === "side-by-side" && (
-        <PanelGroup direction="horizontal"
+        <PanelGroup
+          direction="horizontal"
           style={{
             width: width + "px",
             height: height + "px",
-          }}>
+          }}
+        >
           {order.map((type, index) => (
-            <Panel
-              key={index}
-              className={`w-[${width / 2}]px h-[${height}]px`}
-            >
+            <Panel key={index} className={`w-[${width / 2}]px h-[${height}]px`}>
               {renderMediaComponent(
                 type,
                 media,
@@ -308,16 +320,15 @@ const Display: React.FC<Display> = ({
         </PanelGroup>
       )}
       {layout === "stacked" && (
-        <PanelGroup direction="vertical"
+        <PanelGroup
+          direction="vertical"
           style={{
             width: width + "px",
             height: height + "px",
-          }}>
+          }}
+        >
           {order.map((type, index) => (
-            <Panel
-              key={index}
-              className={`w-[${width}]px h-[${height / 2}]px`}
-            >
+            <Panel key={index} className={`w-[${width}]px h-[${height / 2}]px`}>
               {renderMediaComponent(
                 type,
                 media,
@@ -325,7 +336,7 @@ const Display: React.FC<Display> = ({
                 loopStart,
                 loopEnd,
                 width,
-                (height) / 2,
+                height / 2,
                 `media-${index}`,
               )}
             </Panel>
@@ -333,16 +344,15 @@ const Display: React.FC<Display> = ({
         </PanelGroup>
       )}
       {layout === "stacked-3" && (
-        <PanelGroup direction="vertical"
+        <PanelGroup
+          direction="vertical"
           style={{
             width: width + "px",
             height: height + "px",
-          }}>
+          }}
+        >
           {order.map((type, index) => (
-            <Panel
-              key={index}
-              className={`w-[${width}]px h-[${height / 3}]px`}
-            >
+            <Panel key={index} className={`w-[${width}]px h-[${height / 3}]px`}>
               {renderMediaComponent(
                 type,
                 media,
@@ -350,7 +360,7 @@ const Display: React.FC<Display> = ({
                 loopStart,
                 loopEnd,
                 width,
-                (height) / 3,
+                height / 3,
                 `media-${index}`,
               )}
             </Panel>
@@ -360,10 +370,7 @@ const Display: React.FC<Display> = ({
       {layout === "side-by-side-3" && (
         <PanelGroup direction="horizontal">
           {order.map((type, index) => (
-            <Panel
-              key={index}
-              className={`w-[${width / 3}]px h-[${height}]px`}
-            >
+            <Panel key={index} className={`w-[${width / 3}]px h-[${height}]px`}>
               {renderMediaComponent(
                 type,
                 media,
@@ -376,6 +383,183 @@ const Display: React.FC<Display> = ({
               )}
             </Panel>
           ))}
+        </PanelGroup>
+      )}
+      {layout === "side-by-side-right-stacked" && (
+        <PanelGroup direction="horizontal">
+          <Panel className={`w-[${(width) / 2}]px h-[${height}]px`}>
+            {renderMediaComponent(
+              order[0],
+              media,
+              videoRef2,
+              loopStart,
+              loopEnd,
+              width / 2,
+              height,
+              `media-0`,
+            )}
+          </Panel>
+          <Panel className={`w-[${(width) / 2}]px h-[${height}]px`}>
+            <PanelGroup direction="vertical">
+              <Panel className={`w-[${width / 2}]px h-[${height / 2}]px`}>
+                {renderMediaComponent(
+                  order[1],
+                  media,
+                  videoRef2,
+                  loopStart,
+                  loopEnd,
+                  width / 2,
+                  height / 2,
+                  `media-1`,
+                )}
+              </Panel>
+              <Panel className={`w-[${width / 2}]px h-[${height / 2}]px`}>
+                {renderMediaComponent(
+                  order[2],
+                  media,
+                  videoRef2,
+                  loopStart,
+                  loopEnd,
+                  width / 2,
+                  height / 2,
+                  `media-1`,
+                )}
+              </Panel>
+            </PanelGroup>
+          </Panel>
+        </PanelGroup>
+      )}
+      {layout === "side-by-side-left-stacked" && (
+        <PanelGroup direction="horizontal">
+          <Panel className={`w-[${(width) / 2}]px h-[${height}]px`}>
+            <PanelGroup direction="vertical">
+              <Panel className={`w-[${width / 2}]px h-[${height / 2}]px`}>
+                {renderMediaComponent(
+                  order[0],
+                  media,
+                  videoRef2,
+                  loopStart,
+                  loopEnd,
+                  width / 2,
+                  height / 2,
+                  `media-1`,
+                )}
+              </Panel>
+              <Panel className={`w-[${width / 2}]px h-[${height / 2}]px`}>
+                {renderMediaComponent(
+                  order[1],
+                  media,
+                  videoRef2,
+                  loopStart,
+                  loopEnd,
+                  width / 2,
+                  height / 2,
+                  `media-1`,
+                )}
+              </Panel>
+            </PanelGroup>
+          </Panel>
+          <Panel className={`w-[${(width) / 2}]px h-[${height}]px`}>
+            {renderMediaComponent(
+              order[2],
+              media,
+              videoRef2,
+              loopStart,
+              loopEnd,
+              width / 2,
+              height,
+              `media-0`,
+            )}
+          </Panel>
+        </PanelGroup>
+      )}
+      {layout === "stacked-bottom-side-by-side" && (
+        <PanelGroup direction="vertical">
+          <Panel className={`w-[${(width) / 2}]px h-[${height}]px`}>
+            {renderMediaComponent(
+              order[0],
+              media,
+              videoRef2,
+              loopStart,
+              loopEnd,
+              width / 2,
+              height,
+              `media-0`,
+            )}
+          </Panel>
+          <Panel className={`w-[${(width)}]px h-[${height / 2}]px`}>
+            <PanelGroup direction="horizontal">
+              <Panel className={`w-[${width / 2}]px h-[${height / 2}]px`}>
+                {renderMediaComponent(
+                  order[1],
+                  media,
+                  videoRef2,
+                  loopStart,
+                  loopEnd,
+                  width / 2,
+                  height / 2,
+                  `media-1`,
+                )}
+              </Panel>
+              <Panel className={`w-[${width / 2}]px h-[${height / 2}]px`}>
+                {renderMediaComponent(
+                  order[2],
+                  media,
+                  videoRef2,
+                  loopStart,
+                  loopEnd,
+                  width / 2,
+                  height / 2,
+                  `media-1`,
+                )}
+              </Panel>
+            </PanelGroup>
+          </Panel>
+        </PanelGroup>
+      )}
+      {layout === "stacked-top-side-by-side" && (
+        <PanelGroup direction="vertical">
+          <Panel className={`w-[${(width)}]px h-[${height / 2}]px`}>
+            <PanelGroup direction="horizontal">
+              <Panel className={`w-[${width / 2}]px h-[${height / 2}]px`}>
+                {renderMediaComponent(
+                  order[0],
+                  media,
+                  videoRef2,
+                  loopStart,
+                  loopEnd,
+                  width / 2,
+                  height / 2,
+                  `media-1`,
+                )}
+              </Panel>
+              <Panel className={`w-[${width / 2}]px h-[${height / 2}]px`}>
+                {renderMediaComponent(
+                  order[1],
+                  media,
+                  videoRef2,
+                  loopStart,
+                  loopEnd,
+                  width / 2,
+                  height / 2,
+                  `media-1`,
+                )}
+              </Panel>
+            </PanelGroup>
+          </Panel>
+          <Panel className={`w-[${(width) / 2}]px h-[${height}]px`}>
+            {renderMediaComponent(
+              order[2],
+              media,
+              videoRef2,
+              loopStart,
+              loopEnd,
+              width / 2,
+              height,
+              `media-0`,
+            )}
+          </Panel>
+          
         </PanelGroup>
       )}
     </div>

@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import {
   selectLoopEnd,
+  selectLooping,
   selectLoopStart,
   selectMedia,
   selectTimeElapsed,
@@ -23,13 +24,14 @@ const Minimap: React.FC<MinimapProps> = ({
   startPercentage = 0,
   endPercentage = 100,
   width,
-  height ,
+  height,
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timeElapsed = useSelector(selectTimeElapsed);
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
+  const looping = useSelector(selectLooping);
   const media = useSelector(selectMedia);
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -87,7 +89,6 @@ const Minimap: React.FC<MinimapProps> = ({
         const startSample = 0;
         const endSample = summaryLength;
         const samplesPerPixel = (endSample - startSample) / canvas.width;
-
         if (channel === "LR" && summary.left && summary.right) {
           drawChannel(
             ctx,
@@ -188,13 +189,26 @@ const Minimap: React.FC<MinimapProps> = ({
                 left: `${(timeElapsed / media!.duration) * 100}%`,
                 width: "2px",
                 height: `100%`,
-                backgroundColor: "red",
+                backgroundColor: "blue",
                 zIndex: 100,
                 opacity: 1,
               }}
             />
           )}
         </div>
+        {looping && (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: `${loopStart * width}px`,
+              width: `${(loopEnd - loopStart) * width}px`,
+              height: `100%`,
+              backgroundColor: "rgba(255, 255, 255, 0.3)",
+              zIndex: 200,
+            }}
+          />
+        )}
         <canvas
           ref={canvasRef}
           width={width}

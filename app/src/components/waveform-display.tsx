@@ -7,7 +7,7 @@ import {
 } from "../store/playback-slice";
 import { useSelector } from "react-redux";
 import { FileState } from "../store/filesSlice";
-interface WaveformVisualizerProps {
+interface WaveformDisplayProps {
   media?: FileState;
   channel?: string;
   startPercentage?: number;
@@ -17,7 +17,7 @@ interface WaveformVisualizerProps {
   height: number;
 }
 
-const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
+const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   media,
   channel = "LR",
   startPercentage = 0,
@@ -106,12 +106,41 @@ const WaveformVisualizer: React.FC<WaveformVisualizerProps> = ({
   ]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      style={{ width: width + "px", height: height + "px" }}
-    />
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "none",
+          backgroundColor: "rgba(0, 0, 0, 0)",
+          overflow: "hidden",
+        }}
+      >
+        {crosshair && (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: `${(((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage)) * 100}%`,
+              width: "2px",
+              height: "100%",
+              backgroundColor: "blue",
+              zIndex: 100,
+              opacity: 1,
+            }}
+          />
+        )}
+      </div>
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
+        style={{ width: width + "px", height: height + "px" }}
+      />
+    </div>
   );
 };
-export default WaveformVisualizer;
+export default WaveformDisplay;

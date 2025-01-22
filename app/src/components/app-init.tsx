@@ -5,11 +5,25 @@ import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
-interface FiledropOverlay {
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+
+import { cn } from "@/lib/utils";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { File, FileInput } from "lucide-react";
+interface AppInitProps {
   worker: Worker;
+  className?: string;
 }
 
-const FiledropOverlay: React.FC<FiledropOverlay> = ({ worker }) => {
+const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
   const [isDragging, setIsDragging] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
 
@@ -68,19 +82,57 @@ const FiledropOverlay: React.FC<FiledropOverlay> = ({ worker }) => {
       }}
       onClick={(e) => e.stopPropagation()}
     >
-      <div
-        className="modal"
-        style={{
-          backgroundColor: "white",
-          color: "black",
-          borderRadius: "8px",
-          padding: "20px",
-          textAlign: "center",
-        }}
-      >
-        <h1>Welcome to</h1>
-        <h2>fugue-state.io</h2>
-        <h3>Upload Files</h3>
+      <Card className={cn("w-96", className)}>
+        <CardHeader>
+            <CardTitle className="text-2xl text-center">fugue-state.io</CardTitle>
+          <CardDescription className="text-lg">
+            Login
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form>
+            <div className="flex flex-col gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  required
+                />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
+                  <a
+                    href="#"
+                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                  >
+                    Forgot your password?
+                  </a>
+                </div>
+                <Input id="password" type="password" required />
+              </div>
+              <Button type="submit" className="w-full">
+                Login
+              </Button>
+              <Button variant="outline" className="w-full">
+                Login with Google
+              </Button>
+            </div>
+            <div className="mt-4 text-center text-sm">
+              Don&apos;t have an account?{" "}
+              <a href="#" className="underline underline-offset-4">
+                Sign up
+              </a>
+            </div>
+          </form>
+          <div className="flex items-center justify-center gap-2 mt-6">
+            <h3>--or--</h3>
+          </div>
+          <div className="flex items-center justify-center gap-2 mt-6">
+            <h3>Demo without an account!</h3>
+          </div>
         <div
           className="upload-placeholder"
           style={{
@@ -90,10 +142,9 @@ const FiledropOverlay: React.FC<FiledropOverlay> = ({ worker }) => {
             textAlign: "center",
           }}
         >
-          <FontAwesomeIcon
-            icon={faFileUpload}
-            className="w-6 h-6 unselectable"
-          />
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
+            <FileInput />
+          </div>
           <p className="unselectable">Drag to upload!</p>
           <p className="unselectable">-or-</p>
           <input
@@ -111,9 +162,10 @@ const FiledropOverlay: React.FC<FiledropOverlay> = ({ worker }) => {
             Click to upload files
           </label>
         </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default FiledropOverlay;
+export default AppInit;

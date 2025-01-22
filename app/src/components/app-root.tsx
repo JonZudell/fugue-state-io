@@ -11,21 +11,26 @@ import {
   selectProcessing,
   selectProgress,
   setChannelSummary,
-  setLoopEnd,
-  setLoopStart,
   setProgress,
 } from "@/store/playback-slice";
-import FiledropOverlay from "./filedrop-overlay";
+import AppInit from "./app-init";
 import {
   Panel,
   PanelGroup,
   ImperativePanelGroupHandle,
+  ImperativePanelHandle,
 } from "react-resizable-panels";
 import { useSidebar } from "./ui/sidebar";
 import { Progress } from "./ui/progress";
 import PlaybackControls from "./playback-controls";
 import Minimap from "./minimap";
 import CommandBar from "./CommandBar";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "./ui/resizable";
+import NotationEditor from "./notation-editor";
 
 interface AppRootProps {
   setReady: (ready: boolean) => void;
@@ -35,12 +40,17 @@ interface AppRootProps {
 const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const workerRef = useRef<Worker | null>(null);
   const panelRef = useRef<ImperativePanelGroupHandle>(null);
+  const topPanelRef = useRef<ImperativePanelHandle>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [panelGroupDimensions, setPanelGroupDimensions] = useState({
     width: 0,
     height: 0,
   });
   const [sidebarDimensions, setSidebarDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+  const [topPanelDimensions, setTopPanelDimensions] = useState({
     width: 0,
     height: 0,
   });
@@ -52,14 +62,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const progress = useSelector(selectProgress);
   const { state } = useSidebar();
   const dispatch = useDispatch();
-  const workspaceWidth = panelGroupDimensions.width;
-  const menuHeight = 64; // Define menuHeight or replace with appropriate value
-  const loopEnd = 0; // Define loopEnd or replace with appropriate value
-  const loopStart = 0; // Define loopStart or replace with appropriate value
-  const timeElapsed = 0; // Define timeElapsed or replace with appropriate value
-  const isDraggingRef = useRef(false); // Define isDraggingRef or replace with appropriate value
-  const isPlayingBeforeDragRef = useRef(false); // Define isPlayingBeforeDragRef or replace with appropriate value
-  const videoRef = useRef<HTMLVideoElement>(null); // Define videoRef or replace with appropriate value
+  const menuHeight = 64;
 
   useEffect(() => {
     workerRef.current = new SummarizeWorker();
@@ -125,22 +128,11 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
     };
   }, [handleResize]);
   useEffect(() => {
-    if (state === "collapsed") {
-      const sidebarWidth = 48;
-      setSidebarDimensions({ width: sidebarWidth, height: window.innerHeight });
-      setPanelGroupDimensions({
-        width: window.innerWidth - sidebarWidth,
-        height: window.innerHeight,
-      });
-    } else {
-      const sidebarWidth = 256;
-      setSidebarDimensions({ width: sidebarWidth, height: window.innerHeight });
-      setPanelGroupDimensions({
-        width: window.innerWidth - sidebarWidth,
-        height: window.innerHeight,
-      });
-    }
-  }, [state]);
+    setTopPanelDimensions({
+      width: panelGroupDimensions.width,
+      height: panelGroupDimensions.height,
+    });
+  }, []);
   return (
     <>
       {media && processing ? (
@@ -168,37 +160,57 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
               <Panel
                 style={{
                   width: panelGroupDimensions.width,
-                  height: panelGroupDimensions.height ,
+                  height: panelGroupDimensions.height,
                 }}
               >
-                <CommandBar workspaceWidth={0} leftMenuWidth={0} />
-                <Minimap height={64} width={panelGroupDimensions.width} />
-                <Display
-                  width={panelGroupDimensions.width}
-                  height={panelGroupDimensions.height - menuHeight - 96}
-                  layout={layout}
-                  order={order}
-                />
-                <PlaybackControls
-                  width={panelGroupDimensions.width}
-                  height={menuHeight}
-                  enabled={true}
-                  loopEnd={loopEnd}
-                  setLoopEnd={(end: number) => {
-                    dispatch(setLoopEnd(end));
-                  }}
-                  loopStart={loopStart}
-                  setLoopStart={(start: number) => {
-                    dispatch(setLoopStart(start));
-                  }}
-                  timeElapsed={timeElapsed}
-                  videoRef={videoRef}
-                />
+                <ResizablePanelGroup direction="vertical">
+                  <ResizablePanel
+                    ref={topPanelRef}
+                    onResize={(width, height) => {
+                      console.log(
+                        `Resized to width: ${width}, height: ${height}`,
+                      );
+                      setTopPanelDimensions({ width, height });
+                    }}
+                  >
+                    <CommandBar workspaceWidth={0} leftMenuWidth={0} />
+                    <Minimap height={64} width={panelGroupDimensions.width} />
+                    <Display
+                      width={panelGroupDimensions.width}
+                      height={
+                        (topPanelDimensions.height *
+                          panelGroupDimensions.height) /
+                          100 -
+                        menuHeight -
+                        96
+                      }
+                      layout={layout}
+                      order={order}
+                    />
+                    <PlaybackControls
+                      width={panelGroupDimensions.width}
+                      height={menuHeight}
+                      enabled={true}
+                    />
+                  </ResizablePanel>
+                  <ResizableHandle withHandle />
+                  <ResizablePanel>
+                    <NotationEditor
+                      width={panelGroupDimensions.width}
+                      height={
+                        panelGroupDimensions.height -
+                        (topPanelDimensions.height *
+                          panelGroupDimensions.height) /
+                          100
+                      }
+                    />
+                  </ResizablePanel>
+                </ResizablePanelGroup>
               </Panel>
             )}
 
             {!media && !processing && workerRef.current && (
-              <FiledropOverlay worker={workerRef.current} />
+              <AppInit worker={workerRef.current} />
             )}
           </PanelGroup>
         )

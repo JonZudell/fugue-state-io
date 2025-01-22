@@ -75,13 +75,21 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
       for (let x = 0; x < canvas.width; x++) {
         for (let y = 0; y < canvas.height; y++) {
           const color = colorForBin(Math.floor((y * binsPerPixel) / 8));
-          console.log(samplesPerPixel, startSample, x, y);
-          const alpha = summary.mono[Math.floor(x * samplesPerPixel) + startSample].magnitudes[Math.floor((y * binsPerPixel/ 8))];
-          const index = (x + (canvas.height - y - 1) * canvas.width) * 4;
-          data[index] = color[0];
-          data[index + 1] = color[1];
-          data[index + 2] = color[2];
-          data[index + 3] = alpha * 255;
+          const sampleIndex = Math.floor(x * samplesPerPixel + startSample);
+          const binIndex = Math.floor((y * binsPerPixel) / 8);
+
+          if (
+            summary.mono[sampleIndex] &&
+            summary.mono[sampleIndex].magnitudes[binIndex] !== undefined
+          ) {
+            const magnitude = summary.mono[sampleIndex].magnitudes[binIndex];
+            const alpha = Math.log1p(magnitude) / Math.log1p(255); // Scale alpha logarithmically
+            const index = (x + (canvas.height - y - 1) * canvas.width) * 4;
+            data[index] = color[0];
+            data[index + 1] = color[1];
+            data[index + 2] = color[2];
+            data[index + 3] = alpha * 255;
+          }
         }
       }
 
@@ -110,11 +118,14 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     drawWaveform();
+  }, [media]);
+
+  useEffect(() => {
+    drawWaveform();
   }, [
     channel,
     startPercentage,
     endPercentage,
-    media,
     width,
     height,
     crosshair,
@@ -129,7 +140,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
     if (binsPerPixel) {
       frequencyRef.current = getFrequencyForBin(
         Math.floor(
-          ((canvasRef.current?.height * 2 - mouseY) * binsPerPixel / 8)
+          ((canvasRef.current?.height * 2 - mouseY) * binsPerPixel) / 8,
         ),
       );
       const note = getNoteForFrequency(frequencyRef.current);
@@ -175,7 +186,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
                 left: `${(((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage)) * 100}%`,
                 width: "2px",
                 height: "100%",
-                backgroundColor: "red",
+                backgroundColor: "blue",
                 zIndex: 100,
                 opacity: 1,
               }}

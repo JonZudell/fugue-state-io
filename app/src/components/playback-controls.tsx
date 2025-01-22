@@ -1,7 +1,5 @@
 "use client";
 import "./playback-controls.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPause, faPlay, faRepeat } from "@fortawesome/free-solid-svg-icons";
 import { useSelector, useDispatch } from "react-redux";
 import {
   setPlaying,
@@ -12,19 +10,16 @@ import {
   setLoopEnd,
   selectLooping,
   selectTimeElapsed,
-  selectLoopStart,
-  selectLoopEnd,
 } from "@/store/playback-slice";
 import SpanSlider from "./span-slider";
-import VolumeSelector from "./VolumeSelector";
-import SpeedSelector from "./SpeedSelector";
-import Slider from "./Slider";
+import VolumeSelector from "./volume-selector";
+import SpeedSelector from "./speed-selector";
+import Slider from "./slider";
 import { PauseCircle, PlayCircle, Repeat, Repeat1 } from "lucide-react";
 interface PlaybackControlsProps {
   enabled?: boolean;
   width: number;
   height: number;
-  loopStart: number;
 }
 
 const PlaybackControls: React.FC<PlaybackControlsProps> = ({
@@ -36,8 +31,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const media = useSelector(selectMedia);
   const playing = useSelector(selectPlaying);
   const looping = useSelector(selectLooping);
-  const loopStart = useSelector(selectLoopStart);
-  const loopEnd = useSelector(selectLoopEnd);
   const timeElapsed = useSelector(selectTimeElapsed);
 
   const togglePlay = () => {
@@ -50,10 +43,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   };
 
   const handleToggleLooping = () => {
-    if (looping) {
-      dispatch(setLoopStart(0));
-      dispatch(setLoopEnd(media.duration));
-    }
     dispatch(setLooping(!looping));
   };
 
@@ -97,11 +86,11 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
                   disabled={!enabled}
                   draggable="false"
                 >
-                 {looping ? (
-                  <Repeat className="h-6 w-6" />
-                ) : (
-                  <Repeat1 className="h-6 w-6" />
-                )}
+                  {looping ? (
+                    <Repeat className="h-6 w-6" />
+                  ) : (
+                    <Repeat1 className="h-6 w-6" />
+                  )}
                 </button>
                 <SpeedSelector className="mx-1" enabled={enabled} />
               </div>
