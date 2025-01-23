@@ -1,0 +1,28 @@
+.span-slider__track {
+  background-color: #a3a3a3;
+  position: relative;
+  border-radius: 0px;
+  height: 10px;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  opacity: 1;
+  border: 1px solid #000000;
+}
+
+.span-slider__thumb_1 {
+  width: 8px;
+  height: 10px;
+  background-color: #ffffff;
+  cursor: ew-resize;
+  border-radius: 0%;
+  border: none;
+  z-index: 2;
+}
+
+.span-slider__before {
+  height: 10px;
+  background-color: var(--tw-ring-color);
+  z-index: 0;
+  opacity: 1;
+}
