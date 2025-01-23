@@ -44,21 +44,23 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
       cursorRef.current = cursor;
     }
   };
-  const svgToDataURL = (svg) => {
+  const svgToDataURL = (svg: Node) => {
     const svgString = new XMLSerializer().serializeToString(svg);
     console.log(svgString);
     return `data:image/svg+xml;base64,${btoa(svgString)}`;
   };
 
-  const renderSvgToCanvas = (svg, canvas) => {
+  const renderSvgToCanvas = (svg: SVGSVGElement, canvas: HTMLCanvasElement) => {
     const ctx = canvas.getContext('2d');
     const img = new Image();
     img.onload = () => {
       console.log("drawing image");
-      ctx.save();
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0, canvas.width * 3, canvas.height);
-      ctx.restore();
+      if (ctx) {
+        ctx.save();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width * 3, canvas.height);
+        ctx.restore();
+      }
     };
     img.src = svgToDataURL(svg);
   };
@@ -110,8 +112,8 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
   useEffect(() => {
     if (tunes) {
       createCursor();
-      setTimingCallbacks(
-        new abcjs.TimingCallbacks(tunes[0], {
+      setTimingCallbacks( // @ts-ignore
+        new abcjs.TimingCallbacks(tunes[0], { // @ts-ignore
           eventCallback: (ev: any) => {
             const x = ev.left - 2;
             const y = ev.top;

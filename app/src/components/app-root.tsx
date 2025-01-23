@@ -170,7 +170,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                       console.log(
                         `Resized to width: ${width}, height: ${height}`,
                       );
-                      setTopPanelDimensions({ width, height });
+                      setTopPanelDimensions({ width: width ?? 0, height: height ?? 0 });
                     }}
                   >
                     <CommandBar workspaceWidth={0} leftMenuWidth={0} />

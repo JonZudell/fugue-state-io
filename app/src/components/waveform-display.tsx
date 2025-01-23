@@ -31,7 +31,7 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   const loopStart = useSelector(selectLoopStart);
   const loopEnd = useSelector(selectLoopEnd);
   const drawWaveform = useCallback(
-    (canvas, ctx) => {
+    (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
       if (media && media.summary && canvas) {
         if (!ctx) {
           return;
@@ -40,6 +40,9 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas before drawing
 
         const { summary } = media;
+        if (!summary.mono) {
+          return;
+        }
         const summaryLength = summary.mono.length;
         const startSample = Math.floor((startPercentage / 100) * summaryLength);
         const endSample = Math.floor((endPercentage / 100) * summaryLength);

@@ -43,7 +43,7 @@ const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
       const files = event.dataTransfer?.files;
       if (files) {
         Array.from(files).forEach(async (file) => {
-          dispatch(uploadFile(file));
+          dispatch(uploadFile({file, worker}));
         });
       }
     };

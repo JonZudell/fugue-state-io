@@ -19,10 +19,10 @@ export type SummarizedFrame = {
 };
 
 export type Channels = {
-  mono: SummarizedFrame[];
-  left?: SummarizedFrame[];
-  right?: SummarizedFrame[];
-  side?: SummarizedFrame[];
+  mono: SummarizedFrame[] | null;
+  left?: SummarizedFrame[] | null;
+  right?: SummarizedFrame[] | null;
+  side?: SummarizedFrame[] | null;
 };
 function applyWindowFunction(data: number[], windowType: string): number[] {
   const N = data.length;
@@ -179,7 +179,7 @@ const binColors = [
 
 const frequencyRanges = Array.from({ length: SAMPLE_BIN_SIZE }, (_, bin) => ({
   bin,
-  frequency: getFrequencyForBin(bin, SAMPLE_RATE, SAMPLE_BIN_SIZE),
+  frequency: getFrequencyForBin(bin),
   binColor: binColors.find((color) => color.bins.includes(bin))?.color,
 }));
 const indexesWithBinColor = frequencyRanges
@@ -194,14 +194,16 @@ for (let i = 1; i < indexesWithBinColor.length; i++) {
   const end = indexesWithBinColor[i];
   const startColor = frequencyRanges[start].binColor;
   const endColor = frequencyRanges[end].binColor;
-  const color = new Array(3).fill(0);
-  const gradientWidth = end - start;
-  for (let j = start; j < end; j++) {
-    const ratio = (j - start) / gradientWidth;
-    color[0] = Math.round(startColor[0] * (1 - ratio) + endColor[0] * ratio);
-    color[1] = Math.round(startColor[1] * (1 - ratio) + endColor[1] * ratio);
-    color[2] = Math.round(startColor[2] * (1 - ratio) + endColor[2] * ratio);
-    frequencyRanges[j].binColor = [...color];
+  if (startColor && endColor) {
+    const color = new Array(3).fill(0);
+    const gradientWidth = end - start;
+    for (let j = start; j < end; j++) {
+      const ratio = (j - start) / gradientWidth;
+      color[0] = Math.round(startColor[0] * (1 - ratio) + endColor[0] * ratio);
+      color[1] = Math.round(startColor[1] * (1 - ratio) + endColor[1] * ratio);
+      color[2] = Math.round(startColor[2] * (1 - ratio) + endColor[2] * ratio);
+      frequencyRanges[j].binColor = [...color];
+    }
   }
 }
 export function colorForBin(bin: number): number[] {

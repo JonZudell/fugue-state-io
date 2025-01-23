@@ -20,6 +20,7 @@ import {
 } from "@/store/playback-slice";
 import { Panel, PanelGroup } from "react-resizable-panels";
 import NotationDisplay from "./notation-display";
+import { FileState } from "@/store/filesSlice";
 
 interface Display {
   order: string[];
@@ -31,7 +32,7 @@ interface Display {
 const renderMediaComponent = (
   type: string,
   media: FileState,
-  videoRef2: React.RefObject<HTMLVideoElement>,
+  videoRef2: React.RefObject<HTMLVideoElement | null> | null,
   loopStart: number,
   loopEnd: number,
   width: number,

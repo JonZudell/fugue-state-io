@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { FileState } from "./filesSlice";
 import { setVideoEnabled } from "./display-slice";
+import { Channels } from "@/lib/dsp";
+import { EventCallbackReturn } from "abcjs";
 interface Progress {
   channel: keyof Channels;
   progress: number;
@@ -20,7 +22,7 @@ interface PlaybackState {
   mode: "mono" | "stereo";
   progess: Progress[];
   notationList: string[];
-  timingCallbacks: ((ev: any) => void)[];
+  timingCallbacks: ((ev: any) => EventCallbackReturn) | null;
   changedSelection: {start: number, end: number};
   noteTimings: { [key: string]: number };
 }
@@ -39,7 +41,7 @@ const initialState: PlaybackState = {
   mode: "stereo",
   progess: [],
   notationList: [],
-  timingCallbacks: [],
+  timingCallbacks: null,
   changedSelection: {start: 0, end: 0},
   noteTimings: {},
 };
@@ -186,7 +188,7 @@ const playbackSlice = createSlice({
     ) => {
       state.changedSelection = action.payload;
     },
-    setSelectedNoteTimes: (
+    setNoteTimings: (
       state: PlaybackState,
       action: PayloadAction<{ [key: string]: number }>,
     ) => {
@@ -210,7 +212,7 @@ const playbackSlice = createSlice({
     },
     setTimingCallbacks: (
       state: PlaybackState,
-      action: PayloadAction<((ev: any) => void)[]>,
+      action: PayloadAction<((ev: any) => EventCallbackReturn)>,
     ) => {
       state.timingCallbacks = action.payload;
     },
@@ -218,6 +220,9 @@ const playbackSlice = createSlice({
       state: PlaybackState,
       action: PayloadAction<{ summary: Float32Array; channel: keyof Channels }>,
     ) => {
+      if (!state.media || !state.media.summary) {
+        return;
+      }
       (state.media.summary as any)[action.payload.channel] =
         action.payload.summary;
       if (state.mode === "stereo") {
@@ -312,6 +317,8 @@ export const {
   setProgress,
   restartPlayback,
   setNotationList,
-  setTimingCallbacks
+  setTimingCallbacks,
+  setChangedSelection,
+  setNoteTimings,
 } = playbackSlice.actions;
 export default playbackSlice.reducer;
