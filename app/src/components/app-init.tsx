@@ -1,10 +1,8 @@
 "use client";
 import { uploadFile } from "../store/playback-slice";
 import { AppDispatch } from "../store";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
 import {
   Card,
   CardContent,
@@ -17,29 +15,18 @@ import { cn } from "@/lib/utils";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { File, FileInput } from "lucide-react";
+import { FileInput } from "lucide-react";
 interface AppInitProps {
   worker: Worker;
   className?: string;
 }
 
 const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
-  const [isDragging, setIsDragging] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-
-  const handleDragOver = (e: DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
 
   useEffect(() => {
     const handleDrop = (event: DragEvent) => {
       event.preventDefault();
-      setIsDragging(false);
       const files = event.dataTransfer?.files;
       if (files) {
         Array.from(files).forEach(async (file) => {
@@ -47,13 +34,9 @@ const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
         });
       }
     };
-    document.addEventListener("dragover", handleDragOver);
-    document.addEventListener("dragleave", handleDragLeave);
     document.addEventListener("drop", handleDrop);
 
     return () => {
-      document.removeEventListener("dragover", handleDragOver);
-      document.removeEventListener("dragleave", handleDragLeave);
       document.removeEventListener("drop", handleDrop);
     };
   }, [dispatch]);

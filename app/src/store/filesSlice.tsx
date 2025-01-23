@@ -6,6 +6,7 @@ export interface FileState {
   url: string;
   duration: number;
   summary?: Channels;
+  sampleRate: number;
 }
 interface FilesState {
   files: FileState[];

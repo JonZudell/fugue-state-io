@@ -8,7 +8,7 @@ import {
   selectTimeElapsed,
 } from "../store/playback-slice";
 import { useSelector } from "react-redux";
-import { FileState } from "../store/filesSlice";
+import { SummarizedFrame } from "@/lib/dsp";
 interface MinimapProps {
   width: number;
   channel?: string;
@@ -85,7 +85,7 @@ const Minimap: React.FC<MinimapProps> = ({
         }
 
         const { summary } = media;
-        const summaryLength = summary.mono.length;
+        const summaryLength = summary.mono ? summary.mono.length : 0;
         const startSample = 0;
         const endSample = summaryLength;
         const samplesPerPixel = (endSample - startSample) / canvas.width;

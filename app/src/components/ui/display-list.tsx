@@ -18,10 +18,10 @@ export function DisplayList() {
   ];
   const dispatch = useDispatch();
   const order = useSelector(selectOrder);
-  const addDisplay = (type: string) => {
+  const addDisplay = (type: ("waveform" | "fourier" | "spectrogram" | "video" | "none")) => {
     dispatch(setOrder([...order, type]));
   };
-  const onChange = (value: string, index: number) => {
+  const onChange = (value: ("waveform" | "fourier" | "spectrogram" | "video" | "none"), index: number) => {
     const newOrder = [...order];
     newOrder[index] = value;
     dispatch(setOrder(newOrder));
@@ -49,7 +49,7 @@ export function DisplayList() {
             <DisplayItem
               values={displayOptions}
               value={type}
-              onChange={(value) => onChange(value, index)}
+              onChange={(value) => onChange(value as "waveform" | "fourier" | "spectrogram" | "video" | "none", index)}
               placeholder={"Select Display Type"}
               empty={"Select Display Type"}
             />

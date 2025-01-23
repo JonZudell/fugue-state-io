@@ -22,7 +22,7 @@ interface PlaybackState {
   mode: "mono" | "stereo";
   progess: Progress[];
   notationList: string[];
-  timingCallbacks: ((ev: any) => EventCallbackReturn) | null;
+  timingCallbacks: ((ev: EventCallbackReturn) => EventCallbackReturn) | null;
   changedSelection: {start: number, end: number};
   noteTimings: { [key: string]: number };
 }
@@ -49,7 +49,7 @@ const initialState: PlaybackState = {
 export const selectMedia = (state: { playback: { media: FileState } }) =>
   state.playback.media;
 export const selectTimingCallbacks = (state: {
-  playback: { timingCallbacks: ((ev: any) => void)[] };
+  playback: { timingCallbacks: ((ev: EventCallbackReturn) => void)[] };
 }) => state.playback.timingCallbacks;
 export const selectNoteTimings = (state: {
   playback: { noteTimings: { [key: string]: number } };
@@ -89,7 +89,7 @@ export const selectNotationList = (state: {
 export const uploadFile = createAsyncThunk(
   "playback/uploadFile",
   async ({ file, worker }: { file: File; worker: Worker }, { dispatch }) => {
-    return new Promise<FileState>(async (resolve, reject) => {
+    return new Promise<FileState>(async (_resolve, _reject) => {
       dispatch(setProcessing(true));
       if (!file.type.startsWith("video")) {
         dispatch(setVideoEnabled(false));
@@ -113,6 +113,7 @@ export const uploadFile = createAsyncThunk(
         })(),
         duration: audioBuffer.duration,
         summary: { left: null, right: null, mono: null, side: null },
+        sampleRate: 44100
       };
 
       dispatch(setMedia(media));

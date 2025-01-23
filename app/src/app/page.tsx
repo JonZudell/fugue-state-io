@@ -3,7 +3,7 @@ import { Provider } from "react-redux";
 import store from "../store";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppRoot from "@/components/app-root";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { LoaderPinwheel } from "lucide-react";
 export default function Home() {
   const [ready, setReady] = useState(false);

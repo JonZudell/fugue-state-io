@@ -1,5 +1,5 @@
 "use client";
-import { useState, useLayoutEffect, useEffect, useRef } from "react";
+import { useState } from "react";
 import { selectVolume, setVolume } from "../store/playback-slice";
 import { useSelector, useDispatch } from "react-redux";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
@@ -10,7 +10,7 @@ interface SpanSliderProps {
   enabled?: boolean;
 }
 
-const VolumeSelector: React.FC<SpanSliderProps> = ({ className, enabled }) => {
+const VolumeSelector: React.FC<SpanSliderProps> = ({ className }) => {
   const dispatch = useDispatch();
   const volume = useSelector(selectVolume);
   const [thumbValue, setThumbValue] = useState(volume);

@@ -16,9 +16,9 @@ import {
 
 interface FourierDisplayProps {
   media?: FileState;
-  width?: number;
+  width: number;
   channel?: string;
-  height?: number;
+  height: number;
   crosshair?: boolean;
   displayRatioVertical?: number;
   displayRatioHorizontal?: number;
@@ -178,10 +178,6 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
     frequencyRef.current = null;
     setMouseX(null);
   };
-  const handleMouseEnter = () => {
-    setCursorPosition(null);
-    frequencyRef.current = null;
-  };
 
   useEffect(() => {
     if (cursorPosition !== null && media && media.summary) {
@@ -195,78 +191,82 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       }
       if (channel === "LR" && media.summary.left && media.summary.right) {
         const { summary } = media;
-        const summaryLength = summary.mono.length;
+        const summaryLength = summary.mono ? summary.mono.length : 0;
         const startSample = 0;
         const endSample = summaryLength;
         const topSample = Math.floor(
           (cursorPosition / canvas.width) * (endSample - startSample),
         );
-        const topBin = Math.floor(
-          ((cursorPosition / canvas.width) *
-            summary.left[0].magnitudes.length) /
-            8,
-        );
-        const topFrequency = getFrequencyForBin(topBin, media.sampleRate);
+        const topBin = summary.left
+          ? Math.floor(
+              ((cursorPosition / canvas.width) *
+                summary.left[0].magnitudes.length) /
+                8,
+            )
+          : 0;
+        const topFrequency = getFrequencyForBin(topBin);
         const topNote = getNoteForFrequency(topFrequency);
         const topMagnitude =
-          summary.left[startSample + topSample].magnitudes[topBin];
+          summary.left ? summary.left[startSample + topSample].magnitudes[topBin] : 0;
         setTopInfoString(
           `Frequency: ${topFrequency.toFixed(2)}Hz, Note: ${topNote}, Magnitude: ${topMagnitude.toFixed(2)}`,
         );
         const bottomSample = Math.floor(
           (cursorPosition / canvas.width) * (endSample - startSample),
         );
-        const bottomBin = Math.floor(
-          ((cursorPosition / canvas.width) *
-            summary.right[0].magnitudes.length) /
-            8,
-        );
-        const bottomFrequency = getFrequencyForBin(bottomBin, media.sampleRate);
+        const bottomBin = summary.right
+          ? Math.floor(
+              ((cursorPosition / canvas.width) *
+                summary.right[0].magnitudes.length) /
+                8,
+            )
+          : 0;
+        const bottomFrequency = getFrequencyForBin(bottomBin);
         const bottomNote = getNoteForFrequency(bottomFrequency);
         const bottomMagnitude =
-          summary.right[startSample + bottomSample].magnitudes[bottomBin];
+          summary.right ? summary.right[startSample + bottomSample].magnitudes[bottomBin] : 0;
         setBottomInfoString(
           `Frequency: ${bottomFrequency.toFixed(2)}Hz, Note: ${bottomNote}, Magnitude: ${bottomMagnitude.toFixed(2)}`,
         );
       } else if (channel === "MID" && media.summary.mono) {
         const { summary } = media;
-        const summaryLength = summary.mono.length;
+        const summaryLength = summary.mono ? summary.mono.length : 0;
         const startSample = Math.floor((0 / 100) * summaryLength);
         const endSample = Math.floor((100 / 100) * summaryLength);
         const x = cursorPosition;
         const xSample = Math.floor(
           (x / canvas.width) * (endSample - startSample),
         );
-        const bin = Math.floor(
+        const bin = summary.mono ? Math.floor(
           ((cursorPosition / canvas.width) *
             summary.mono[0].magnitudes.length) /
             8,
-        );
-        const frequency = getFrequencyForBin(bin, media.sampleRate);
+        ) : 0;
+        const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
         const time = (xSample / media.sampleRate).toFixed(2);
-        const magnitude = summary.mono[startSample + xSample].magnitudes[bin];
+        const magnitude = summary.mono ? summary.mono[startSample + xSample].magnitudes[bin] : 0;
         setTopInfoString(
           `Time: ${time}s, Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
         );
       } else if (channel === "SIDE" && media.summary.side) {
         const { summary } = media;
-        const summaryLength = summary.side.length;
+        const summaryLength = summary.side ? summary.side.length : 0;
         const startSample = Math.floor((0 / 100) * summaryLength);
         const endSample = Math.floor((100 / 100) * summaryLength);
         const x = cursorPosition;
         const xSample = Math.floor(
           (x / canvas.width) * (endSample - startSample),
         );
-        const bin = Math.floor(
+        const bin = summary.side ? Math.floor(
           ((cursorPosition / canvas.width) *
             summary.side[0].magnitudes.length) /
             8,
-        );
-        const frequency = getFrequencyForBin(bin, media.sampleRate);
+        ) : 0;
+        const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
         const time = (xSample / media.sampleRate).toFixed(2);
-        const magnitude = summary.side[startSample + xSample].magnitudes[bin];
+        const magnitude = summary.side ? summary.side[startSample + xSample].magnitudes[bin] : 0;
         setTopInfoString(
           `Time: ${time}s, Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
         );

@@ -1,9 +1,8 @@
 "use client";
 import { useState, useLayoutEffect, useEffect, useRef } from "react";
-import "./Slider.css";
+import "./slider.css";
 import {
   selectLoopEnd,
-  selectLooping,
   selectLoopStart,
   selectMedia,
   selectPlaying,
@@ -53,7 +52,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
     dispatch(setPlaying(isPlayingBeforeDragRef.current));
     document.removeEventListener("mousemove", handleThumb1Drag);
   };
-  const handleMouseDown = (e) => {
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     const rect = spanSliderRef.current?.getBoundingClientRect();
     if (!rect) return;

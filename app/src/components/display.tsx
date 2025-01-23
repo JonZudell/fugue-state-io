@@ -1,7 +1,5 @@
 "use client";
-import { ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Fragment, useEffect, useRef } from "react";
-import CommandBar from "./CommandBar";
+import { useEffect, useRef } from "react";
 import FourierDisplay from "./fourier-display";
 import SpectrogramDisplay from "./spectrogram-display";
 import WaveformDisplay from "./waveform-display";
@@ -15,7 +13,6 @@ import {
   selectTimeElapsed,
   selectVolume,
   selectSpeed,
-  selectMode,
   setTimeElapsed,
 } from "@/store/playback-slice";
 import { Panel, PanelGroup } from "react-resizable-panels";

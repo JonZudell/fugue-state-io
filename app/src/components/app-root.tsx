@@ -1,9 +1,9 @@
 "use client";
 import { useDispatch, useSelector } from "react-redux";
-import { AppSidebar } from "./app-sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 import { selectLayout, selectOrder } from "@/store/display-slice";
-import Display from "./display";
-import { useCallback, useEffect, useRef, useState } from "react";
+import Display from "@/components/display";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import SummarizeWorker from "@/workers/summarize.worker.js"; // Adjust the import path as necessary
 import {
   selectMedia,
@@ -23,8 +23,8 @@ import {
 import { useSidebar } from "./ui/sidebar";
 import { Progress } from "./ui/progress";
 import PlaybackControls from "./playback-controls";
-import Minimap from "./minimap";
-import CommandBar from "./CommandBar";
+import Minimap from "@/components/minimap";
+import CommandBar from "@/components/CommandBar";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -43,10 +43,6 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const topPanelRef = useRef<ImperativePanelHandle>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [panelGroupDimensions, setPanelGroupDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
-  const [sidebarDimensions, setSidebarDimensions] = useState({
     width: 0,
     height: 0,
   });
@@ -89,7 +85,6 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                 channel: event.data.channel,
               }),
             );
-          } else {
           }
         }
       };
@@ -102,17 +97,16 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
       }
     };
   }, [workerRef, dispatch, mode]);
+
   const handleResize = useCallback(() => {
     if (state === "collapsed") {
       const sidebarWidth = 48;
-      setSidebarDimensions({ width: sidebarWidth, height: window.innerHeight });
       setPanelGroupDimensions({
         width: window.innerWidth - sidebarWidth,
         height: window.innerHeight,
       });
     } else {
       const sidebarWidth = 256;
-      setSidebarDimensions({ width: sidebarWidth, height: window.innerHeight });
       setPanelGroupDimensions({
         width: window.innerWidth - sidebarWidth,
         height: window.innerHeight,
@@ -120,19 +114,21 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
     }
   }, [state]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.addEventListener("resize", handleResize);
     handleResize();
     return () => {
       window.removeEventListener("resize", handleResize);
     };
   }, [handleResize]);
-  useEffect(() => {
+
+  useLayoutEffect(() => {
     setTopPanelDimensions({
       width: panelGroupDimensions.width,
       height: panelGroupDimensions.height,
     });
-  }, []);
+  }, [panelGroupDimensions]);
+
   return (
     <>
       {media && processing ? (

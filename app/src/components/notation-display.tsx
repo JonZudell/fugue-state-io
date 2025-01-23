@@ -1,7 +1,6 @@
 "use client";
-import { Editor } from "@monaco-editor/react";
-import { use, useEffect, useRef, useState } from "react";
-import abcjs from "abcjs";
+import { useEffect, useRef, useState } from "react";
+import abcjs, { TuneObjectArray } from "abcjs";
 import { selectNotationList, selectTimeElapsed, setTimingCallbacks, setNoteTimings } from "@/store/playback-slice";
 import { useDispatch, useSelector } from "react-redux";
 interface NotationDisplayProps {
@@ -11,7 +10,6 @@ interface NotationDisplayProps {
 }
 
 const NotationDisplay: React.FC<NotationDisplayProps> = ({
-  className,
   width,
   height,
 }) => {
@@ -20,7 +18,7 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
   const svgRef = useRef<SVGSVGElement | null>(null);
   const divRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [tunes, setTunes] = useState<any>(null);
+  const [tunes, setTunes] = useState<TuneObjectArray | null>(null);
   const timeElapsed = useSelector(selectTimeElapsed);
   const notationList = useSelector(selectNotationList)
 
@@ -112,8 +110,8 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
   useEffect(() => {
     if (tunes) {
       createCursor();
-      setTimingCallbacks( // @ts-ignore
-        new abcjs.TimingCallbacks(tunes[0], { // @ts-ignore
+      setTimingCallbacks( // @ts-expect-error
+        new abcjs.TimingCallbacks(tunes[0], { // @ts-expect-error
           eventCallback: (ev: any) => {
             const x = ev.left - 2;
             const y = ev.top;

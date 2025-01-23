@@ -1,4 +1,3 @@
-const SAMPLE_RATE = 44100;
 const SAMPLE_BIN_SIZE = 4096;
 const HALF_SAMPLE_BIN_SIZE = Math.floor(SAMPLE_BIN_SIZE / 2);
 const WINDOW_FUNCTION = "hamming";

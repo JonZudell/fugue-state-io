@@ -1,5 +1,5 @@
 "use client";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useRef } from "react";
 import { setNotationList } from "@/store/playback-slice";
 import { Editor } from "@monaco-editor/react";

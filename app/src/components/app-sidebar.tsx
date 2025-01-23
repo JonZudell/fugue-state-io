@@ -142,8 +142,8 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
-  const [activeMenu, setActiveMenu] = React.useState("display");
+  const { state } = useSidebar();
+  const activeMenu = "display";
   return props.hidden ? null : (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

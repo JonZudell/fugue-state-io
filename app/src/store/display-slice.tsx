@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface DisplayState {
   minimap: boolean;
-  order: ("waveform" | "fourier" | "spectrogram" | "video" | "none")[];
+  order: ("waveform" | "fourier" | "spectrogram" | "video" | "none" | "notation")[];
   layout: ("none" | "single" | "stacked" | "stacked-3") | string;
   videoEnabled: boolean;
 }
