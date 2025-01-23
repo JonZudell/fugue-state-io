@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import { selectVolume, setVolume } from "../store/playback-slice";
+import { selectVolume, setVolume } from "@/store/playback-slice";
 import { useSelector, useDispatch } from "react-redux";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Volume, Volume1, Volume2 } from "lucide-react";
 
 interface SpanSliderProps {

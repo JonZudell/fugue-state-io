@@ -1,6 +1,6 @@
 "use client";
 import { Provider } from "react-redux";
-import store from "../store";
+import store from "@/store";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppRoot from "@/components/app-root";
 import { useState } from "react";

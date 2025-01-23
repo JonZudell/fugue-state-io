@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import { FileState } from "./filesSlice";
-import { setVideoEnabled } from "./display-slice";
+import { FileState } from "@/store/filesSlice";
+import { setVideoEnabled } from "@/store/display-slice";
 import { Channels } from "@/lib/dsp";
 import { EventCallbackReturn } from "abcjs";
 interface Progress {

@@ -4,7 +4,7 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setLayout, selectLayout, selectOrder } from "@/store/display-slice";
-import { ViewIcon } from "./view-icon";
+import { ViewIcon } from "@/components/ui/view-icon";
 
 export function DisplayLayout() {
   const dispatch = useDispatch();

@@ -13,24 +13,24 @@ import {
   setChannelSummary,
   setProgress,
 } from "@/store/playback-slice";
-import AppInit from "./app-init";
+import AppInit from "@/components/app-init";
 import {
   Panel,
   PanelGroup,
   ImperativePanelGroupHandle,
   ImperativePanelHandle,
 } from "react-resizable-panels";
-import { useSidebar } from "./ui/sidebar";
-import { Progress } from "./ui/progress";
-import PlaybackControls from "./playback-controls";
-import Minimap from "@/components/minimap";
+import { useSidebar } from "@/components/ui/sidebar";
+import { Progress } from "@/components/ui/progress";
+import PlaybackControls from "@/components/playback-controls";
+import Minimap from "@/components/minimap-display";
 import CommandBar from "@/components/CommandBar";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "./ui/resizable";
-import NotationEditor from "./notation-editor";
+} from "@/components/ui/resizable";
+import NotationEditor from "@/components/notation-editor";
 
 interface AppRootProps {
   setReady: (ready: boolean) => void;

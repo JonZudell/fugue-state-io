@@ -9,7 +9,7 @@ import {
   selectTimeElapsed,
   setPlaying,
   setTimeElapsed,
-} from "../store/playback-slice";
+} from "@/store/playback-slice";
 import { useDispatch, useSelector } from "react-redux";
 interface SpanSliderProps {
   className?: string;

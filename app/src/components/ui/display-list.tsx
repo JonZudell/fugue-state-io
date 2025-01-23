@@ -1,10 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { DisplayItem } from "./display-item";
+import { DisplayItem } from "@/components/ui/display-item";
 import { selectOrder, setOrder } from "@/store/display-slice";
 import { useSelector, useDispatch } from "react-redux";
-import { Button } from "./button";
+import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Trash } from "lucide-react";
 
 export function DisplayList() {

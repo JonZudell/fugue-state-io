@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef } from "react";
-import FourierDisplay from "./fourier-display";
-import SpectrogramDisplay from "./spectrogram-display";
-import WaveformDisplay from "./waveform-display";
+import FourierDisplay from "@/components/fourier-display";
+import SpectrogramDisplay from "@/components/spectrogram-display";
+import WaveformDisplay from "@/components/waveform-display";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectLoopEnd,
@@ -16,7 +16,7 @@ import {
   setTimeElapsed,
 } from "@/store/playback-slice";
 import { Panel, PanelGroup } from "react-resizable-panels";
-import NotationDisplay from "./notation-display";
+import NotationDisplay from "@/components/notation-display";
 import { FileState } from "@/store/filesSlice";
 
 interface Display {

@@ -1,5 +1,5 @@
 "use client";
-import "./playback-controls.css";
+import "@/components/playback-controls.css";
 import { useSelector, useDispatch } from "react-redux";
 import {
   setPlaying,
@@ -11,10 +11,10 @@ import {
   selectLooping,
   selectTimeElapsed,
 } from "@/store/playback-slice";
-import SpanSlider from "./span-slider";
-import VolumeSelector from "./volume-selector";
-import SpeedSelector from "./speed-selector";
-import Slider from "./slider";
+import SpanSlider from "@/components/span-slider";
+import VolumeSelector from "@/components/volume-selector";
+import SpeedSelector from "@/components/speed-selector";
+import Slider from "@/components/slider-input";
 import { PauseCircle, PlayCircle, Repeat, Repeat1 } from "lucide-react";
 interface PlaybackControlsProps {
   enabled?: boolean;

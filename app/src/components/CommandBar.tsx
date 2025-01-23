@@ -7,8 +7,8 @@ import {
   selectIsCommandFocused,
   selectEscDown,
   selectKDown,
-} from "../store/commandSlice";
-import CommandDropdown from "./CommandDrowndown";
+} from "@/store/commandSlice";
+import CommandDropdown from "@/components/CommandDrowndown";
 interface CommandBarProps {
   workspaceWidth: number;
   leftMenuWidth: number;

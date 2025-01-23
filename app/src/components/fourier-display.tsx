@@ -4,9 +4,9 @@ import {
   selectLoopEnd,
   selectLoopStart,
   selectTimeElapsed,
-} from "../store/playback-slice";
+} from "@/store/playback-slice";
 import { useSelector } from "react-redux";
-import { FileState } from "../store/filesSlice";
+import { FileState } from "@/store/filesSlice";
 import {
   colorForBin,
   SummarizedFrame,

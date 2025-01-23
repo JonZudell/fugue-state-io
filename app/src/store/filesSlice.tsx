@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Channels } from "../lib/dsp";
+import { Channels } from "@/lib/dsp";
 export interface FileState {
   name: string;
   fileType: string;

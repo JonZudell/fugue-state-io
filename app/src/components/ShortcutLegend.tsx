@@ -1,7 +1,7 @@
 "use client";
 import { useSelector } from "react-redux";
-import { selectControlDown } from "../store/commandSlice";
-import KeyIcon from "./KeyIcon";
+import { selectControlDown } from "@/store/commandSlice";
+import KeyIcon from "@/components/KeyIcon";
 interface ShortcutLegendProps {
   className?: string;
   width?: number;

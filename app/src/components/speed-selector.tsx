@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
-import { selectSpeed, setSpeed } from "../store/playback-slice";
+import { selectSpeed, setSpeed } from "@/store/playback-slice";
 import { useSelector, useDispatch } from "react-redux";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 interface SpeedSelectorProps {
   className?: string;
   enabled?: boolean;

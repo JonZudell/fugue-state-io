@@ -22,7 +22,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { DisplayMenu } from "./ui/display-menu";
+import { DisplayMenu } from "@/components/ui/display-menu";
 
 // This is sample data.
 const data = {

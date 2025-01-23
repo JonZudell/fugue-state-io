@@ -1,6 +1,6 @@
 "use client";
-import { uploadFile } from "../store/playback-slice";
-import { AppDispatch } from "../store";
+import { uploadFile } from "@/store/playback-slice";
+import { AppDispatch } from "@/store";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/card"
 
 import { cn } from "@/lib/utils";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { FileInput } from "lucide-react";
 interface AppInitProps {
   worker: Worker;

@@ -6,7 +6,7 @@ import {
   selectLoopStart,
   selectMedia,
   selectTimeElapsed,
-} from "../store/playback-slice";
+} from "@/store/playback-slice";
 import { useSelector } from "react-redux";
 import { SummarizedFrame } from "@/lib/dsp";
 interface MinimapProps {
