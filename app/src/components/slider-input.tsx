@@ -1,6 +1,6 @@
 "use client";
-import { useState, useLayoutEffect, useEffect, useRef } from "react";
-import "@/components/slider.css";
+import { useState, useLayoutEffect, useRef } from "react";
+import "@/components/slider-input.css";
 import {
   selectLoopEnd,
   selectLoopStart,
