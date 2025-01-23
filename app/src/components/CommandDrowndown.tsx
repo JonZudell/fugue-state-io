@@ -1,5 +1,5 @@
 "use client";
-import "./CommandDropdown.css";
+import "@/components/CommandDropdown.css";
 interface CommandDropdownProps {
   className?: string;
   width?: number;

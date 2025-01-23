@@ -1,5 +1,5 @@
 import type { Preview } from "@storybook/react";
-import "../src/app/globals.css";
+import "@/app/globals.css";
 import { withCssResources } from "@storybook/addon-cssresources";
 export const decorators = [withCssResources];
 
