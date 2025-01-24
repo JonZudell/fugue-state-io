@@ -9,10 +9,7 @@ interface NotationEditorProps {
   height: number;
 }
 
-const NotationEditor: React.FC<NotationEditorProps> = ({
-  width,
-  height,
-}) => {
+const NotationEditor: React.FC<NotationEditorProps> = ({ width, height }) => {
   const monacoRef = useRef(null);
   const editorRef = useRef(null);
   const dispatch = useDispatch();

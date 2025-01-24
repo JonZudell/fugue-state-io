@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { DisplayItem } from "@/components/ui/display-item";
-import { selectOrder, setOrder } from "@/store/display-slice";
+import { selectDisplay, setOrder } from "@/store/display-slice";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Trash } from "lucide-react";
@@ -17,11 +17,16 @@ export function DisplayList() {
     "notation",
   ];
   const dispatch = useDispatch();
-  const order = useSelector(selectOrder);
-  const addDisplay = (type: ("waveform" | "fourier" | "spectrogram" | "video" | "none")) => {
+  const { order } = useSelector(selectDisplay);
+  const addDisplay = (
+    type: "waveform" | "fourier" | "spectrogram" | "video",
+  ) => {
     dispatch(setOrder([...order, type]));
   };
-  const onChange = (value: ("waveform" | "fourier" | "spectrogram" | "video" | "none"), index: number) => {
+  const onChange = (
+    value: "waveform" | "fourier" | "spectrogram" | "video",
+    index: number,
+  ) => {
     const newOrder = [...order];
     newOrder[index] = value;
     dispatch(setOrder(newOrder));
@@ -49,7 +54,12 @@ export function DisplayList() {
             <DisplayItem
               values={displayOptions}
               value={type}
-              onChange={(value) => onChange(value as "waveform" | "fourier" | "spectrogram" | "video" | "none", index)}
+              onChange={(value) =>
+                onChange(
+                  value as "waveform" | "fourier" | "spectrogram" | "video",
+                  index,
+                )
+              }
               placeholder={"Select Display Type"}
               empty={"Select Display Type"}
             />
@@ -86,7 +96,7 @@ export function DisplayList() {
       ))}
       <button
         className="border-2 border-black border-dashed mt-2 rounded"
-        onClick={() => addDisplay("none")}
+        onClick={() => addDisplay("waveform")}
       >
         +
       </button>

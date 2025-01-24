@@ -1,12 +1,8 @@
 "use client";
 import { useCallback, useEffect, useRef } from "react";
-import {
-  selectLoopEnd,
-  selectLoopStart,
-  selectTimeElapsed,
-} from "@/store/playback-slice";
+import { selectPlayback } from "@/store/playback-slice";
 import { useSelector } from "react-redux";
-import { FileState } from "@/store/filesSlice";
+import { FileState } from "@/store/project-slice";
 interface WaveformDisplayProps {
   media?: FileState;
   channel?: string;
@@ -27,9 +23,7 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   height,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const timeElapsed = useSelector(selectTimeElapsed);
-  const loopStart = useSelector(selectLoopStart);
-  const loopEnd = useSelector(selectLoopEnd);
+  const { timeElapsed, loopStart, loopEnd } = useSelector(selectPlayback);
   const drawWaveform = useCallback(
     (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
       if (media && media.summary && canvas) {

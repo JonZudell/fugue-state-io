@@ -155,7 +155,7 @@ function summarizeFrame(frame) {
   }
 }
 
-function summarizeInterleavedFrames(frames, channel, postMessage) {
+function summarizeInterleavedFrames(frames, channel, id, postMessage) {
   try {
     console.log("Summarizing frames", frames);
     let lastFrame = summarizeFrame(frames[0]);
@@ -186,6 +186,7 @@ function summarizeInterleavedFrames(frames, channel, postMessage) {
           type: "CHANNEL_PROGRESS",
           channel: channel,
           progress: ndx / frames.length,
+          id: id,
         });
       }
       ndx++;
@@ -197,7 +198,7 @@ function summarizeInterleavedFrames(frames, channel, postMessage) {
   }
 }
 
-function process(arrayBuffer, channel, postMessage) {
+function process(arrayBuffer, channel, id, postMessage) {
   try {
     console.log("Processing arrayBuffer:", arrayBuffer, channel);
     const frames = interleavedFramesFromChannelData(arrayBuffer);
@@ -205,10 +206,15 @@ function process(arrayBuffer, channel, postMessage) {
     const summarizedFrames = summarizeInterleavedFrames(
       frames,
       channel,
+      id,
       postMessage,
     );
-    console.log("Summarized frames:", summarizedFrames, channel);
-    postMessage({ type: "CHANNEL_PROGRESS", channel: channel, progress: 1 });
+    postMessage({
+      type: "CHANNEL_PROGRESS",
+      channel: channel,
+      id: id,
+      progress: 1,
+    });
     postMessage({
       type: "SUMMARIZED",
       summary: summarizedFrames,
@@ -235,7 +241,12 @@ self.addEventListener("message", (event) => {
   try {
     console.log("Worker received message:", event.data);
     if (event.data && event.data.type === "SUMMARIZE") {
-      process(event.data.arrayBuffer, event.data.channel, self.postMessage);
+      process(
+        event.data.arrayBuffer,
+        event.data.channel,
+        event.data.channel,
+        self.postMessage,
+      );
     } else if (event.data && event.data.type === "CHECK_READY") {
       checkReady(self.postMessage);
     }

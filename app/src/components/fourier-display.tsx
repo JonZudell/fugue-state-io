@@ -1,12 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import {
-  selectLoopEnd,
-  selectLoopStart,
-  selectTimeElapsed,
-} from "@/store/playback-slice";
 import { useSelector } from "react-redux";
-import { FileState } from "@/store/filesSlice";
+import { MediaFile } from "@/store/project-slice";
+import { selectPlayback } from "@/store/playback-slice";
 import {
   colorForBin,
   SummarizedFrame,
@@ -15,7 +11,7 @@ import {
 } from "@/lib/dsp";
 
 interface FourierDisplayProps {
-  media?: FileState;
+  media?: MediaFile;
   width: number;
   channel?: string;
   height: number;
@@ -32,9 +28,7 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const timeElapsed = useSelector(selectTimeElapsed);
-  const loopStart = useSelector(selectLoopStart);
-  const loopEnd = useSelector(selectLoopEnd);
+  const { timeElapsed, loopStart, loopEnd } = useSelector(selectPlayback);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const frequencyRef = useRef<number | null>(null);
   const [mouseX, setMouseX] = useState<number | null>(null);
@@ -206,8 +200,9 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
           : 0;
         const topFrequency = getFrequencyForBin(topBin);
         const topNote = getNoteForFrequency(topFrequency);
-        const topMagnitude =
-          summary.left ? summary.left[startSample + topSample].magnitudes[topBin] : 0;
+        const topMagnitude = summary.left
+          ? summary.left[startSample + topSample].magnitudes[topBin]
+          : 0;
         setTopInfoString(
           `Frequency: ${topFrequency.toFixed(2)}Hz, Note: ${topNote}, Magnitude: ${topMagnitude.toFixed(2)}`,
         );
@@ -223,8 +218,9 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
           : 0;
         const bottomFrequency = getFrequencyForBin(bottomBin);
         const bottomNote = getNoteForFrequency(bottomFrequency);
-        const bottomMagnitude =
-          summary.right ? summary.right[startSample + bottomSample].magnitudes[bottomBin] : 0;
+        const bottomMagnitude = summary.right
+          ? summary.right[startSample + bottomSample].magnitudes[bottomBin]
+          : 0;
         setBottomInfoString(
           `Frequency: ${bottomFrequency.toFixed(2)}Hz, Note: ${bottomNote}, Magnitude: ${bottomMagnitude.toFixed(2)}`,
         );
@@ -237,15 +233,19 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         const xSample = Math.floor(
           (x / canvas.width) * (endSample - startSample),
         );
-        const bin = summary.mono ? Math.floor(
-          ((cursorPosition / canvas.width) *
-            summary.mono[0].magnitudes.length) /
-            8,
-        ) : 0;
+        const bin = summary.mono
+          ? Math.floor(
+              ((cursorPosition / canvas.width) *
+                summary.mono[0].magnitudes.length) /
+                8,
+            )
+          : 0;
         const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
         const time = (xSample / media.sampleRate).toFixed(2);
-        const magnitude = summary.mono ? summary.mono[startSample + xSample].magnitudes[bin] : 0;
+        const magnitude = summary.mono
+          ? summary.mono[startSample + xSample].magnitudes[bin]
+          : 0;
         setTopInfoString(
           `Time: ${time}s, Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
         );
@@ -258,15 +258,19 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         const xSample = Math.floor(
           (x / canvas.width) * (endSample - startSample),
         );
-        const bin = summary.side ? Math.floor(
-          ((cursorPosition / canvas.width) *
-            summary.side[0].magnitudes.length) /
-            8,
-        ) : 0;
+        const bin = summary.side
+          ? Math.floor(
+              ((cursorPosition / canvas.width) *
+                summary.side[0].magnitudes.length) /
+                8,
+            )
+          : 0;
         const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
         const time = (xSample / media.sampleRate).toFixed(2);
-        const magnitude = summary.side ? summary.side[startSample + xSample].magnitudes[bin] : 0;
+        const magnitude = summary.side
+          ? summary.side[startSample + xSample].magnitudes[bin]
+          : 0;
         setTopInfoString(
           `Time: ${time}s, Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
         );

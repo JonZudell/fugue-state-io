@@ -1,7 +1,7 @@
 "use client";
 import { useState, useLayoutEffect, useEffect, useRef } from "react";
 import "@/components/span-slider.css";
-import { selectLooping } from "@/store/playback-slice";
+import { selectPlayback } from "@/store/playback-slice";
 import { useSelector } from "react-redux";
 interface SpanSliderProps {
   className?: string;
@@ -19,7 +19,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({
   const [thumb1Value, setThumb1Value] = useState(0);
   const [thumb2Value, setThumb2Value] = useState(100);
   const [width, setWidth] = useState(0);
-  const looping = useSelector(selectLooping);
+  const { looping } = useSelector(selectPlayback);
 
   useLayoutEffect(() => {
     if (spanSliderRef.current) {

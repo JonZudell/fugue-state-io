@@ -1,18 +1,18 @@
 "use client";
 import { useDispatch, useSelector } from "react-redux";
 import { AppSidebar } from "@/components/app-sidebar";
-import { selectLayout, selectOrder } from "@/store/display-slice";
+import { selectDisplay } from "@/store/display-slice";
 import Display from "@/components/display";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import SummarizeWorker from "@/workers/summarize.worker.js"; // Adjust the import path as necessary
 import {
-  selectMedia,
-  selectMode,
-  selectProcessing,
-  selectProgress,
-  setChannelSummary,
-  setProgress,
-} from "@/store/playback-slice";
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
+import SummarizeWorker from "@/workers/summarize.worker.js"; // Adjust the import path as necessary
+import { selectPlayback, setChannelSummary } from "@/store/playback-slice";
+import { setProgress } from "@/store/project-slice";
 import AppInit from "@/components/app-init";
 import {
   Panel,
@@ -24,13 +24,19 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { Progress } from "@/components/ui/progress";
 import PlaybackControls from "@/components/playback-controls";
 import Minimap from "@/components/minimap-display";
-import CommandBar from "@/components/CommandBar";
+import CommandHeader from "@/components/command-header";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import NotationEditor from "@/components/notation-editor";
+import {
+  selectProject,
+  selectAnyProcessing,
+  selectProgresses,
+  Project,
+} from "@/store/project-slice";
 
 interface AppRootProps {
   setReady: (ready: boolean) => void;
@@ -38,10 +44,21 @@ interface AppRootProps {
 }
 
 const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
+  const dispatch = useDispatch();
+  const commandBarHeight = 48;
+  const playbackControlsHeight = 64;
+  const minimapHeight = 64;
   const workerRef = useRef<Worker | null>(null);
   const panelRef = useRef<ImperativePanelGroupHandle>(null);
   const topPanelRef = useRef<ImperativePanelHandle>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const progress = useSelector(selectProgresses);
+  const processing = useSelector(selectAnyProcessing);
+
+  const { files, abcs } = useSelector(selectProject) as Project;
+  const { editor, order, layout } = useSelector(selectDisplay);
+  const { mode, media } = useSelector(selectPlayback);
+  const { state } = useSidebar();
   const [panelGroupDimensions, setPanelGroupDimensions] = useState({
     width: 0,
     height: 0,
@@ -50,15 +67,6 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
     width: 0,
     height: 0,
   });
-  const order = useSelector(selectOrder);
-  const mode = useSelector(selectMode);
-  const layout = useSelector(selectLayout);
-  const media = useSelector(selectMedia);
-  const processing = useSelector(selectProcessing);
-  const progress = useSelector(selectProgress);
-  const { state } = useSidebar();
-  const dispatch = useDispatch();
-  const menuHeight = 64;
 
   useEffect(() => {
     workerRef.current = new SummarizeWorker();
@@ -72,6 +80,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
           console.log("Received progress", event.data);
           dispatch(
             setProgress({
+              id: event.data.id,
               channel: event.data.channel,
               progress: event.data.progress,
             }),
@@ -81,6 +90,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
           if (mode === "stereo") {
             dispatch(
               setChannelSummary({
+                id: event.data.id,
                 summary: event.data.summary,
                 channel: event.data.channel,
               }),
@@ -136,11 +146,16 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
           <div className="flex flex-col items-center justify-center h-screen">
             <h1 className="text-4xl text-white">Processing...</h1>
             {progress.map((p, index) => (
-              <Progress
-                key={index}
-                value={p.progress * 100}
-                className="w-[60%] m-2"
-              />
+              <>
+                <h2 className="text-white">
+                  {files[p.id].name} - {p.channel}
+                </h2>
+                <Progress
+                  key={index}
+                  value={p.progress * 100}
+                  className="w-[60%] m-2"
+                />
+              </>
             ))}
           </div>
         </div>
@@ -166,41 +181,52 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                       console.log(
                         `Resized to width: ${width}, height: ${height}`,
                       );
-                      setTopPanelDimensions({ width: width ?? 0, height: height ?? 0 });
+                      setTopPanelDimensions({
+                        width: width ?? 0,
+                        height: height ?? 0,
+                      });
                     }}
                   >
-                    <CommandBar workspaceWidth={0} leftMenuWidth={0} />
-                    <Minimap height={64} width={panelGroupDimensions.width} />
+                    <CommandHeader height={commandBarHeight} />
+                    <Minimap
+                      height={minimapHeight}
+                      width={panelGroupDimensions.width}
+                    />
                     <Display
                       width={panelGroupDimensions.width}
                       height={
                         (topPanelDimensions.height *
                           panelGroupDimensions.height) /
                           100 -
-                        menuHeight -
-                        96
+                        commandBarHeight -
+                        minimapHeight -
+                        playbackControlsHeight
                       }
                       layout={layout}
                       order={order}
                     />
                     <PlaybackControls
                       width={panelGroupDimensions.width}
-                      height={menuHeight}
+                      height={playbackControlsHeight}
                       enabled={true}
                     />
                   </ResizablePanel>
-                  <ResizableHandle withHandle />
-                  <ResizablePanel>
-                    <NotationEditor
-                      width={panelGroupDimensions.width}
-                      height={
-                        panelGroupDimensions.height -
-                        (topPanelDimensions.height *
-                          panelGroupDimensions.height) /
-                          100
-                      }
-                    />
-                  </ResizablePanel>
+                  {editor && (
+                    <>
+                      <ResizableHandle withHandle />
+                      <ResizablePanel>
+                        <NotationEditor
+                          width={panelGroupDimensions.width}
+                          height={
+                            panelGroupDimensions.height -
+                            (topPanelDimensions.height *
+                              panelGroupDimensions.height) /
+                              100
+                          }
+                        />
+                      </ResizablePanel>
+                    </>
+                  )}
                 </ResizablePanelGroup>
               </Panel>
             )}

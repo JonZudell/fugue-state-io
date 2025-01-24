@@ -1,8 +1,12 @@
 "use client";
 import { useState } from "react";
-import { selectSpeed, setSpeed } from "@/store/playback-slice";
+import { selectPlayback, setSpeed } from "@/store/playback-slice";
 import { useSelector, useDispatch } from "react-redux";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 interface SpeedSelectorProps {
   className?: string;
   enabled?: boolean;
@@ -10,16 +14,14 @@ interface SpeedSelectorProps {
 
 const SpeedSelector: React.FC<SpeedSelectorProps> = ({ className }) => {
   const dispatch = useDispatch();
-  const speed = useSelector(selectSpeed);
+  const { speed } = useSelector(selectPlayback);
   const [thumbValue, setThumbValue] = useState(speed);
 
   return (
     <HoverCard>
       <HoverCardTrigger>
-        <div className="h-8 w-8 flex items-center">
-          <span className="transform translate-y1/2">
-            {thumbValue.toFixed(2)}x
-          </span>
+        <div className="h-8 w-8 flex items-center my-[0.25rem]">
+          <span className="">{thumbValue.toFixed(2)}x</span>
         </div>
       </HoverCardTrigger>
       <HoverCardContent>

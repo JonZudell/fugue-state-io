@@ -1,13 +1,8 @@
-ui rewrite shadcn
-  display-menu
-    select / sort displays
-    select associated catalan number
-  
-qol
-  replace current media
+playback-controls rewrite
+  change style
+  handle spacing for loop spanner
+  vertical audio and speed sliders
 
-playback
-  eq
+command-bar
+  replace with shad-cn
 
-ideal implementation
-  layout splits instead of playback area

@@ -6,7 +6,7 @@ import {
   selectTimeElapsed,
 } from "@/store/playback-slice";
 import { useSelector } from "react-redux";
-import { FileState } from "@/store/filesSlice";
+import { FileState } from "@/store/project-slice";
 import {
   colorForBin,
   getFrequencyForBin,
@@ -67,7 +67,9 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
       const startSample = Math.floor((startPercentage / 100) * summaryLength);
       const endSample = Math.floor((endPercentage / 100) * summaryLength);
       const samplesPerPixel = (endSample - startSample) / canvas.width;
-      const binsPerPixel = summary.mono ? summary.mono[0].magnitudes.length / canvas.height : 0;
+      const binsPerPixel = summary.mono
+        ? summary.mono[0].magnitudes.length / canvas.height
+        : 0;
 
       const imageData = ctx.createImageData(canvas.width, canvas.height);
       const data = imageData.data;
@@ -136,12 +138,14 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
 
   useEffect(() => {
     const binsPerPixel =
-      media?.summary?.mono?.[0]?.magnitudes?.length ?? 0 /
-      (canvasRef.current ? canvasRef.current.height * 2 : 0);
+      media?.summary?.mono?.[0]?.magnitudes?.length ??
+      0 / (canvasRef.current ? canvasRef.current.height * 2 : 0);
     if (binsPerPixel) {
       frequencyRef.current = getFrequencyForBin(
         Math.floor(
-          canvasRef.current && mouseY !== null ? ((canvasRef.current.height * 2 - mouseY) * binsPerPixel) / 8 : 0,
+          canvasRef.current && mouseY !== null
+            ? ((canvasRef.current.height * 2 - mouseY) * binsPerPixel) / 8
+            : 0,
         ),
       );
       const note = getNoteForFrequency(frequencyRef.current);

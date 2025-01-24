@@ -1,16 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
-import filesReducer from "@/store/filesSlice";
+import projectReducer from "@/store/project-slice";
 import playbackReducer from "@/store/playback-slice";
-import commandReducer from "@/store/commandSlice";
 import displayReducer from "@/store/display-slice";
 
 import logger from "redux-logger";
 
 const RootState = configureStore({
   reducer: {
-    files: filesReducer,
+    project: projectReducer,
     playback: playbackReducer,
-    command: commandReducer,
     display: displayReducer,
   },
   middleware: (getDefaultMiddleware) =>

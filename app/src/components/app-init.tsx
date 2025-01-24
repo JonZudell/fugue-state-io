@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
@@ -30,7 +30,7 @@ const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
       const files = event.dataTransfer?.files;
       if (files) {
         Array.from(files).forEach(async (file) => {
-          dispatch(uploadFile({file, worker}));
+          dispatch(uploadFile({ file, worker }));
         });
       }
     };
@@ -67,10 +67,8 @@ const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
     >
       <Card className={cn("w-96", className)}>
         <CardHeader>
-            <CardTitle className="text-2xl text-center">fugue-state.io</CardTitle>
-          <CardDescription className="text-lg">
-            Login
-          </CardDescription>
+          <CardTitle className="text-2xl text-center">fugue-state.io</CardTitle>
+          <CardDescription className="text-lg">Login</CardDescription>
         </CardHeader>
         <CardContent>
           <form>
@@ -115,36 +113,43 @@ const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
           </div>
           <div className="flex items-center justify-center gap-2 mt-6">
             <h3>Demo without an account!</h3>
+            <p>Upload a Video or Audio File</p>
           </div>
-        <div
-          className="upload-placeholder"
-          style={{
-            border: "2px dashed #ccc",
-            borderRadius: "8px",
-            padding: "20px",
-            textAlign: "center",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: "10px" }}>
-            <FileInput />
-          </div>
-          <p className="unselectable">Drag to upload!</p>
-          <p className="unselectable">-or-</p>
-          <input
-            type="file"
-            onChange={handleFileUpload}
-            className="upload-button text-gray-400"
-            multiple
-            style={{ display: "none" }}
-            id="file-upload"
-          />
-          <label
-            htmlFor="file-upload"
-            className="cursor-pointer text-blue-500 unselectable"
+          <div
+            className="upload-placeholder"
+            style={{
+              border: "2px dashed #ccc",
+              borderRadius: "8px",
+              padding: "20px",
+              textAlign: "center",
+            }}
           >
-            Click to upload files
-          </label>
-        </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: "10px",
+              }}
+            >
+              <FileInput />
+            </div>
+            <p className="unselectable">Drag to upload file!</p>
+            <p className="unselectable">-or-</p>
+            <input
+              type="file"
+              onChange={handleFileUpload}
+              className="upload-button text-gray-400"
+              multiple
+              style={{ display: "none" }}
+              id="file-upload"
+            />
+            <label
+              htmlFor="file-upload"
+              className="cursor-pointer text-blue-500 unselectable"
+            >
+              Click to upload!
+            </label>
+          </div>
         </CardContent>
       </Card>
     </div>
