@@ -3,12 +3,13 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { setLayout, selectDisplay } from "@/store/display-slice";
+import { setLayout, selectLayout, selectOrder } from "@/store/display-slice";
 import { ViewIcon } from "@/components/ui/view-icon";
 
 export function DisplayLayout() {
   const dispatch = useDispatch();
-  const { layout, order } = useSelector(selectDisplay);
+  const layout = useSelector(selectLayout);
+  const order = useSelector(selectOrder);
   const [count, setCount] = useState(order.length);
   useEffect(() => {
     setCount(order.length);

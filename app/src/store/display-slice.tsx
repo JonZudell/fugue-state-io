@@ -2,24 +2,28 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface DisplayState {
   minimap: boolean;
-  topBar: boolean;
-  editor: boolean;
-  order: ("waveform" | "fourier" | "spectrogram" | "video" | "notation")[];
+  order: ("waveform" | "fourier" | "spectrogram" | "video" | "none")[];
   layout: ("none" | "single" | "stacked" | "stacked-3") | string;
   videoEnabled: boolean;
 }
 
 const initialState: DisplayState = {
   minimap: true,
-  topBar: true,
-  editor: true,
   order: [],
   layout: "none",
   videoEnabled: false,
 };
 
-export const selectDisplay = (state: { display: DisplayState }) =>
-  state.display;
+export const selectMinimap = (state: { display: DisplayState }) =>
+  state.display.minimap;
+export const selectOrder = (state: { display: DisplayState }) =>
+  state.display.order;
+export const selectLayout = (state: { display: DisplayState }) => {
+  console.log(state.display.layout);
+  return state.display.layout;
+};
+export const selectVideoEnabled = (state: { display: DisplayState }) =>
+  state.display.videoEnabled;
 
 const displaySlice = createSlice({
   name: "display",

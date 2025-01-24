@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { MediaFile } from "@/store/project-slice";
-import { selectPlayback } from "@/store/playback-slice";
+import { FileState } from "@/store/asset-slice";
+import { selectTimeElapsed, selectLoopStart, selectLoopEnd } from "@/store/playback-slice";
 import {
   colorForBin,
   SummarizedFrame,
@@ -11,7 +11,7 @@ import {
 } from "@/lib/dsp";
 
 interface FourierDisplayProps {
-  media?: MediaFile;
+  media?: FileState;
   width: number;
   channel?: string;
   height: number;
@@ -28,7 +28,9 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { timeElapsed, loopStart, loopEnd } = useSelector(selectPlayback);
+  const timeElapsed = useSelector(selectTimeElapsed);
+  const loopStart = useSelector(selectLoopStart);
+  const loopEnd = useSelector(selectLoopEnd);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const frequencyRef = useRef<number | null>(null);
   const [mouseX, setMouseX] = useState<number | null>(null);

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { selectPlayback } from "@/store/playback-slice";
+import { selectTimeElapsed, selectLoopStart, selectLoopEnd, selectLooping, selectMedia } from "@/store/playback-slice";
 import { useSelector } from "react-redux";
 import { SummarizedFrame } from "@/lib/dsp";
 interface MinimapProps {
@@ -22,8 +22,12 @@ const Minimap: React.FC<MinimapProps> = ({
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { timeElapsed, loopStart, loopEnd, looping, media } =
-    useSelector(selectPlayback);
+  const timeElapsed = useSelector(selectTimeElapsed);
+  const loopStart = useSelector(selectLoopStart);
+  const loopEnd = useSelector(selectLoopEnd);
+  const looping = useSelector(selectLooping);
+  const media = useSelector(selectMedia);
+    
 
   useEffect(() => {
     const canvas = canvasRef.current;

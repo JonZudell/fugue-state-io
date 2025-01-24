@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { DisplayItem } from "@/components/ui/display-item";
-import { selectDisplay, setOrder } from "@/store/display-slice";
+import { selectOrder, setOrder } from "@/store/display-slice";
 import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp, Trash } from "lucide-react";
@@ -17,7 +17,7 @@ export function DisplayList() {
     "notation",
   ];
   const dispatch = useDispatch();
-  const { order } = useSelector(selectDisplay);
+  const order= useSelector(selectOrder);
   const addDisplay = (
     type: "waveform" | "fourier" | "spectrogram" | "video",
   ) => {

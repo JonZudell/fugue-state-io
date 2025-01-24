@@ -6,7 +6,7 @@ import {
   selectTimeElapsed,
 } from "@/store/playback-slice";
 import { useSelector } from "react-redux";
-import { FileState } from "@/store/project-slice";
+import { FileState } from "@/store/asset-slice";
 import {
   colorForBin,
   getFrequencyForBin,

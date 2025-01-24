@@ -1,13 +1,13 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { use, useEffect, useRef } from "react";
 import FourierDisplay from "@/components/fourier-display";
 import SpectrogramDisplay from "@/components/spectrogram-display";
 import WaveformDisplay from "@/components/waveform-display";
 import { useDispatch, useSelector } from "react-redux";
-import { selectPlayback, setTimeElapsed } from "@/store/playback-slice";
+import { selectMedia, selectPlaying, selectLoopEnd, selectLoopStart, selectLooping, selectTimeElapsed, selectVolume, selectSpeed, setTimeElapsed } from "@/store/playback-slice";
 import { Panel, PanelGroup } from "react-resizable-panels";
 import NotationDisplay from "@/components/notation-display";
-import { MediaFile } from "@/store/project-slice";
+import { FileState } from "@/store/asset-slice";
 
 interface Display {
   order: string[];
@@ -18,7 +18,7 @@ interface Display {
 
 const renderMediaComponent = (
   type: string,
-  media: MediaFile,
+  media: FileState,
   videoRef2: React.RefObject<HTMLVideoElement | null> | null,
   loopStart: number,
   loopEnd: number,
@@ -95,16 +95,14 @@ const renderMediaComponent = (
   }
 };
 const Display: React.FC<Display> = ({ order, layout, width, height }) => {
-  const {
-    media,
-    playing,
-    timeElapsed,
-    loopStart,
-    loopEnd,
-    looping,
-    volume,
-    speed,
-  } = useSelector(selectPlayback);
+  const media = useSelector(selectMedia);
+  const playing = useSelector(selectPlaying);
+  const timeElapsed = useSelector(selectTimeElapsed);
+  const loopStart = useSelector(selectLoopStart);
+  const loopEnd = useSelector(selectLoopEnd);
+  const looping = useSelector(selectLooping);
+  const volume = useSelector(selectVolume);
+  const speed = useSelector(selectSpeed);
   const dispatch = useDispatch();
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoRef2 = useRef<HTMLVideoElement>(null);

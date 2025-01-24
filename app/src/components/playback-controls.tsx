@@ -2,11 +2,14 @@
 import "@/components/playback-controls.css";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  selectPlayback,
   setPlaying,
+  selectPlaying,
+  selectMedia,
   setLooping,
   setLoopStart,
   setLoopEnd,
+  selectLooping,
+  selectTimeElapsed,
 } from "@/store/playback-slice";
 import SpanSlider from "@/components/span-slider";
 import VolumeSelector from "@/components/volume-selector";
@@ -25,7 +28,10 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   width,
 }) => {
   const dispatch = useDispatch();
-  const { media, playing, looping, timeElapsed } = useSelector(selectPlayback);
+  const media = useSelector(selectMedia);
+  const playing = useSelector(selectPlaying);
+  const looping = useSelector(selectLooping);
+  const timeElapsed = useSelector(selectTimeElapsed);
 
   const togglePlay = () => {
     dispatch(setPlaying(!playing));
@@ -79,14 +85,18 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               </button>
               <VolumeSelector className="mx-1" enabled={enabled} />
               <SpeedSelector className="mx-1" enabled={enabled} />
-              <span style={{ userSelect: "none" }} className="my-2 mx-4">
-                {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} / -
+              <span style={{ userSelect: "none"}} className="my-2 mx-4">
+
+            {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} /{" "}
+                -
                 {new Date((media.duration - timeElapsed) * 1000)
                   .toISOString()
                   .substr(12, 7)}
               </span>
             </div>
-          </div>
+
+              
+            </div>
         )}
       </div>
     </>

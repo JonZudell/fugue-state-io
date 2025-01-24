@@ -113,6 +113,8 @@ const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
           </div>
           <div className="flex items-center justify-center gap-2 mt-6">
             <h3>Demo without an account!</h3>
+          </div>
+          <div className="flex items-center justify-center gap-2">
             <p>Upload a Video or Audio File</p>
           </div>
           <div

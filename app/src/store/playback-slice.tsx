@@ -1,12 +1,16 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
-import { MediaFile } from "@/store/project-slice";
+import { FileState } from "@/store/asset-slice";
 import { setVideoEnabled, setLayout, setOrder } from "@/store/display-slice";
 import { Channels } from "@/lib/dsp";
-import { v4 as uuidv4 } from "uuid";
+import { EventCallbackReturn } from "abcjs";
+interface Progress {
+  channel: keyof Channels;
+  progress: number;
+}
 
 interface PlaybackState {
   audioContext: AudioContext | null;
-  media: MediaFile | null;
+  media: FileState | null;
   playing: boolean;
   looping: boolean;
   timeElapsed: number;
@@ -14,7 +18,13 @@ interface PlaybackState {
   volume: number;
   loopStart: number;
   loopEnd: number;
+  processing: boolean;
   mode: "mono" | "stereo";
+  progess: Progress[];
+  notationList: string[];
+  timingCallbacks: ((ev: EventCallbackReturn) => EventCallbackReturn) | null;
+  changedSelection: {start: number, end: number};
+  noteTimings: { [key: string]: number };
 }
 
 const initialState: PlaybackState = {
@@ -27,19 +37,62 @@ const initialState: PlaybackState = {
   volume: 1,
   loopStart: 0,
   loopEnd: 1,
+  processing: false,
   mode: "stereo",
+  progess: [],
+  notationList: [],
+  timingCallbacks: null,
+  changedSelection: {start: 0, end: 0},
+  noteTimings: {},
 };
 
-export const selectPlayback = (state: { playback: PlaybackState }) =>
-  state.playback;
+export const selectMedia = (state: { playback: { media: FileState } }) =>
+  state.playback.media;
+export const selectTimingCallbacks = (state: {
+  playback: { timingCallbacks: ((ev: EventCallbackReturn) => void)[] };
+}) => state.playback.timingCallbacks;
+export const selectNoteTimings = (state: {
+  playback: { noteTimings: { [key: string]: number } };
+}) => state.playback.noteTimings;
+export const selectChangedSelection = (state: {
+  playback: { changedSelection: { start: number; end: number } };
+}) => state.playback.changedSelection;
+export const selectAudioContext = (state: {
+  playback: { audioContext: AudioContext };
+}) => state.playback.audioContext;
+export const selectVolume = (state: { playback: { volume: number } }) =>
+  state.playback.volume;
+export const selectSpeed = (state: { playback: { speed: number } }) =>
+  state.playback.speed;
+export const selectPlaying = (state: { playback: { playing: boolean } }) =>
+  state.playback.playing;
+export const selectTimeElapsed = (state: {
+  playback: { timeElapsed: number };
+}) => state.playback.timeElapsed;
+export const selectLoopStart = (state: { playback: { loopStart: number } }) =>
+  state.playback.loopStart;
+export const selectLoopEnd = (state: { playback: { loopEnd: number } }) =>
+  state.playback.loopEnd;
+export const selectLooping = (state: { playback: { looping: boolean } }) =>
+  state.playback.looping;
+export const selectProgress = (state: { playback: { progess: Progress[] } }) =>
+  state.playback.progess;
+export const selectProcessing = (state: {
+  playback: { processing: boolean };
+}) => state.playback.processing;
+export const selectMode = (state: { playback: { mode: "mono" | "stereo" } }) =>
+  state.playback.mode;
+export const selectNotationList = (state: {
+  playback: { notationList: string[] };
+}) => state.playback.notationList;
 
 export const uploadFile = createAsyncThunk(
   "playback/uploadFile",
   async ({ file, worker }: { file: File; worker: Worker }, { dispatch }) => {
-    return new Promise<MediaFile>(async (_resolve, _reject) => {
-      const id = uuidv4();
-      if (file.type.startsWith("video")) {
-        dispatch(setVideoEnabled(true));
+    return new Promise<FileState>(async (_resolve, _reject) => {
+      dispatch(setProcessing(true));
+      if (!file.type.startsWith("video")) {
+        dispatch(setVideoEnabled(false));
       }
       const audioContext = new AudioContext();
       const audioBuffer = await audioContext.decodeAudioData(
@@ -47,8 +100,7 @@ export const uploadFile = createAsyncThunk(
       );
       const isStereo = audioBuffer.numberOfChannels > 1;
       console.log(`Audio buffer is ${isStereo ? "stereo" : "mono"}`);
-      const media: MediaFile = {
-        id: id,
+      const media: FileState = {
         name: file.name,
         fileType: file.type,
         url: (() => {
@@ -61,18 +113,8 @@ export const uploadFile = createAsyncThunk(
         })(),
         duration: audioBuffer.duration,
         summary: { left: null, right: null, mono: null, side: null },
-        sampleRate: 44100,
-        processing: true,
-        progress: isStereo
-          ? [
-              { channel: "left", progress: 0 },
-              { channel: "right", progress: 0 },
-              { channel: "mono", progress: 0 },
-              { channel: "side", progress: 0 },
-            ]
-          : [{ channel: "mono", progress: 0 }],
+        sampleRate: 44100
       };
-
       if (file.type.startsWith("video")) {
         dispatch(setVideoEnabled(true));
         dispatch(setOrder(["video", "fourier", "notation"]));
@@ -85,6 +127,7 @@ export const uploadFile = createAsyncThunk(
 
       dispatch(setMedia(media));
       if (isStereo) {
+        console.log("Generating stereo summary");
         const leftChannel = audioBuffer.getChannelData(0);
         const rightChannel = audioBuffer.getChannelData(1);
         const monoChannel = new Float32Array(leftChannel.length);
@@ -96,6 +139,11 @@ export const uploadFile = createAsyncThunk(
           sideChannel[i] = leftChannel[i] - rightChannel[i] / 2;
         }
         const framesNeeded = (leftChannel.length / 2048 - 1) * 8 * 4;
+        console.log(`Frames needed: ${framesNeeded}`);
+        dispatch(setProgress({ channel: "mono", progress: 0 }));
+        dispatch(setProgress({ channel: "side", progress: 0 }));
+        dispatch(setProgress({ channel: "left", progress: 0 }));
+        dispatch(setProgress({ channel: "right", progress: 0 }));
         worker.postMessage({
           type: "SUMMARIZE",
           arrayBuffer: monoChannel.buffer,
@@ -117,6 +165,7 @@ export const uploadFile = createAsyncThunk(
           channel: "right",
         });
       } else {
+        dispatch(setProgress({ channel: "mono", progress: 0 }));
         worker.postMessage({
           type: "SUMMARIZE",
           arrayBuffer: audioBuffer.getChannelData(0).buffer,
@@ -137,36 +186,68 @@ const playbackSlice = createSlice({
     ) => {
       state.audioContext = action.payload;
     },
-    setMedia: (state: PlaybackState, action: PayloadAction<MediaFile>) => {
+    setNotationList: (
+      state: PlaybackState,
+      action: PayloadAction<string[]>,
+    ) => {
+      state.notationList = action.payload;
+    },
+    setChangedSelection: (
+      state: PlaybackState,
+      action: PayloadAction<{ start: number; end: number }>,
+    ) => {
+      state.changedSelection = action.payload;
+    },
+    setNoteTimings: (
+      state: PlaybackState,
+      action: PayloadAction<{ [key: string]: number }>,
+    ) => {
+      state.noteTimings = action.payload;
+    },
+    setMedia: (state: PlaybackState, action: PayloadAction<FileState>) => {
       state.media = action.payload;
+    },
+    setProgress: (
+      state: PlaybackState,
+      action: PayloadAction<{ channel: keyof Channels; progress: number }>,
+    ) => {
+      const progressIndex = state.progess.findIndex(
+        (progress) => progress.channel === action.payload.channel,
+      );
+      if (progressIndex === -1) {
+        state.progess.push(action.payload);
+      } else {
+        state.progess[progressIndex] = action.payload;
+      }
+    },
+    setTimingCallbacks: (
+      state: PlaybackState,
+      action: PayloadAction<((ev: any) => EventCallbackReturn)>,
+    ) => {
+      state.timingCallbacks = action.payload;
     },
     setChannelSummary: (
       state: PlaybackState,
-      action: PayloadAction<{
-        summary: Float32Array;
-        id: string;
-        channel: keyof Channels;
-      }>,
+      action: PayloadAction<{ summary: Float32Array; channel: keyof Channels }>,
     ) => {
       if (!state.media || !state.media.summary) {
         return;
       }
       (state.media.summary as any)[action.payload.channel] =
         action.payload.summary;
-    },
-    setProgress: (
-      state: PlaybackState,
-      action: PayloadAction<{ id: string; channel: string; progress: number }>,
-    ) => {
-      if (!state.media || !state.media.progress) {
-        return;
-      }
-      const progress = state.media.progress.find(
-        (p) =>
-          p.channel === action.payload.channel && p.id === action.payload.id,
-      );
-      if (progress) {
-        progress.progress = action.payload.progress;
+      if (state.mode === "stereo") {
+        if (
+          state.media.summary.left &&
+          state.media.summary.right &&
+          state.media.summary.mono &&
+          state.media.summary.side
+        ) {
+          state.processing = false;
+        } else {
+          console.log("Still processing");
+        }
+      } else {
+        state.processing = false;
       }
     },
     setVolume: (state: PlaybackState, action: PayloadAction<number>) => {
@@ -208,6 +289,9 @@ const playbackSlice = createSlice({
         state.loopEnd = 1;
       }
     },
+    setProcessing: (state: PlaybackState, action: PayloadAction<boolean>) => {
+      state.processing = action.payload;
+    },
     setMode: (
       state: PlaybackState,
       action: PayloadAction<"mono" | "stereo">,
@@ -237,8 +321,14 @@ export const {
   setLoopStart,
   setLoopEnd,
   setLooping,
+  setProcessing,
   setMode,
   setChannelSummary,
+  setProgress,
   restartPlayback,
+  setNotationList,
+  setTimingCallbacks,
+  setChangedSelection,
+  setNoteTimings,
 } = playbackSlice.actions;
 export default playbackSlice.reducer;

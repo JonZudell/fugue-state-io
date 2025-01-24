@@ -2,9 +2,13 @@
 import { useState, useLayoutEffect, useRef } from "react";
 import "@/components/slider-input.css";
 import {
+  selectLoopEnd,
+  selectLoopStart,
+  selectMedia,
+  selectPlaying,
+  selectTimeElapsed,
   setPlaying,
   setTimeElapsed,
-  selectPlayback,
 } from "@/store/playback-slice";
 import { useDispatch, useSelector } from "react-redux";
 interface SpanSliderProps {
@@ -15,8 +19,11 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
   const spanSliderRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const [width, setWidth] = useState(0);
-  const { timeElapsed, loopStart, loopEnd, media, playing } =
-    useSelector(selectPlayback);
+  const timeElapsed = useSelector(selectTimeElapsed);
+  const loopStart = useSelector(selectLoopStart);
+  const loopEnd = useSelector(selectLoopEnd);
+  const media = useSelector(selectMedia);
+  const playing = useSelector(selectPlaying);
   const isDraggingRef = useRef<boolean>(false);
   const isPlayingBeforeDragRef = useRef<boolean>(false);
 
