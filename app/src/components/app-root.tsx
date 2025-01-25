@@ -34,7 +34,6 @@ import NotationEditor from "@/components/notation-editor";
 import {
   selectProject,
   selectAnyProcessing,
-  selectProgresses,
   Project,
 } from "@/store/project-slice";
 
@@ -52,10 +51,9 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const panelRef = useRef<ImperativePanelGroupHandle>(null);
   const topPanelRef = useRef<ImperativePanelHandle>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const progress = useSelector(selectProgresses);
   const processing = useSelector(selectAnyProcessing);
 
-  const { files, abcs } = useSelector(selectProject) as Project;
+  const { mediaFiles, abcs } = useSelector(selectProject) as Project;
   const { editor, order, layout } = useSelector(selectDisplay);
   const { mode, media } = useSelector(selectPlayback);
   const { state } = useSidebar();
@@ -145,7 +143,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
         <div className="w-full h-full bg-black">
           <div className="flex flex-col items-center justify-center h-screen">
             <h1 className="text-4xl text-white">Processing...</h1>
-            {progress.map((p, index) => (
+            {/* {progress.map((p, index) => (
               <>
                 <h2 className="text-white">
                   {files[p.id].name} - {p.channel}
@@ -156,7 +154,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                   className="w-[60%] m-2"
                 />
               </>
-            ))}
+            ))} */}
           </div>
         </div>
       ) : (

@@ -1,19 +1,15 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import {
-  selectLoopEnd,
-  selectLoopStart,
-  selectTimeElapsed,
-} from "@/store/playback-slice";
+import { selectPlayback } from "@/store/playback-slice";
 import { useSelector } from "react-redux";
-import { FileState } from "@/store/project-slice";
+import { MediaFile } from "@/store/project-slice";
 import {
   colorForBin,
   getFrequencyForBin,
   getNoteForFrequency,
 } from "@/lib/dsp";
 interface SpectrogramDisplayProps {
-  media?: FileState;
+  media?: MediaFile;
   width?: number;
   channel?: string;
   startPercentage?: number;
@@ -21,8 +17,6 @@ interface SpectrogramDisplayProps {
   height?: number;
   displayRatio?: number;
   crosshair?: boolean;
-  displayRatioVertical?: number;
-  displayRatioHorizontal?: number;
 }
 
 const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
@@ -32,14 +26,10 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   endPercentage = 100,
   width = 1000,
   height = 200,
-  displayRatioVertical = 1,
-  displayRatioHorizontal = 1,
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const timeElapsed = useSelector(selectTimeElapsed);
-  const loopStart = useSelector(selectLoopStart);
-  const loopEnd = useSelector(selectLoopEnd);
+  const { timeElapsed, loopStart, loopEnd } = useSelector(selectPlayback);
   const [mouseY, setMouseY] = useState<number | null>(null);
 
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
@@ -234,8 +224,8 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
           height={height}
           className="w-full"
           style={{
-            width: `${displayRatioHorizontal * 100}%`,
-            height: `${displayRatioVertical * 100}%`,
+            width: `${100}%`,
+            height: `${100}%`,
           }}
         />
       </div>

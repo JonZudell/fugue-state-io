@@ -19,7 +19,7 @@ export type SummarizedFrame = {
 };
 
 export type Channels = {
-  mono: SummarizedFrame[] | null;
+  mono?: SummarizedFrame[] | null;
   left?: SummarizedFrame[] | null;
   right?: SummarizedFrame[] | null;
   side?: SummarizedFrame[] | null;

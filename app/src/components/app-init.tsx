@@ -1,5 +1,5 @@
 "use client";
-import { uploadFile } from "@/store/playback-slice";
+import { uploadFile } from "@/store/project-slice";
 import { AppDispatch } from "@/store";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -42,8 +42,8 @@ const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
   }, [dispatch]);
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    console.log("Files selected for upload:", files);
     if (files) {
+
       Array.from(files).forEach((file) => {
         dispatch(uploadFile({ file, worker }));
       });

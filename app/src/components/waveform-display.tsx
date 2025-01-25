@@ -2,9 +2,9 @@
 import { useCallback, useEffect, useRef } from "react";
 import { selectPlayback } from "@/store/playback-slice";
 import { useSelector } from "react-redux";
-import { FileState } from "@/store/project-slice";
+import { MediaFile } from "@/store/project-slice";
 interface WaveformDisplayProps {
-  media?: FileState;
+  media?: MediaFile;
   channel?: string;
   startPercentage?: number;
   endPercentage?: number;

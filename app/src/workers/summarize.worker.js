@@ -159,7 +159,7 @@ function summarizeInterleavedFrames(frames, channel, id, postMessage) {
   try {
     console.log("Summarizing frames", frames);
     let lastFrame = summarizeFrame(frames[0]);
-    postMessage({ type: "CHANNEL_PROGRESS", channel: channel, progress: 0 });
+    postMessage({ type: "CHANNEL_PROGRESS", id: id, channel: channel, progress: 0 });
 
     const summarizedFrames = [];
 
@@ -218,6 +218,7 @@ function process(arrayBuffer, channel, id, postMessage) {
     postMessage({
       type: "SUMMARIZED",
       summary: summarizedFrames,
+      id: id,
       channel: channel,
     });
   } catch (error) {
@@ -244,7 +245,7 @@ self.addEventListener("message", (event) => {
       process(
         event.data.arrayBuffer,
         event.data.channel,
-        event.data.channel,
+        event.data.mediaId,
         self.postMessage,
       );
     } else if (event.data && event.data.type === "CHECK_READY") {
