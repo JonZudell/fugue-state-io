@@ -159,7 +159,12 @@ function summarizeInterleavedFrames(frames, channel, id, postMessage) {
   try {
     console.log("Summarizing frames", frames);
     let lastFrame = summarizeFrame(frames[0]);
-    postMessage({ type: "CHANNEL_PROGRESS", id: id, channel: channel, progress: 0 });
+    postMessage({
+      type: "CHANNEL_PROGRESS",
+      id: id,
+      channel: channel,
+      progress: 0,
+    });
 
     const summarizedFrames = [];
 

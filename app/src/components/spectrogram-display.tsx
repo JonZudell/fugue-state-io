@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { selectPlayback } from "@/store/playback-slice";
 import { useSelector } from "react-redux";
 import { MediaFile } from "@/store/project-slice";
@@ -17,6 +17,8 @@ interface SpectrogramDisplayProps {
   height?: number;
   displayRatio?: number;
   crosshair?: boolean;
+  displayRatioVertical?: number;
+  displayRatioHorizontal?: number;
 }
 
 const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
@@ -26,6 +28,8 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   endPercentage = 100,
   width = 1000,
   height = 200,
+  displayRatioVertical = 1,
+  displayRatioHorizontal = 1,
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -76,12 +80,11 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
             summary.mono[sampleIndex].magnitudes[binIndex] !== undefined
           ) {
             const magnitude = summary.mono[sampleIndex].magnitudes[binIndex];
-            const alpha = Math.log1p(magnitude) / Math.log1p(255); // Scale alpha logarithmically
             const index = (x + (canvas.height - y - 1) * canvas.width) * 4;
             data[index] = color[0];
             data[index + 1] = color[1];
             data[index + 2] = color[2];
-            data[index + 3] = alpha * 255;
+            data[index + 3] = magnitude * 255;
           }
         }
       }
@@ -127,20 +130,17 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   ]);
 
   useEffect(() => {
-    const binsPerPixel =
-      media?.summary?.mono?.[0]?.magnitudes?.length ??
-      0 / (canvasRef.current ? canvasRef.current.height * 2 : 0);
-    if (binsPerPixel) {
-      frequencyRef.current = getFrequencyForBin(
-        Math.floor(
-          canvasRef.current && mouseY !== null
-            ? ((canvasRef.current.height * 2 - mouseY) * binsPerPixel) / 8
-            : 0,
-        ),
-      );
-      const note = getNoteForFrequency(frequencyRef.current);
-      setInfoString(`${frequencyRef.current.toFixed(2)}Hz - ${note}`);
-    }
+    const length = media?.summary?.mono?.[0].magnitudes.length ?? 0;
+    const heightToLengthRatio = length / canvasRef.current?.height;
+    frequencyRef.current = getFrequencyForBin(
+      Math.floor(
+        canvasRef.current && mouseY !== null
+          ? ((canvasRef.current.height - mouseY) * heightToLengthRatio) / 8
+          : 0,
+      ) + 1,
+    );
+    const note = getNoteForFrequency(frequencyRef.current);
+    setInfoString(`${frequencyRef.current.toFixed(2)}Hz - ${note}`);
   }, [
     cursorPosition,
     endPercentage,
@@ -224,8 +224,8 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
           height={height}
           className="w-full"
           style={{
-            width: `${100}%`,
-            height: `${100}%`,
+            width: `${displayRatioHorizontal * 100}%`,
+            height: `${displayRatioVertical * 100}%`,
           }}
         />
       </div>

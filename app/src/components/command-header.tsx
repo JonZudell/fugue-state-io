@@ -1,21 +1,23 @@
 "use client";
-import { useState, useEffect } from "react";
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { Command } from "@/components/ui/command-header";
+import { Command as CommandPrimitive } from "cmdk";
 
 interface CommandDialogProps {
+  sidebarWidth: number;
   height: number;
+  width: number;
 }
 
-const CommandHeader: React.FC<CommandDialogProps> = ({ height }) => {
+const CommandHeader: React.FC<CommandDialogProps> = ({
+  sidebarWidth,
+  height,
+  width,
+}) => {
   const [open, setOpen] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const commandRef = useRef<typeof CommandPrimitive>(null);
+
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -26,22 +28,20 @@ const CommandHeader: React.FC<CommandDialogProps> = ({ height }) => {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+
   return (
     <>
-      <div
-        className={`h-[${height}px] bg-gray-800 flex items-center justify-center`}
-      ></div>
-      <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder="Type a command or search..." />
-        <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Suggestions">
-            <CommandItem>Calendar</CommandItem>
-            <CommandItem>Search Emoji</CommandItem>
-            <CommandItem>Calculator</CommandItem>
-          </CommandGroup>
-        </CommandList>
-      </CommandDialog>
+      <Command
+        ref={commandRef}
+        style={{ left: sidebarWidth + width / 2 - 225 }}
+        className="absolute rounded-lg border shadow-md max-w-[450px] w-full z-10"
+        openOrHovered={open || hovered}
+        hovered={hovered}
+        open={open}
+        setOpen={setOpen}
+        setHovered={setHovered}
+      />
+      <div style={{ height, width, zIndex: 0 }}></div>
     </>
   );
 };

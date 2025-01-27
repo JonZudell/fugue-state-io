@@ -1,0 +1,21 @@
+.tabs {
+}
+.tab {
+  cursor: pointer;
+  border: 1px solid #000000;
+  background-color: #1e1e1e;
+  padding: 0.5em;
+}
+
+.tab-content {
+}
+
+.add-file-button {
+}
+
+.editor-drawer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}

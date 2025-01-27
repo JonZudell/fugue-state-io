@@ -12,7 +12,7 @@ import {
 } from "react";
 import SummarizeWorker from "@/workers/summarize.worker.js"; // Adjust the import path as necessary
 import { selectPlayback, setChannelSummary } from "@/store/playback-slice";
-import { setProgress } from "@/store/project-slice";
+import { selectProgressState, setProgress } from "@/store/project-slice";
 import AppInit from "@/components/app-init";
 import {
   Panel,
@@ -36,6 +36,7 @@ import {
   selectAnyProcessing,
   Project,
 } from "@/store/project-slice";
+import EditorDrawer from "./editor-drawer";
 
 interface AppRootProps {
   setReady: (ready: boolean) => void;
@@ -52,9 +53,11 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const topPanelRef = useRef<ImperativePanelHandle>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const processing = useSelector(selectAnyProcessing);
+  const progress = useSelector(selectProgressState);
+  const { isMobile } = useSidebar();
 
   const { mediaFiles, abcs } = useSelector(selectProject) as Project;
-  const { editor, order, layout } = useSelector(selectDisplay);
+  const { editor, root } = useSelector(selectDisplay);
   const { mode, media } = useSelector(selectPlayback);
   const { state } = useSidebar();
   const [panelGroupDimensions, setPanelGroupDimensions] = useState({
@@ -76,13 +79,23 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
           console.log("Received message", event.data);
         } else if (event.data.type === "CHANNEL_PROGRESS") {
           console.log("Received progress", event.data);
-          dispatch(
-            setProgress({
-              id: event.data.id,
-              channel: event.data.channel,
-              progress: event.data.progress,
-            }),
-          );
+
+          if (
+            event.data.id &&
+            event.data.channel &&
+            typeof event.data.progress === "number"
+          ) {
+            console.log("Setting progress", event.data);
+            dispatch(
+              setProgress({
+                id: event.data.id,
+                channel: event.data.channel,
+                progress: event.data.progress,
+              }),
+            );
+          } else {
+            console.error("Invalid data shape for setProgress", event.data);
+          }
         } else if (event.data.type === "SUMMARIZED") {
           console.log("Received summary", event.data);
           if (mode === "stereo") {
@@ -107,12 +120,20 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   }, [workerRef, dispatch, mode]);
 
   const handleResize = useCallback(() => {
+    console.log("window.innerWidth", window.innerWidth);
     if (state === "collapsed") {
       const sidebarWidth = 48;
-      setPanelGroupDimensions({
-        width: window.innerWidth - sidebarWidth,
-        height: window.innerHeight,
-      });
+      if (isMobile) {
+        setPanelGroupDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      } else {
+        setPanelGroupDimensions({
+          width: window.innerWidth - sidebarWidth,
+          height: window.innerHeight,
+        });
+      }
     } else {
       const sidebarWidth = 256;
       setPanelGroupDimensions({
@@ -120,7 +141,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
         height: window.innerHeight,
       });
     }
-  }, [state]);
+  }, [state, isMobile]);
 
   useLayoutEffect(() => {
     window.addEventListener("resize", handleResize);
@@ -131,11 +152,14 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   }, [handleResize]);
 
   useLayoutEffect(() => {
-    setTopPanelDimensions({
-      width: panelGroupDimensions.width,
-      height: panelGroupDimensions.height,
-    });
-  }, [panelGroupDimensions]);
+    const height = topPanelRef.current?.getSize();
+    if (height) {
+      setTopPanelDimensions({
+        width: panelGroupDimensions.width,
+        height,
+      });
+    }
+  }, [topPanelRef, panelGroupDimensions]);
 
   return (
     <>
@@ -143,18 +167,18 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
         <div className="w-full h-full bg-black">
           <div className="flex flex-col items-center justify-center h-screen">
             <h1 className="text-4xl text-white">Processing...</h1>
-            {/* {progress.map((p, index) => (
-              <>
+            {progress.map((p, index) => (
+              <div key={index} className="flex flex-col items-center">
                 <h2 className="text-white">
-                  {files[p.id].name} - {p.channel}
+                  {p.name} - {p.channel}
                 </h2>
                 <Progress
                   key={index}
                   value={p.progress * 100}
                   className="w-[60%] m-2"
                 />
-              </>
-            ))} */}
+              </div>
+            ))}
           </div>
         </div>
       ) : (
@@ -176,16 +200,19 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                   <ResizablePanel
                     ref={topPanelRef}
                     onResize={(width, height) => {
-                      console.log(
-                        `Resized to width: ${width}, height: ${height}`,
-                      );
                       setTopPanelDimensions({
                         width: width ?? 0,
                         height: height ?? 0,
                       });
                     }}
                   >
-                    <CommandHeader height={commandBarHeight} />
+                    <CommandHeader
+                      sidebarWidth={
+                        state === "expanded" ? 256 : isMobile ? 0 : 48
+                      }
+                      height={commandBarHeight}
+                      width={panelGroupDimensions.width}
+                    />
                     <Minimap
                       height={minimapHeight}
                       width={panelGroupDimensions.width}
@@ -200,8 +227,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                         minimapHeight -
                         playbackControlsHeight
                       }
-                      layout={layout}
-                      order={order}
+                      node={root}
                     />
                     <PlaybackControls
                       width={panelGroupDimensions.width}
@@ -213,7 +239,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                     <>
                       <ResizableHandle withHandle />
                       <ResizablePanel>
-                        <NotationEditor
+                        <EditorDrawer
                           width={panelGroupDimensions.width}
                           height={
                             panelGroupDimensions.height -

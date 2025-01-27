@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import { MediaFile } from "@/store/project-slice";
-import { setVideoEnabled, setLayout, setOrder } from "@/store/display-slice";
+import { setVideoEnabled } from "@/store/display-slice";
 import { Channels } from "@/lib/dsp";
 import { v4 as uuidv4 } from "uuid";
 

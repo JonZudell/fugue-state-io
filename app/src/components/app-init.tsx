@@ -43,7 +43,6 @@ const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
-
       Array.from(files).forEach((file) => {
         dispatch(uploadFile({ file, worker }));
       });

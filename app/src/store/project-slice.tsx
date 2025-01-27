@@ -45,7 +45,7 @@ const initialState: ProjectsStateInterface = {
 
 export const uploadFile = createAsyncThunk(
   "playback/uploadFile",
-  async ({ file, worker }: { file: File, worker: Worker }, { dispatch }) => {
+  async ({ file, worker }: { file: File; worker: Worker }, { dispatch }) => {
     return new Promise<MediaFile>(async (_resolve, _reject) => {
       const id = uuidv4();
       const audioContext = new AudioContext();
@@ -143,9 +143,22 @@ export const selectAnyProcessing = (state: {
   ).some((file) => file.processing);
 };
 
-export const selectProgress = (state: { project: ProjectsStateInterface }) => {
-  return state.project.projects[state.project.activeProject];
-}
+export const selectProgressState = (state: {
+  project: ProjectsStateInterface;
+}) => {
+  return Object.values(state.project.projects).flatMap((project) =>
+    Object.values(project.mediaFiles).flatMap((file) =>
+      file.progress.map((progress) => ({
+        projectId: project.id,
+        id: file.id,
+        name: file.name,
+        channel: progress.channel,
+        progress: progress.progress,
+      })),
+    ),
+  );
+};
+
 const projectSlice = createSlice({
   name: "files",
   initialState,
@@ -165,13 +178,18 @@ const projectSlice = createSlice({
       action: PayloadAction<{ id: string; channel: string; progress: number }>,
     ) => {
       console.log("Setting progress", action.payload);
-      const file = state.projects[state.activeProject].mediaFiles[action.payload.id];
+
+      const file =
+        state.projects[state.activeProject].mediaFiles[action.payload.id];
+      console.log("File", file);
       if (!file.progress) {
         console.error("No progress found for file", file);
       } else {
+        console.log("File progress", file.progress);
         const progressItem = file.progress.find(
           (p) => p.channel === action.payload.channel,
         );
+        console.log("Progress item", progressItem);
         if (progressItem) {
           progressItem.progress = action.payload.progress;
         } else {
@@ -198,7 +216,7 @@ const projectSlice = createSlice({
       if (state.activeProject === null) {
         console.error("No active project");
       } else {
-        state.projects[state.activeProject].abcs[action.payload.name] =
+        state.projects[state.activeProject].abcs[action.payload.id] =
           action.payload;
       }
     },
@@ -214,6 +232,14 @@ const projectSlice = createSlice({
         console.error("No active project");
       } else {
         delete state.projects[state.activeProject].abcs[action.payload];
+      }
+    },
+    setAbc: (state, action: PayloadAction<ABCAsset>) => {
+      if (state.activeProject === null) {
+        console.error("No active project");
+      } else {
+        state.projects[state.activeProject].abcs[action.payload.id] =
+          action.payload;
       }
     },
     setFileProcessing: (
@@ -235,8 +261,9 @@ const projectSlice = createSlice({
       if (state.activeProject === null) {
         console.error("No active project");
       } else {
-        const file = state.projects[state.activeProject].mediaFiles[action.payload.id];
-        console.log(file)
+        const file =
+          state.projects[state.activeProject].mediaFiles[action.payload.id];
+        console.log(file);
         if (!file.progress) {
           console.error("No progress found for file", file);
         } else {
@@ -260,6 +287,7 @@ const projectSlice = createSlice({
 export const {
   addFile,
   addAbc,
+  setAbc,
   removeFile,
   removeAbc,
   setFileProcessing,

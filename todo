@@ -3,6 +3,4 @@ playback-controls rewrite
   handle spacing for loop spanner
   vertical audio and speed sliders
 
-command-bar
-  replace with shad-cn
-
+multiple notation files

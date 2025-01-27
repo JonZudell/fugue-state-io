@@ -1,21 +1,33 @@
 "use client";
 import { useDispatch } from "react-redux";
-import { useRef } from "react";
-import { setNotationList } from "@/store/playback-slice";
+import { useEffect, useRef } from "react";
+import { ABCAsset, setAbc } from "@/store/project-slice";
 import { Editor } from "@monaco-editor/react";
+import * as monaco from "monaco-editor";
 interface NotationEditorProps {
   className?: string;
   width: number;
   height: number;
+  abc: ABCAsset;
 }
 
-const NotationEditor: React.FC<NotationEditorProps> = ({ width, height }) => {
-  const monacoRef = useRef(null);
-  const editorRef = useRef(null);
+const NotationEditor: React.FC<NotationEditorProps> = ({
+  width,
+  height,
+  abc,
+}) => {
+  const monacoRef = useRef<typeof monaco | null>(null);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const dispatch = useDispatch();
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.setValue(abc.abc);
+    }
+  }, [abc]);
+
   function handleEditorChange(value: any, event: any) {
     console.log("here is the current model value:", value);
-    dispatch(setNotationList([value]));
+    dispatch(setAbc({ ...abc, abc: value }));
   }
   function handleEditorDidMount(editor: any, monaco: any) {
     editorRef.current = editor;

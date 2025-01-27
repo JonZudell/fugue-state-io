@@ -1,11 +1,19 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+export type Node = {
+  id: string;
+  splitDirection?: "horizontal" | "vertical"; // Split container
+  children?: Node[]; // Children for split nodes
+  content?: string; // Content for leaf nodes (windows)
+  width: number; // Width of the node
+  height: number; // Height of the node
+};
+
 export interface DisplayState {
   minimap: boolean;
   topBar: boolean;
   editor: boolean;
-  order: ("waveform" | "fourier" | "spectrogram" | "video" | "notation")[];
-  layout: ("none" | "single" | "stacked" | "stacked-3") | string;
+  root: Node | null;
   videoEnabled: boolean;
 }
 
@@ -13,8 +21,7 @@ const initialState: DisplayState = {
   minimap: true,
   topBar: true,
   editor: true,
-  order: [],
-  layout: "none",
+  root: null,
   videoEnabled: false,
 };
 
@@ -25,26 +32,18 @@ const displaySlice = createSlice({
   name: "display",
   initialState,
   reducers: {
-    setLayout: (state: DisplayState, action: PayloadAction<string>) => {
-      state.layout = action.payload;
-    },
     setMinimap: (state: DisplayState, action: PayloadAction<boolean>) => {
       state.minimap = action.payload;
-    },
-    setOrder: (
-      state: DisplayState,
-      action: PayloadAction<DisplayState["order"]>,
-    ) => {
-      console.log(action.payload);
-      state.order = action.payload;
     },
     setVideoEnabled: (state: DisplayState, action: PayloadAction<boolean>) => {
       state.videoEnabled = action.payload;
     },
+    setRoot: (state: DisplayState, action: PayloadAction<Node>) => {
+      state.root = action.payload;
+    },
   },
 });
 
-export const { setLayout, setMinimap, setOrder, setVideoEnabled } =
-  displaySlice.actions;
+export const { setMinimap, setVideoEnabled } = displaySlice.actions;
 
 export default displaySlice.reducer;
