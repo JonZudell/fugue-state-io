@@ -2,15 +2,16 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type Node = {
   id: string;
-  splitDirection?: "horizontal" | "vertical"; // Split container
-  children?: Node[]; // Children for split nodes
-  content?: string; // Content for leaf nodes (windows)
-  width: number; // Width of the node
-  height: number; // Height of the node
+  splitDirection?: "horizontal" | "vertical";
+  children?: Node[];
+  content?: string;
+  width: number;
+  height: number;
 };
 
 export interface DisplayState {
-  minimap: boolean;
+  minimapEnabled: boolean;
+  minimapSource: string;
   topBar: boolean;
   editor: boolean;
   root: Node | null;
@@ -18,7 +19,8 @@ export interface DisplayState {
 }
 
 const initialState: DisplayState = {
-  minimap: true,
+  minimapEnabled: true,
+  minimapSource: "",
   topBar: true,
   editor: true,
   root: null,
@@ -32,8 +34,11 @@ const displaySlice = createSlice({
   name: "display",
   initialState,
   reducers: {
-    setMinimap: (state: DisplayState, action: PayloadAction<boolean>) => {
-      state.minimap = action.payload;
+    setMinimapEnabled: (state: DisplayState, action: PayloadAction<boolean>) => {
+      state.minimapEnabled = action.payload;
+    },
+    setMinimapSource: (state: DisplayState, action: PayloadAction<string>) => {
+      state.minimapSource = action.payload;
     },
     setVideoEnabled: (state: DisplayState, action: PayloadAction<boolean>) => {
       state.videoEnabled = action.payload;
@@ -44,6 +49,6 @@ const displaySlice = createSlice({
   },
 });
 
-export const { setMinimap, setVideoEnabled } = displaySlice.actions;
+export const { setMinimapEnabled, setMinimapSource, setVideoEnabled } = displaySlice.actions;
 
 export default displaySlice.reducer;

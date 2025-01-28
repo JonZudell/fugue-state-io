@@ -15,7 +15,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
   const spanSliderRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const [width, setWidth] = useState(0);
-  const { timeElapsed, loopStart, loopEnd, media, playing } =
+  const { timeElapsed, loopStart, loopEnd, playing, timelineDuration } =
     useSelector(selectPlayback);
   const isDraggingRef = useRef<boolean>(false);
   const isPlayingBeforeDragRef = useRef<boolean>(false);
@@ -27,14 +27,14 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
   }, [spanSliderRef.current?.clientWidth]);
 
   const handleThumb1Drag = (e: MouseEvent) => {
-    if (spanSliderRef.current && media) {
+    if (spanSliderRef.current) {
       const rect = spanSliderRef.current.getBoundingClientRect();
       let newValue =
-        ((e.clientX - rect.left) / (rect.width - 10)) * media.duration;
+        ((e.clientX - rect.left) / (rect.width - 10)) * timelineDuration;
       if (loopStart !== null && loopEnd !== null) {
         newValue = Math.max(
-          loopStart * media.duration,
-          Math.min(newValue, loopEnd * media.duration),
+          loopStart * timelineDuration,
+          Math.min(newValue, loopEnd * timelineDuration),
         );
       }
       dispatch(setTimeElapsed(newValue));
@@ -50,7 +50,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
     const rect = spanSliderRef.current?.getBoundingClientRect();
     if (!rect) return;
     const newValue =
-      ((e.clientX - rect.left) / (rect.width - 10)) * media.duration;
+      ((e.clientX - rect.left) / (rect.width - 10)) * timelineDuration;
     dispatch(setTimeElapsed(newValue));
     document.addEventListener("mousemove", handleThumb1Drag);
     document.addEventListener("mouseup", handleMouseUp, { once: true });
@@ -71,7 +71,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
           className="span-slider__before"
           style={{
             position: "absolute",
-            width: `${(timeElapsed / media.duration) * (width - 10)}px`,
+            width: `${(timeElapsed / timelineDuration) * (width - 10)}px`,
             cursor: "grab",
           }}
         ></div>
@@ -79,7 +79,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
           className="span-slider__thumb_1"
           style={{
             position: "absolute",
-            left: `${(timeElapsed / media.duration) * (width - 10)}px`,
+            left: `${(timeElapsed / timelineDuration) * (width - 10)}px`,
             cursor: "ew-resize",
           }}
           // onMouseDown={(e) => {

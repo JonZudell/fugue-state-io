@@ -94,7 +94,6 @@ const NullDisplay: React.FC<NullDisplayProps> = ({ width, height }) => {
             </DialogDescription>
           </DialogHeader>{" "}
           <Separator />
-          
           <div className="flex items-center space-x-4">
             <p className="text-sm text-muted-foreground">Type</p>
             <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
@@ -126,7 +125,9 @@ const NullDisplay: React.FC<NullDisplayProps> = ({ width, height }) => {
                           key={display.value}
                           value={display.value}
                           onSelect={(currentValue) => {
-                            setValue(currentValue === value ? "" : currentValue);
+                            setValue(
+                              currentValue === value ? "" : currentValue,
+                            );
                             setPopoverOpen(false);
                           }}
                         >

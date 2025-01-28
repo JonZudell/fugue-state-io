@@ -1,13 +1,14 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Channels } from "@/lib/dsp";
 import { v4 as uuidv4 } from "uuid";
-import { setMedia } from "./playback-slice";
+import { registerMedia } from "./playback-slice";
 export interface MediaFile {
   id: string;
   name: string;
   fileType: string;
   url: string;
   duration: number;
+  offset: number;
   summary: Channels;
   sampleRate: number;
   stereo: boolean;
@@ -58,6 +59,7 @@ export const uploadFile = createAsyncThunk(
         name: file.name,
         stereo: isStereo,
         fileType: file.type,
+        offset: 0,
         url: (() => {
           try {
             return URL.createObjectURL(new Blob([file], { type: file.type }));
@@ -82,7 +84,7 @@ export const uploadFile = createAsyncThunk(
             ],
       };
       dispatch(addFile(media));
-      dispatch(setMedia(media));
+      dispatch(registerMedia(media));
       if (isStereo) {
         const leftChannel = audioBuffer.getChannelData(0);
         const rightChannel = audioBuffer.getChannelData(1);
@@ -169,6 +171,7 @@ const projectSlice = createSlice({
       state.projects[action.payload] = {
         id: id,
         name: action.payload,
+        ready: false,
         mediaFiles: {},
         abcs: {},
       };
@@ -210,6 +213,7 @@ const projectSlice = createSlice({
         console.log("Adding file", action.payload);
         state.projects[state.activeProject].mediaFiles[action.payload.id] =
           action.payload;
+        registerMedia(action.payload);
       }
     },
     addAbc: (state, action: PayloadAction<ABCAsset>) => {
@@ -281,6 +285,21 @@ const projectSlice = createSlice({
         }
       }
     },
+    setChannelSummary: (
+      state,
+      action: PayloadAction<{
+        summary: Float32Array;
+        id: string;
+        channel: keyof Channels;
+      }>,
+    ) => {
+      if (state.activeProject === null) {
+        console.error("No active project");
+      } else {
+        const file = state.projects[state.activeProject].mediaFiles[action.payload.id];
+        file.summary[action.payload.channel] = Array.from(action.payload.summary).map(value => ({ value }));
+      }
+    },
   },
 });
 
@@ -294,5 +313,6 @@ export const {
   setFileChannelProgress,
   newProject,
   setProgress,
+  setChannelSummary,
 } = projectSlice.actions;
 export default projectSlice.reducer;

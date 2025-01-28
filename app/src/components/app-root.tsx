@@ -11,8 +11,8 @@ import {
   useState,
 } from "react";
 import SummarizeWorker from "@/workers/summarize.worker.js"; // Adjust the import path as necessary
-import { selectPlayback, setChannelSummary } from "@/store/playback-slice";
-import { selectProgressState, setProgress } from "@/store/project-slice";
+import { selectPlayback } from "@/store/playback-slice";
+import { selectProgressState, setProgress, setChannelSummary } from "@/store/project-slice";
 import AppInit from "@/components/app-init";
 import {
   Panel,
@@ -56,9 +56,9 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const progress = useSelector(selectProgressState);
   const { isMobile } = useSidebar();
 
-  const { mediaFiles, abcs } = useSelector(selectProject) as Project;
+  const { mediaFiles, abcs, ready } = useSelector(selectProject) as Project;
   const { editor, root } = useSelector(selectDisplay);
-  const { mode, media } = useSelector(selectPlayback);
+  const { mode,  } = useSelector(selectPlayback);
   const { state } = useSidebar();
   const [panelGroupDimensions, setPanelGroupDimensions] = useState({
     width: 0,
@@ -163,7 +163,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
 
   return (
     <>
-      {media && processing ? (
+      {mediaFiles && processing ? (
         <div className="w-full h-full bg-black">
           <div className="flex flex-col items-center justify-center h-screen">
             <h1 className="text-4xl text-white">Processing...</h1>
@@ -183,82 +183,82 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
         </div>
       ) : (
         !hidden && (
-          <PanelGroup
+            <PanelGroup
             ref={panelRef}
             direction="horizontal"
             className="w-full h-full"
-          >
-            <AppSidebar ref={sidebarRef} hidden={!media || processing} />
-            {media && !processing && (
+            >
+            <AppSidebar ref={sidebarRef} hidden={Object.keys(mediaFiles).length == 0 || processing} />
+            {mediaFiles && Object.keys(mediaFiles).length > 0 && !processing && (
               <Panel
-                style={{
-                  width: panelGroupDimensions.width,
-                  height: panelGroupDimensions.height,
-                }}
+              style={{
+                width: panelGroupDimensions.width,
+                height: panelGroupDimensions.height,
+              }}
               >
-                <ResizablePanelGroup direction="vertical">
-                  <ResizablePanel
-                    ref={topPanelRef}
-                    onResize={(width, height) => {
-                      setTopPanelDimensions({
-                        width: width ?? 0,
-                        height: height ?? 0,
-                      });
-                    }}
-                  >
-                    <CommandHeader
-                      sidebarWidth={
-                        state === "expanded" ? 256 : isMobile ? 0 : 48
-                      }
-                      height={commandBarHeight}
-                      width={panelGroupDimensions.width}
-                    />
-                    <Minimap
-                      height={minimapHeight}
-                      width={panelGroupDimensions.width}
-                    />
-                    <Display
-                      width={panelGroupDimensions.width}
-                      height={
-                        (topPanelDimensions.height *
-                          panelGroupDimensions.height) /
-                          100 -
-                        commandBarHeight -
-                        minimapHeight -
-                        playbackControlsHeight
-                      }
-                      node={root}
-                    />
-                    <PlaybackControls
-                      width={panelGroupDimensions.width}
-                      height={playbackControlsHeight}
-                      enabled={true}
-                    />
+              <ResizablePanelGroup direction="vertical">
+                <ResizablePanel
+                ref={topPanelRef}
+                onResize={(width, height) => {
+                  setTopPanelDimensions({
+                  width: width ?? 0,
+                  height: height ?? 0,
+                  });
+                }}
+                >
+                <CommandHeader
+                  sidebarWidth={
+                  state === "expanded" ? 256 : isMobile ? 0 : 48
+                  }
+                  height={commandBarHeight}
+                  width={panelGroupDimensions.width}
+                />
+                <Minimap
+                  height={minimapHeight}
+                  width={panelGroupDimensions.width}
+                />
+                <Display
+                  width={panelGroupDimensions.width}
+                  height={
+                  (topPanelDimensions.height *
+                    panelGroupDimensions.height) /
+                    100 -
+                  commandBarHeight -
+                  minimapHeight -
+                  playbackControlsHeight
+                  }
+                  node={root}
+                />
+                <PlaybackControls
+                  width={panelGroupDimensions.width}
+                  height={playbackControlsHeight}
+                  enabled={true}
+                />
+                </ResizablePanel>
+                {editor && (
+                <>
+                  <ResizableHandle withHandle />
+                  <ResizablePanel>
+                  <EditorDrawer
+                    width={panelGroupDimensions.width}
+                    height={
+                    panelGroupDimensions.height -
+                    (topPanelDimensions.height *
+                      panelGroupDimensions.height) /
+                      100
+                    }
+                  />
                   </ResizablePanel>
-                  {editor && (
-                    <>
-                      <ResizableHandle withHandle />
-                      <ResizablePanel>
-                        <EditorDrawer
-                          width={panelGroupDimensions.width}
-                          height={
-                            panelGroupDimensions.height -
-                            (topPanelDimensions.height *
-                              panelGroupDimensions.height) /
-                              100
-                          }
-                        />
-                      </ResizablePanel>
-                    </>
-                  )}
-                </ResizablePanelGroup>
+                </>
+                )}
+              </ResizablePanelGroup>
               </Panel>
             )}
 
-            {!media && !processing && workerRef.current && (
+            {Object.keys(mediaFiles).length == 0 && !processing && workerRef.current && (
               <AppInit worker={workerRef.current} />
             )}
-          </PanelGroup>
+            </PanelGroup>
         )
       )}
     </>

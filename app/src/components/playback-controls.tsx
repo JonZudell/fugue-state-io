@@ -25,7 +25,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   width,
 }) => {
   const dispatch = useDispatch();
-  const { media, playing, looping, timeElapsed } = useSelector(selectPlayback);
+  const { playing, looping, timeElapsed, timelineDuration } = useSelector(selectPlayback);
 
   const togglePlay = () => {
     dispatch(setPlaying(!playing));
@@ -50,44 +50,42 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         className="playback-controls bg-gray-800 text-white px-4 z-100"
         style={{ height: height, width: width }}
       >
-        {media && (
-          <div className="h-full flex flex-col">
-            <div className={`flex w-full`}>
-              <button
-                className="mx-1"
-                onClick={togglePlay}
-                disabled={!enabled}
-                draggable="false"
-              >
-                {playing ? (
-                  <PauseCircle className="h-6 w-6" />
-                ) : (
-                  <PlayCircle className="h-6 w-6" />
-                )}
-              </button>
-              <button
-                className="mx-1"
-                onClick={handleToggleLooping}
-                disabled={!enabled}
-                draggable="false"
-              >
-                {looping ? (
-                  <Repeat className="h-6 w-6" />
-                ) : (
-                  <Repeat1 className="h-6 w-6" />
-                )}
-              </button>
-              <VolumeSelector className="mx-1" enabled={enabled} />
-              <SpeedSelector className="mx-1" enabled={enabled} />
-              <span style={{ userSelect: "none" }} className="my-2 mx-4">
-                {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} / -
-                {new Date((media.duration - timeElapsed) * 1000)
-                  .toISOString()
-                  .substr(12, 7)}
-              </span>
-            </div>
+        <div className="h-full flex flex-col">
+          <div className={`flex w-full`}>
+            <button
+              className="mx-1"
+              onClick={togglePlay}
+              disabled={!enabled}
+              draggable="false"
+            >
+              {playing ? (
+                <PauseCircle className="h-6 w-6" />
+              ) : (
+                <PlayCircle className="h-6 w-6" />
+              )}
+            </button>
+            <button
+              className="mx-1"
+              onClick={handleToggleLooping}
+              disabled={!enabled}
+              draggable="false"
+            >
+              {looping ? (
+                <Repeat className="h-6 w-6" />
+              ) : (
+                <Repeat1 className="h-6 w-6" />
+              )}
+            </button>
+            <VolumeSelector className="mx-1" enabled={enabled} />
+            <SpeedSelector className="mx-1" enabled={enabled} />
+            <span style={{ userSelect: "none" }} className="my-2 mx-4">
+              {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} / -
+              {new Date((timelineDuration - timeElapsed) * 1000)
+                .toISOString()
+                .substr(12, 7)}
+            </span>
           </div>
-        )}
+        </div>
       </div>
     </>
   );

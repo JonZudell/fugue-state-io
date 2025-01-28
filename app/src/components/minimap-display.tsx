@@ -1,6 +1,8 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { selectProject } from "@/store/project-slice";
 import { selectPlayback } from "@/store/playback-slice";
+import { selectDisplay } from "@/store/display-slice";
 import { useSelector } from "react-redux";
 import { SummarizedFrame } from "@/lib/dsp";
 interface MinimapProps {
@@ -22,9 +24,16 @@ const Minimap: React.FC<MinimapProps> = ({
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { timeElapsed, loopStart, loopEnd, looping, media } =
+  const { timeElapsed, loopStart, loopEnd, looping } =
     useSelector(selectPlayback);
-
+  const { mediaFiles } = useSelector(selectProject);
+  const { minimapSource } = useSelector(selectDisplay);
+  const [media, setMedia] = useState();
+  useEffect(() => {
+    if (mediaFiles && minimapSource) {
+      setMedia(Object.keys(mediaFiles).find((media) => media.id === minimapSource));
+    }
+  }, [mediaFiles, minimapSource]);
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
@@ -154,6 +163,7 @@ const Minimap: React.FC<MinimapProps> = ({
 
   return (
     <>
+      {!media ? <div>No media available</div> : 
       <div
         style={{
           position: "relative",
@@ -211,7 +221,7 @@ const Minimap: React.FC<MinimapProps> = ({
             height: `${100}%`,
           }}
         />
-      </div>
+      </div>}
     </>
   );
 };
