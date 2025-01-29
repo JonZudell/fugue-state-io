@@ -37,17 +37,6 @@ const renderMediaComponent = (
           </div>
         </div>
       );
-    case "waveform":
-      return (
-        <WaveformDisplay
-          key={key}
-          media={media}
-          startPercentage={loopStart * 100}
-          endPercentage={loopEnd * 100}
-          width={width}
-          height={height}
-        />
-      );
     case "spectrogram":
       return (
         <SpectrogramDisplay
@@ -74,9 +63,8 @@ interface DisplayProps {
   node: Node | null;
   width: number;
   height: number;
-  media?: any;
 }
-const Display: React.FC<DisplayProps> = ({ node, width, height, media }) => {
+const Display: React.FC<DisplayProps> = ({ node, width, height }) => {
   const { playing, timeElapsed, loopStart, loopEnd, looping, volume, speed } =
     useSelector(selectPlayback);
   const [open, setOpen] = useState(false);
@@ -84,6 +72,20 @@ const Display: React.FC<DisplayProps> = ({ node, width, height, media }) => {
 
   if (node === null) {
     return <NullDisplay width={width} height={height} />;
+  }
+  if (node.type === "waveform") {
+    return (
+      <WaveformDisplay
+        key={node.id}
+        nodeId={node.id}
+        sourceId={node.sourceId}
+        channel={node.channel}
+        startPercentage={loopStart * 100}
+        endPercentage={loopEnd * 100}
+        width={width}
+        height={height}
+      />
+    );
   }
   // Render the node recursively
   if (node.children && node.children.length > 0) {

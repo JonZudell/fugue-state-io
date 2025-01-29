@@ -70,7 +70,8 @@ const NullDisplay: React.FC<NullDisplayProps> = ({ width, height }) => {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                height: "100%",
+                height: height,
+                width: width,
                 textAlign: "center",
                 color: "gray",
               }}
@@ -154,7 +155,7 @@ const NullDisplay: React.FC<NullDisplayProps> = ({ width, height }) => {
                 {(() => {
                   switch (value) {
                     case "waveform":
-                      return <WaveformSettings />;
+                      return <WaveformSettings nodeId={null} />;
                     case "notation":
                       return <div>Notation settings...</div>;
                     case "video":
@@ -170,9 +171,6 @@ const NullDisplay: React.FC<NullDisplayProps> = ({ width, height }) => {
               </div>
             )}
           </div>
-          <DialogFooter>
-            <Button type="submit">Confirm</Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

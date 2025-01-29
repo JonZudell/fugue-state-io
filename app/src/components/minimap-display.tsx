@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { selectProject } from "@/store/project-slice";
+import { MediaFile, selectProject } from "@/store/project-slice";
 import { selectPlayback } from "@/store/playback-slice";
 import { selectDisplay } from "@/store/display-slice";
 import { useSelector } from "react-redux";
@@ -28,13 +28,10 @@ const Minimap: React.FC<MinimapProps> = ({
     useSelector(selectPlayback);
   const { mediaFiles } = useSelector(selectProject);
   const { minimapSource } = useSelector(selectDisplay);
-  const [media, setMedia] = useState();
+  const media = mediaFiles[minimapSource];
+
   useEffect(() => {
-    if (mediaFiles && minimapSource) {
-      setMedia(Object.keys(mediaFiles).find((media) => media.id === minimapSource));
-    }
-  }, [mediaFiles, minimapSource]);
-  useEffect(() => {
+    console.log("Minimap useEffect");
     const canvas = canvasRef.current;
     if (!canvas) {
       return;
@@ -67,8 +64,8 @@ const Minimap: React.FC<MinimapProps> = ({
         const endIndex =
           Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
         const slice = summary.slice(startIndex, endIndex);
-        const min = Math.min(...slice.map((frame) => frame.min));
-        const max = Math.max(...slice.map((frame) => frame.max));
+        const min = Math.min(...slice.map((frame) => frame.value.min));
+        const max = Math.max(...slice.map((frame) => frame.value.max));
         ctx.fillStyle = "rgba(255, 255, 255, 1)";
         ctx.fillRect(
           i,
@@ -80,6 +77,7 @@ const Minimap: React.FC<MinimapProps> = ({
     };
 
     const drawWaveform = () => {
+      console.log("drawWaveform for minimap");
       if (media && media.summary && canvas) {
         if (!ctx) {
           return;
@@ -163,65 +161,68 @@ const Minimap: React.FC<MinimapProps> = ({
 
   return (
     <>
-      {!media ? <div>No media available</div> : 
-      <div
-        style={{
-          position: "relative",
-          width: "100%",
-          height: `${height}px`,
-        }}
-      >
+      {!media ? (
+        <div>No media available</div>
+      ) : (
         <div
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
+            position: "relative",
             width: "100%",
-            height: `100%`,
-            pointerEvents: "none",
-            backgroundColor: "rgba(0, 0, 0, 0)",
-            overflow: "hidden",
+            height: `${height}px`,
           }}
         >
-          {crosshair && (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: `${(timeElapsed / media!.duration) * 100}%`,
-                width: "2px",
-                height: `100%`,
-                backgroundColor: "blue",
-                zIndex: 100,
-                opacity: 1,
-              }}
-            />
-          )}
-        </div>
-        {looping && (
           <div
             style={{
               position: "absolute",
               top: 0,
-              left: `${loopStart * width}px`,
-              width: `${(loopEnd - loopStart) * width}px`,
+              left: 0,
+              width: "100%",
               height: `100%`,
-              backgroundColor: "rgba(255, 255, 255, 0.3)",
-              zIndex: 200,
+              pointerEvents: "none",
+              backgroundColor: "rgba(0, 0, 0, 0)",
+              overflow: "hidden",
+            }}
+          >
+            {crosshair && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: `${(timeElapsed / media!.duration) * 100}%`,
+                  width: "2px",
+                  height: `100%`,
+                  backgroundColor: "blue",
+                  zIndex: 100,
+                  opacity: 1,
+                }}
+              />
+            )}
+          </div>
+          {looping && (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: `${loopStart * width}px`,
+                width: `${(loopEnd - loopStart) * width}px`,
+                height: `100%`,
+                backgroundColor: "rgba(255, 255, 255, 0.3)",
+                zIndex: 200,
+              }}
+            />
+          )}
+          <canvas
+            ref={canvasRef}
+            width={width}
+            height={height}
+            className="w-full"
+            style={{
+              width: `${100}%`,
+              height: `${100}%`,
             }}
           />
-        )}
-        <canvas
-          ref={canvasRef}
-          width={width}
-          height={height}
-          className="w-full"
-          style={{
-            width: `${100}%`,
-            height: `${100}%`,
-          }}
-        />
-      </div>}
+        </div>
+      )}
     </>
   );
 };

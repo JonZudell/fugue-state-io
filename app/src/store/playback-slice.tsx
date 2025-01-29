@@ -61,9 +61,7 @@ const playbackSlice = createSlice({
     },
     setLoopStart: (state: PlaybackState, action: PayloadAction<number>) => {
       state.loopStart = action.payload;
-      if (
-        state.timeElapsed < state.loopStart * state.timelineDuration
-      ) {
+      if (state.timeElapsed < state.loopStart * state.timelineDuration) {
         state.timeElapsed = state.loopStart * state.timelineDuration;
       }
     },
@@ -93,11 +91,10 @@ const playbackSlice = createSlice({
       state.timeElapsed = state.loopStart * state.timelineDuration;
       state.playing = true;
     },
-    registerMedia: (
-      state: PlaybackState,
-      action: PayloadAction<MediaFile>,
-    ) => {
-      if (state.mediaSources.find((source) => source.id === action.payload.id)) {
+    registerMedia: (state: PlaybackState, action: PayloadAction<MediaFile>) => {
+      if (
+        state.mediaSources.find((source) => source.id === action.payload.id)
+      ) {
         return;
       } else {
         state.mediaSources.push({
@@ -106,13 +103,8 @@ const playbackSlice = createSlice({
         if (action.payload.duration > state.timelineDuration) {
           state.timelineDuration = action.payload.duration;
         }
-        if (state.mediaSources.length === 1) {
-          setMinimapSource(action.payload.id);
-        }
       }
-
     },
-
   },
 });
 

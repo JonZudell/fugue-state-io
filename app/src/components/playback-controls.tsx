@@ -25,7 +25,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   width,
 }) => {
   const dispatch = useDispatch();
-  const { playing, looping, timeElapsed, timelineDuration } = useSelector(selectPlayback);
+  const { playing, looping, timeElapsed, timelineDuration } =
+    useSelector(selectPlayback);
 
   const togglePlay = () => {
     dispatch(setPlaying(!playing));

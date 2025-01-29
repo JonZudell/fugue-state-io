@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Channels } from "@/lib/dsp";
 import { v4 as uuidv4 } from "uuid";
 import { registerMedia } from "./playback-slice";
+import { setMinimapSource } from "./display-slice";
 export interface MediaFile {
   id: string;
   name: string;
@@ -85,6 +86,7 @@ export const uploadFile = createAsyncThunk(
       };
       dispatch(addFile(media));
       dispatch(registerMedia(media));
+      dispatch(setMinimapSource(media.id));
       if (isStereo) {
         const leftChannel = audioBuffer.getChannelData(0);
         const rightChannel = audioBuffer.getChannelData(1);
@@ -171,7 +173,6 @@ const projectSlice = createSlice({
       state.projects[action.payload] = {
         id: id,
         name: action.payload,
-        ready: false,
         mediaFiles: {},
         abcs: {},
       };
@@ -213,7 +214,6 @@ const projectSlice = createSlice({
         console.log("Adding file", action.payload);
         state.projects[state.activeProject].mediaFiles[action.payload.id] =
           action.payload;
-        registerMedia(action.payload);
       }
     },
     addAbc: (state, action: PayloadAction<ABCAsset>) => {
@@ -296,8 +296,11 @@ const projectSlice = createSlice({
       if (state.activeProject === null) {
         console.error("No active project");
       } else {
-        const file = state.projects[state.activeProject].mediaFiles[action.payload.id];
-        file.summary[action.payload.channel] = Array.from(action.payload.summary).map(value => ({ value }));
+        const file =
+          state.projects[state.activeProject].mediaFiles[action.payload.id];
+        file.summary[action.payload.channel] = Array.from(
+          action.payload.summary,
+        ).map((value) => ({ value }));
       }
     },
   },

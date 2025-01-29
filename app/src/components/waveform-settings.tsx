@@ -1,8 +1,9 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { selectPlayback } from "@/store/playback-slice";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectProject } from "@/store/project-slice";
+import { setRoot } from "@/store/display-slice";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
@@ -16,12 +17,36 @@ import {
 } from "./ui/command";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-const WaveformSettings: React.FC = () => {
+import { DialogFooter } from "./ui/dialog";
+import WaveformDisplay from "./waveform-display";
+import { init } from "next/dist/compiled/webpack/webpack";
+const WaveformSettings: React.FC<{ nodeId: string | null, initialMediaKey: string | null, initialChannel: string | null }> = ({nodeId, initialMediaKey, initialChannel}) => {
+  const dispatch = useDispatch();
   const { mediaFiles } = useSelector(selectProject);
-  const [channel, setChannel] = useState<string>("");
+  const [channel, setChannel] = useState<string>(initialChannel ? initialChannel : "");
   const [channelPopoverOpen, setChannelPopoverOpen] = useState<boolean>(false);
   const [mediaPopoverOpen, setMediaPopoverOpen] = useState<boolean>(false);
-  const [mediaKey, setMediaKey] = useState<string>("");
+  const [mediaKey, setMediaKey] = useState<string>(initialMediaKey ? initialMediaKey : "");
+  const [errors, setErrors] = useState<string[]>([]);
+
+  const submit = useCallback(() => {
+    if (!mediaKey) {
+      setErrors(["Please select a media file."]);
+      return;
+    }
+    if (!channel) {
+      setErrors(["Please select a channel."]);
+      return;
+    }
+    dispatch(
+      setRoot({
+        id: "root",
+        type: "waveform",
+        sourceId: mediaKey,
+        channel: channel,
+      }),
+    );
+  }, [mediaKey, channel]);
 
   return (
     <>
@@ -36,18 +61,18 @@ const WaveformSettings: React.FC = () => {
                 aria-expanded={mediaPopoverOpen}
                 className="w-[300px] justify-between"
               >
-                {mediaKey ? mediaFiles[mediaKey].name : "Select media file..."}
+                {mediaKey ? mediaFiles[mediaKey].name : "Select Media File..."}
                 <ChevronsUpDown className="opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[300px] p-0 flex">
               <Command>
                 <CommandInput
-                  placeholder="Search Select media file..."
+                  placeholder="Search Select Media File..."
                   className="h-9"
                 />
                 <CommandList>
-                  <CommandEmpty>No framework found.</CommandEmpty>
+                  <CommandEmpty>No Media Files found.</CommandEmpty>
                   <CommandGroup heading="Media Files">
                     {Object.keys(mediaFiles).map((mediaId) => {
                       const media = mediaFiles[mediaId];
@@ -106,7 +131,7 @@ const WaveformSettings: React.FC = () => {
                     className="h-9"
                   />
                   <CommandList>
-                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandEmpty>No channel found.</CommandEmpty>
                     <CommandGroup heading="Channels">
                       {Object.keys(mediaFiles[mediaKey].summary).map(
                         (channelKey) => {
@@ -134,6 +159,26 @@ const WaveformSettings: React.FC = () => {
                           );
                         },
                       )}
+                      <CommandItem
+                        key="left + right"
+                        value="left + right"
+                        onSelect={(currentValue) => {
+                          setChannel(
+                            currentValue === channel ? "" : currentValue,
+                          );
+                          setChannelPopoverOpen(false);
+                        }}
+                      >
+                        {"left + right"}
+                        <Check
+                          className={cn(
+                            "ml-auto",
+                            "left + right" === channel
+                              ? "opacity-100"
+                              : "opacity-0",
+                          )}
+                        />
+                      </CommandItem>
                     </CommandGroup>
                   </CommandList>
                 </Command>
@@ -141,6 +186,11 @@ const WaveformSettings: React.FC = () => {
             </Popover>
           </div>
         )}
+        <DialogFooter>
+          <Button onClick={submit} type="submit">
+            Confirm
+          </Button>
+        </DialogFooter>
       </div>
     </>
   );
