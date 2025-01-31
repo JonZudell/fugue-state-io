@@ -1,8 +1,10 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { selectPlayback } from "@/store/playback-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { selectProject } from "@/store/project-slice";
 import { setNode, setRoot } from "@/store/display-slice";
+import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
@@ -16,7 +18,8 @@ import {
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DialogFooter } from "./ui/dialog";
-const WaveformSettings: React.FC<{
+
+const SpectrogramSettings: React.FC<{
   nodeId: string | null;
   initialMediaKey: string | null;
   initialChannel: string | null;
@@ -46,7 +49,7 @@ const WaveformSettings: React.FC<{
       dispatch(
         setRoot({
           id: nodeId,
-          type: "waveform",
+          type: "spectrogram",
           sourceId: mediaKey,
           channel: channel,
         })
@@ -55,7 +58,7 @@ const WaveformSettings: React.FC<{
       dispatch(
         setNode({nodeId: nodeId, node:{
           id: nodeId,
-          type: "waveform",
+          type: "spectrogram",
           sourceId: mediaKey,
           channel: channel,
         }}),
@@ -210,4 +213,4 @@ const WaveformSettings: React.FC<{
     </>
   );
 };
-export default WaveformSettings;
+export default SpectrogramSettings;

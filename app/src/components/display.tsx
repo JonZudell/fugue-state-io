@@ -63,10 +63,13 @@ interface DisplayProps {
   node: Node | null;
   width: number;
   height: number;
+  parentNodeId?: string;
+  parentDirection?: string;
 }
-const Display: React.FC<DisplayProps> = ({ node, width, height }) => {
+const Display: React.FC<DisplayProps> = ({ node, width, height, parentNodeId, parentDirection }) => {
   const { playing, timeElapsed, loopStart, loopEnd, looping, volume, speed } =
     useSelector(selectPlayback);
+
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
 
@@ -79,6 +82,22 @@ const Display: React.FC<DisplayProps> = ({ node, width, height }) => {
         key={node.id}
         nodeId={node.id}
         sourceId={node.sourceId}
+        parentNodeId={parentNodeId}
+        channel={node.channel}
+        startPercentage={loopStart * 100}
+        endPercentage={loopEnd * 100}
+        width={width}
+        height={height}
+      />
+    );
+  }
+  if (node.type === "spectrogram") {
+    return (
+      <SpectrogramDisplay
+        key={node.id}
+        nodeId={node.id}
+        sourceId={node.sourceId}
+        parentNodeId={parentNodeId}
         channel={node.channel}
         startPercentage={loopStart * 100}
         endPercentage={loopEnd * 100}
@@ -105,17 +124,19 @@ const Display: React.FC<DisplayProps> = ({ node, width, height }) => {
       >
         {node.children.map((child, index) => (
           <Panel
-            key={child.id}
+            key={index}
             style={{
               width: `${childWidth}px`,
               height: `${childHeight}px`,
             }}
           >
             <Display
+              parentNodeId={node.id}
+              parentDirection={node.splitDirection}
+              nodeId={child.id}
               node={child}
               width={childWidth}
               height={childHeight}
-              media={media}
             />
           </Panel>
         ))}

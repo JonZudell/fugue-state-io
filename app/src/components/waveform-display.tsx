@@ -3,34 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { selectPlayback } from "@/store/playback-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { MediaFile, selectProject } from "@/store/project-slice";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "./ui/dialog";
-import { Separator } from "./ui/separator";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Button } from "./ui/button";
-import WaveformSettings from "./waveform-settings";
-import { Check, ChevronsUpDown } from "lucide-react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "./ui/command";
-import { cn } from "@/lib/utils";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "./ui/context-menu";
-import { removeNode } from "@/store/display-slice";
+import ContextMenuDialog from "./context-menu-dialog";
 interface WaveformDisplayProps {
   nodeId: string;
   sourceId: string;
@@ -40,29 +13,10 @@ interface WaveformDisplayProps {
   crosshair?: boolean;
   width: number;
   height: number;
+  parentNodeId?: string;
+  parentDirection?: string;
 }
-const displays = [
-  {
-    value: "waveform",
-    label: "Waveform",
-  },
-  {
-    value: "notation",
-    label: "Notation",
-  },
-  {
-    value: "video",
-    label: "Video",
-  },
-  {
-    value: "fourier",
-    label: "Fourier",
-  },
-  {
-    value: "spectrogram",
-    label: "Spectrogram",
-  },
-];
+
 const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   nodeId,
   sourceId,
@@ -72,15 +26,13 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   crosshair = true,
   width,
   height,
+  parentNodeId,
+  parentDirection,
 }) => {
-  const dispatch = useDispatch();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { timeElapsed, loopStart, loopEnd } = useSelector(selectPlayback);
   const project = useSelector(selectProject);
   const media = project.mediaFiles[sourceId];
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("waveform");
-  const [popoverOpen, setPopoverOpen] = useState(false);
   const drawWaveform = useCallback(
     (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
       console.log("drawWaveform");
@@ -251,140 +203,52 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
 
   return (
     <>
-      <ContextMenu>
-        <ContextMenuTrigger>
-          <div style={{ position: "relative" }}>
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                pointerEvents: "none",
-                backgroundColor: "rgba(0, 0, 0, 0)",
-                overflow: "hidden",
-              }}
-            >
-              {crosshair && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: `${(((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage)) * 100}%`,
-                    width: "2px",
-                    height: "100%",
-                    backgroundColor: "blue",
-                    zIndex: 100,
-                    opacity: 1,
-                  }}
-                />
-              )}
-            </div>
-            <canvas
-              ref={canvasRef}
-              width={width}
-              height={height}
-              style={{ width: width + "px", height: height + "px" }}
-            />
-          </div>
-        </ContextMenuTrigger>
-        <ContextMenuContent>
-          <ContextMenuItem onClick={() => setOpen(true)}>
-            <span>Edit Display Settings</span>
-          </ContextMenuItem>
-          <ContextMenuItem onClick={() => {dispatch(removeNode(nodeId)); console.log("removeNode", nodeId)}}>
-            <span>Remove Display</span>
-          </ContextMenuItem>
-        </ContextMenuContent>
-      </ContextMenu>
-      <Dialog open={open} onOpenChange={setOpen} modal={false}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add a New Display</DialogTitle>
-            <DialogDescription>
-              Select and configure a new display type.
-            </DialogDescription>
-          </DialogHeader>{" "}
-          <Separator />
-          <div className="flex items-center space-x-4">
-            <p className="text-sm text-muted-foreground">Type</p>
-            <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={popoverOpen}
-                  className="w-[200px] justify-between"
-                >
-                  {value
-                    ? displays.find((framework) => framework.value === value)
-                        ?.label
-                    : "Select framework..."}
-                  <ChevronsUpDown className="opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[200px] p-0">
-                <Command>
-                  <CommandInput
-                    placeholder="Search display types..."
-                    className="h-9"
-                  />
-                  <CommandList>
-                    <CommandEmpty>No Display Types found.</CommandEmpty>
-                    <CommandGroup heading="Display Types">
-                      {displays.map((display) => (
-                        <CommandItem
-                          key={display.value}
-                          value={display.value}
-                          onSelect={(currentValue) => {
-                            setValue(
-                              currentValue === value ? "" : currentValue,
-                            );
-                            setPopoverOpen(false);
-                          }}
-                        >
-                          {display.label}
-                          <Check
-                            className={cn(
-                              "ml-auto",
-                              value === display.value
-                                ? "opacity-100"
-                                : "opacity-0",
-                            )}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
-          <div className="mt-4">
-            {value && (
-              <div>
-                {(() => {
-                  switch (value) {
-                    case "waveform":
-                      return <WaveformSettings nodeId={nodeId} initialChannel={channel} initialMediaKey={media.id} />;
-                    case "notation":
-                      return <div>Notation settings...</div>;
-                    case "video":
-                      return <div>Video settings...</div>;
-                    case "fourier":
-                      return <div>Fourier settings...</div>;
-                    case "spectrogram":
-                      return <div>Spectrogram settings...</div>;
-                    default:
-                      return null;
-                  }
-                })()}
-              </div>
+      <ContextMenuDialog
+        width={0}
+        height={0}
+        nodeId={nodeId}
+        initialValue={"waveform"}
+        parentNodeId={parentNodeId}
+        parentDirection={parentDirection}
+        mediaKey={sourceId}
+        initialChannel={channel}
+      >
+        <div style={{ position: "relative" }}>
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              backgroundColor: "rgba(0, 0, 0, 0)",
+              overflow: "hidden",
+            }}
+          >
+            {crosshair && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: `${(((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage)) * 100}%`,
+                  width: "2px",
+                  height: "100%",
+                  backgroundColor: "blue",
+                  zIndex: 100,
+                  opacity: 1,
+                }}
+              />
             )}
           </div>
-        </DialogContent>
-      </Dialog>
+          <canvas
+            ref={canvasRef}
+            width={width}
+            height={height}
+            style={{ width: width + "px", height: height + "px" }}
+          />
+        </div>
+      </ContextMenuDialog>
     </>
   );
 };

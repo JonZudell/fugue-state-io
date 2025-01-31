@@ -1,35 +1,37 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { selectPlayback } from "@/store/playback-slice";
-import { useSelector } from "react-redux";
-import { MediaFile } from "@/store/project-slice";
+import { useDispatch, useSelector } from "react-redux";
+import { MediaFile, selectProject } from "@/store/project-slice";
 import {
   colorForBin,
   getFrequencyForBin,
   getNoteForFrequency,
 } from "@/lib/dsp";
+import ContextMenuDialog from "./context-menu-dialog";
 interface SpectrogramDisplayProps {
-  media?: MediaFile;
-  width?: number;
-  channel?: string;
-  startPercentage?: number;
-  endPercentage?: number;
-  height?: number;
+  nodeId: string;
+  sourceId: string;
+  width: number;
+  channel: string;
+  startPercentage: number;
+  endPercentage: number;
+  height: number;
   displayRatio?: number;
   crosshair?: boolean;
-  displayRatioVertical?: number;
-  displayRatioHorizontal?: number;
+  parentNodeId?: string;
+  parentDirection?: string;
 }
-
 const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
-  media,
+  nodeId,
+  sourceId,
+  parentNodeId,
+  parentDirection,
   channel = "LR",
   startPercentage = 0,
   endPercentage = 100,
   width = 1000,
   height = 200,
-  displayRatioVertical = 1,
-  displayRatioHorizontal = 1,
   crosshair = true,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -39,6 +41,8 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [infoString, setInfoString] = useState<string | null>(null);
   const frequencyRef = useRef<number | null>(null);
+  const project = useSelector(selectProject);
+  const media = project.mediaFiles[sourceId];
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     setMouseY(event.clientY - rect.top);
@@ -62,7 +66,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
       const endSample = Math.floor((endPercentage / 100) * summaryLength);
       const samplesPerPixel = (endSample - startSample) / canvas.width;
       const binsPerPixel = summary.mono
-        ? summary.mono[0].magnitudes.length / canvas.height
+        ? summary.mono[0].value.magnitudes.length / canvas.height
         : 0;
 
       const imageData = ctx.createImageData(canvas.width, canvas.height);
@@ -76,10 +80,11 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
 
           if (
             summary.mono &&
-            summary.mono[sampleIndex] &&
-            summary.mono[sampleIndex].magnitudes[binIndex] !== undefined
+            summary.mono[sampleIndex].value &&
+            summary.mono[sampleIndex].value.magnitudes[binIndex] !== undefined
           ) {
-            const magnitude = summary.mono[sampleIndex].magnitudes[binIndex];
+            const magnitude =
+              summary.mono[sampleIndex].value.magnitudes[binIndex];
             const index = (x + (canvas.height - y - 1) * canvas.width) * 4;
             data[index] = color[0];
             data[index + 1] = color[1];
@@ -130,7 +135,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   ]);
 
   useEffect(() => {
-    const length = media?.summary?.mono?.[0].magnitudes.length ?? 0;
+    const length = media.summary.mono[0].value.magnitudes.length ?? 0;
     const heightToLengthRatio = length / canvasRef.current?.height;
     frequencyRef.current = getFrequencyForBin(
       Math.floor(
@@ -156,79 +161,91 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
 
   return (
     <>
-      <div
-        style={{ position: "relative", width: "100%", height: "100%" }}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+      <ContextMenuDialog
+        width={0}
+        height={0}
+        nodeId={nodeId}
+        initialValue={"spectrogram"}
+        parentNodeId={parentNodeId}
+        parentDirection={parentDirection}
+        mediaKey={sourceId}
+        initialChannel={channel}
       >
         <div
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            pointerEvents: "none",
-            backgroundColor: "rgba(0, 0, 0, 0)",
-            overflow: "hidden",
+            position: "relative",
+            width: width + "px",
+            height: height + "px",
           }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         >
-          {crosshair && (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: `${(((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage)) * 100}%`,
-                width: "2px",
-                height: "100%",
-                backgroundColor: "blue",
-                zIndex: 100,
-                opacity: 1,
-              }}
-            />
-          )}
-          {mouseY !== null && (
-            <div>
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              pointerEvents: "none",
+              backgroundColor: "rgba(0, 0, 0, 0)",
+              overflow: "hidden",
+            }}
+          >
+            {crosshair && (
               <div
                 style={{
                   position: "absolute",
-                  top: `${mouseY}px`,
-                  left: 0,
-                  width: "100%",
-                  height: "2px",
-                  backgroundColor: "red",
-                  zIndex: 99,
+                  top: 0,
+                  left: `${(((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage)) * 100}%`,
+                  width: "2px",
+                  height: "100%",
+                  backgroundColor: "blue",
+                  zIndex: 100,
                   opacity: 1,
                 }}
               />
-              <span
-                style={{
-                  position: "absolute",
-                  top: `${mouseY < 40 ? mouseY + 20 : mouseY - 40}px`,
-                  color: "white",
-                  backgroundColor: "black",
-                  padding: "2px 5px",
-                  fontSize: "12px",
-                  zIndex: 101,
-                  width: "115px",
-                }}
-              >
-                {infoString}
-              </span>
-            </div>
-          )}
+            )}
+            {mouseY !== null && (
+              <div>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: `${mouseY}px`,
+                    left: 0,
+                    width: "100%",
+                    height: "2px",
+                    backgroundColor: "red",
+                    zIndex: 99,
+                    opacity: 1,
+                  }}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    top: `${mouseY < 40 ? mouseY + 20 : mouseY - 40}px`,
+                    color: "white",
+                    backgroundColor: "black",
+                    padding: "2px 5px",
+                    fontSize: "12px",
+                    zIndex: 101,
+                    width: "115px",
+                  }}
+                >
+                  {infoString}
+                </span>
+              </div>
+            )}
+          </div>
+          <canvas
+            ref={canvasRef}
+            width={width}
+            height={height}
+            className="w-full"
+            style={{ width: width + "px", height: height + "px" }}
+          />
         </div>
-        <canvas
-          ref={canvasRef}
-          width={width}
-          height={height}
-          className="w-full"
-          style={{
-            width: `${displayRatioHorizontal * 100}%`,
-            height: `${displayRatioVertical * 100}%`,
-          }}
-        />
-      </div>
+      </ContextMenuDialog>
     </>
   );
 };

@@ -237,6 +237,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                           playbackControlsHeight
                         }
                         node={root}
+                        parentNodeId={null}
                       />
                       <PlaybackControls
                         width={panelGroupDimensions.width}
