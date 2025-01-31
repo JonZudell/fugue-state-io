@@ -29,22 +29,33 @@ const initialState: DisplayState = {
 };
 
 const compressTree = (node: Node): Node => {
-  if (node.type === "split" && node.children && node.children.length === 1) {
-    return compressTree(node.children[0]);
-  }
   if (node.children) {
+    if (node.children.length === 1) {
+      return compressTree(node.children[0]);
+    }
     return {
-      id: node.id,
-      splitDirection: node.splitDirection,
+      ...node,
       children: node.children.map(compressTree),
     };
   }
-  return {
-    id: node.id,
-    type: node.type,
-    sourceId: node.sourceId,
-    channel: node.channel,
-  };
+  return node;
+}
+
+const treeEquals = (a: Node, b: Node): boolean => {
+  if (a.id !== b.id) {
+    return false;
+  }
+  if (a.children && b.children) {
+    if (a.children.length !== b.children.length) {
+      return false;
+    }
+    for (let i = 0; i < a.children.length; i++) {
+      if (!treeEquals(a.children[i], b.children[i])) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 export const selectDisplay = (state: { display: DisplayState }) =>
@@ -128,30 +139,41 @@ const displaySlice = createSlice({
       }>,
     ) => {
       console.log("Splitting node", action.payload);
-      if (action.payload.nodeId === "root") {
-        const temporaryNode = state.root;
-        temporaryNode.id = uuidv4();
-        const temporaryNodeCopy = { ...temporaryNode };
-        temporaryNodeCopy.id = uuidv4();
-        state.root = {
-          id: "root",
-          splitDirection: action.payload.direction,
-          type: "split",
-          children: [temporaryNode, temporaryNodeCopy],
-        };
+      if (state.root === null) {
+        return;
       }
-      const findNode = (node: Node, nodeId: string): Node => {
-        if (node.id === nodeId) {
-          return node;
+      const splitNode = (node: Node): Node => {
+        if (node.id === action.payload.nodeId) {
+          return {
+            id: node.id,
+            splitDirection: action.payload.direction,
+            type: "split",
+            children: [
+              {
+                id: uuidv4(),
+                type: node.type,
+                sourceId: node.sourceId,
+                channel: node.channel,
+              },
+              {
+                id: uuidv4(),
+                type: node.type,
+                sourceId: node.sourceId,
+                channel: node.channel,
+              },
+            ],
+          };
         }
         if (node.children) {
           return {
             ...node,
-            children: node.children.map((child) => findNode(child, nodeId)),
+            children: node.children.map((child) => splitNode(child)),
           };
         }
         return node;
       };
+      state.root = compressTree(splitNode(state.root));
+      state.root.id = "root";
     },
   },
 });
