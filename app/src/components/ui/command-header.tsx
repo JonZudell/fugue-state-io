@@ -20,6 +20,7 @@ const Command = React.forwardRef<
     openOrHovered?: boolean;
     setOpen?: (open: boolean) => void;
     setHovered?: (hovered: boolean) => void;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   }
 >(({ className, open, setOpen, ...props }, ref) => {
   const inputRef =
@@ -45,15 +46,15 @@ const Command = React.forwardRef<
       <CommandInput
         ref={inputRef}
         setOpen={setOpen}
+        onChange={props.onChange}
+        onFocus={() => setOpen(true)}
+        onBlur={() => {setOpen(false); inputRef.current.value = "";}}
+        
         placeholder="Type a command or search..."
       />
       <CommandList style={{ display: open ? "block" : "none" }}>
         <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="Suggestions">
-          <CommandItem>Calendar</CommandItem>
-          <CommandItem>Search Emoji</CommandItem>
-          <CommandItem>Calculator</CommandItem>
-        </CommandGroup>
+          {props.children}
       </CommandList>
     </CommandPrimitive>
   );
@@ -166,6 +167,7 @@ const CommandItem = React.forwardRef<
     children?: React.ReactNode;
     disabled?: boolean;
     selected?: boolean;
+    onSelect: (value: string) => void
   }
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Item
@@ -174,7 +176,11 @@ const CommandItem = React.forwardRef<
       "relative flex cursor-default gap-2 select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled=true]:pointer-events-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
       className,
     )}
-    {...props}
+    disabled={props.disabled}
+    selected={props.selected}
+    onSelect={props.onSelect}
+    children={props.children}
+    onPointerDown={props.onSelect}
   />
 ));
 

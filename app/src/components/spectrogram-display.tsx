@@ -201,7 +201,6 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
                   width: "2px",
                   height: "100%",
                   backgroundColor: "blue",
-                  zIndex: 100,
                   opacity: 1,
                 }}
               />
@@ -216,7 +215,6 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
                     width: "100%",
                     height: "2px",
                     backgroundColor: "red",
-                    zIndex: 99,
                     opacity: 1,
                   }}
                 />
@@ -228,7 +226,6 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
                     backgroundColor: "black",
                     padding: "2px 5px",
                     fontSize: "12px",
-                    zIndex: 101,
                     width: "115px",
                   }}
                 >

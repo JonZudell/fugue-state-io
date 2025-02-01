@@ -49,16 +49,19 @@ const WaveformSettings: React.FC<{
           type: "waveform",
           sourceId: mediaKey,
           channel: channel,
-        })
-      )
+        }),
+      );
     } else {
       dispatch(
-        setNode({nodeId: nodeId, node:{
-          id: nodeId,
-          type: "waveform",
-          sourceId: mediaKey,
-          channel: channel,
-        }}),
+        setNode({
+          nodeId: nodeId,
+          node: {
+            id: nodeId,
+            type: "waveform",
+            sourceId: mediaKey,
+            channel: channel,
+          },
+        }),
       );
     }
   }, [mediaKey, channel]);

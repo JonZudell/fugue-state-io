@@ -1,5 +1,11 @@
-.span-slider__track {
-  background-color: #a3a3a3;
+.span-input {
+  border-left: 10px solid #000;
+  border-right: 10px solid #000;
+  border-top: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+}
+.span-input__track {
+  background-color: #000;
   position: relative;
   border-radius: 0px;
   height: 10px;
@@ -7,22 +13,21 @@
   overflow: hidden;
   box-sizing: border-box;
   opacity: 1;
-  border: 1px solid #000000;
 }
 
-.span-slider__thumb_1 {
-  width: 8px;
+.span-input__thumb_1 {
+  width: 10px;
   height: 10px;
-  background-color: #ffffff;
+  background-color: #3b82f6;
   cursor: ew-resize;
-  border-radius: 0%;
   border: none;
   z-index: 2;
+  opacity: 1;
 }
 
-.span-slider__before {
+.span-input__before {
   height: 10px;
-  background-color: var(--tw-ring-color);
-  z-index: 0;
+  background-color: #ffffff;
+  opacity: 1;
   opacity: 1;
 }

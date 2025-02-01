@@ -31,7 +31,7 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ width, height }) => {
   };
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "n") {
+      if ((event.ctrlKey) && event.key === "n") {
         event.preventDefault();
         handleNewFile();
       }

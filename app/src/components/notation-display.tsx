@@ -4,17 +4,27 @@ import abcjs, { TuneObjectArray } from "abcjs";
 import { selectPlayback } from "@/store/playback-slice";
 import { useSelector } from "react-redux";
 import { selectProject } from "@/store/project-slice";
+import ContextMenuDialog from "./context-menu-dialog";
 interface NotationDisplayProps {
   className?: string;
   width: number;
   height: number;
-  abcKey: string;
+  abcKey?: string;
+  nodeId: string;
+  sourceId: string;
+  parentNodeId: string;
+  parentDirection: string;
+
 }
 
 const NotationDisplay: React.FC<NotationDisplayProps> = ({
   width,
   height,
   abcKey,
+  nodeId,
+  sourceId,
+  parentNodeId,
+  parentDirection,
 }) => {
   const notationRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -127,6 +137,15 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
     }
   }, [translateX]);
   return (
+    <ContextMenuDialog
+    width={0}
+    height={0}
+    nodeId={nodeId}
+    initialValue={"notation"}
+    parentNodeId={parentNodeId}
+    parentDirection={parentDirection}
+    abcKey={sourceId}
+  >
     <div
       ref={notationRef}
       id="notation"
@@ -139,6 +158,7 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
         style={{ width: width + "px", height: height + "px" }}
       />
     </div>
+  </ContextMenuDialog>
   );
 };
 export default NotationDisplay;

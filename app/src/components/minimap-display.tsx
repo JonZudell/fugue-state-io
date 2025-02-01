@@ -16,7 +16,7 @@ interface MinimapProps {
 }
 
 const Minimap: React.FC<MinimapProps> = ({
-  channel = "MID",
+  channel = "mono",
   startPercentage = 0,
   endPercentage = 100,
   width,
@@ -88,7 +88,7 @@ const Minimap: React.FC<MinimapProps> = ({
         const startSample = 0;
         const endSample = summaryLength;
         const samplesPerPixel = (endSample - startSample) / canvas.width;
-        if (channel === "LR" && summary.left && summary.right) {
+        if (channel === "left + right" && summary.left && summary.right) {
           drawChannel(
             ctx,
             canvas,
@@ -105,7 +105,7 @@ const Minimap: React.FC<MinimapProps> = ({
             startSample,
             canvas.height / 4,
           );
-        } else if (channel === "MID" && summary.mono) {
+        } else if (channel === "mono" && summary.mono) {
           drawChannel(
             ctx,
             canvas,
@@ -114,7 +114,7 @@ const Minimap: React.FC<MinimapProps> = ({
             startSample,
             canvas.height / 2,
           );
-        } else if (channel === "SIDE" && summary.side) {
+        } else if (channel === "side" && summary.side) {
           drawChannel(
             ctx,
             canvas,
@@ -123,7 +123,7 @@ const Minimap: React.FC<MinimapProps> = ({
             startSample,
             canvas.height / 2,
           );
-        } else if (channel === "LEFT" && summary.left) {
+        } else if (channel === "left" && summary.left) {
           drawChannel(
             ctx,
             canvas,
@@ -132,7 +132,7 @@ const Minimap: React.FC<MinimapProps> = ({
             startSample,
             canvas.height / 2,
           );
-        } else if (channel === "RIGHT" && summary.right) {
+        } else if (channel === "right" && summary.right) {
           drawChannel(
             ctx,
             canvas,
@@ -192,7 +192,6 @@ const Minimap: React.FC<MinimapProps> = ({
                   width: "2px",
                   height: `100%`,
                   backgroundColor: "blue",
-                  zIndex: 100,
                   opacity: 1,
                 }}
               />
@@ -207,7 +206,6 @@ const Minimap: React.FC<MinimapProps> = ({
                 width: `${(loopEnd - loopStart) * width}px`,
                 height: `100%`,
                 backgroundColor: "rgba(255, 255, 255, 0.3)",
-                zIndex: 200,
               }}
             />
           )}

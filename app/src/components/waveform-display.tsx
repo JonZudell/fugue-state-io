@@ -235,7 +235,6 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
                   width: "2px",
                   height: "100%",
                   backgroundColor: "blue",
-                  zIndex: 100,
                   opacity: 1,
                 }}
               />

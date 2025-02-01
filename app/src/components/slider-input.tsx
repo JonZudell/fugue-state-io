@@ -60,15 +60,15 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
   };
 
   return (
-    <div className={`span-slider ${className}`} ref={spanSliderRef}>
+    <div className={`span-input ${className}`} ref={spanSliderRef}>
       <div
-        className="span-slider__track"
+        className="span-input__track"
         onMouseDown={(e) => {
           handleMouseDown(e);
         }}
       >
         <div
-          className="span-slider__before"
+          className="span-input__before"
           style={{
             position: "absolute",
             width: `${(timeElapsed / timelineDuration) * (width - 10)}px`,
@@ -76,7 +76,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
           }}
         ></div>
         <div
-          className="span-slider__thumb_1"
+          className="span-input__thumb_1"
           style={{
             position: "absolute",
             left: `${(timeElapsed / timelineDuration) * (width - 10)}px`,

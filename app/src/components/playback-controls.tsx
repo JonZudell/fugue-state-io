@@ -12,7 +12,9 @@ import SpanSlider from "@/components/span-slider";
 import VolumeSelector from "@/components/volume-selector";
 import SpeedSelector from "@/components/speed-selector";
 import Slider from "@/components/slider-input";
-import { PauseCircle, PlayCircle, Repeat, Repeat1 } from "lucide-react";
+import { Code, PauseCircle, PlayCircle, Repeat, Repeat1 } from "lucide-react";
+import { selectDisplay, setEditor } from "@/store/display-slice";
+import { selectProject } from "@/store/project-slice";
 interface PlaybackControlsProps {
   enabled?: boolean;
   width: number;
@@ -25,6 +27,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   width,
 }) => {
   const dispatch = useDispatch();
+  const { editor } = useSelector(selectDisplay);
+  const { mediaFiles, referenceFile } = useSelector(selectProject);
   const { playing, looping, timeElapsed, timelineDuration } =
     useSelector(selectPlayback);
 
@@ -43,16 +47,20 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
   return (
     <>
+      <Slider />
       {looping && (
         <SpanSlider callback={handleSpanSliderChange} enabled={!playing} />
       )}
-      <Slider />
       <div
-        className="playback-controls bg-gray-800 text-white px-4 z-100"
-        style={{ height: height, width: width }}
+        className="playback-controls bg-black text-white px-4"
+        style={{
+          height: height,
+          width: width,
+          paddingTop: !looping ? "11px" : "0px",
+        }}
       >
-        <div className="h-full flex flex-col">
-          <div className={`flex w-full`}>
+        <div id="button-wrapper" className="w-full flex justify-between">
+          <div className="flex">
             <button
               className="mx-1"
               onClick={togglePlay}
@@ -72,20 +80,37 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               draggable="false"
             >
               {looping ? (
-                <Repeat className="h-6 w-6" />
+                <Repeat className="h-6 w-6 text-green-500" />
               ) : (
                 <Repeat1 className="h-6 w-6" />
               )}
             </button>
             <VolumeSelector className="mx-1" enabled={enabled} />
             <SpeedSelector className="mx-1" enabled={enabled} />
-            <span style={{ userSelect: "none" }} className="my-2 mx-4">
-              {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} / -
-              {new Date((timelineDuration - timeElapsed) * 1000)
-                .toISOString()
-                .substr(12, 7)}
-            </span>
+            <div className="flex items-center">
+              <span style={{ userSelect: "none" }} className="my-2 mx-4">
+                {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} / -
+                {new Date((timelineDuration - timeElapsed) * 1000)
+                  .toISOString()
+                  .substr(12, 7)}
+              </span>
+            </div>
           </div>
+
+          <button
+            className="mx-1"
+            disabled={!enabled}
+            draggable="false"
+            onClick={() => {
+              dispatch(setEditor(!editor));
+            }}
+          >
+            {editor ? (
+              <Code className="h-6 w-6 text-green-500" />
+            ) : (
+              <Code className="h-6 w-6" />
+            )}
+          </button>
         </div>
       </div>
     </>

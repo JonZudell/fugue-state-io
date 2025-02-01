@@ -19,7 +19,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DialogFooter } from "./ui/dialog";
 
-const SpectrogramSettings: React.FC<{
+const FourierSettings: React.FC<{
   nodeId: string | null;
   initialMediaKey: string | null;
   initialChannel: string | null;
@@ -49,7 +49,7 @@ const SpectrogramSettings: React.FC<{
       dispatch(
         setRoot({
           id: nodeId,
-          type: "spectrogram",
+          type: "fourier",
           sourceId: mediaKey,
           channel: channel,
         }),
@@ -60,7 +60,7 @@ const SpectrogramSettings: React.FC<{
           nodeId: nodeId,
           node: {
             id: nodeId,
-            type: "spectrogram",
+            type: "fourier",
             sourceId: mediaKey,
             channel: channel,
           },
@@ -216,4 +216,4 @@ const SpectrogramSettings: React.FC<{
     </>
   );
 };
-export default SpectrogramSettings;
+export default FourierSettings;

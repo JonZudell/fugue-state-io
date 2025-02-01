@@ -6,6 +6,7 @@ import {
   BookOpen,
   Bot,
   Command,
+  Folder,
   Frame,
   GalleryVerticalEnd,
   Settings2,
@@ -33,16 +34,16 @@ const data = {
   },
   menus: [
     {
-      name: "Display",
+      name: "Project Settings",
+      logo: Folder,
+    },
+    {
+      name: "Display Settings",
       logo: GalleryVerticalEnd,
     },
     {
-      name: "Audio",
+      name: "Audio Settings",
       logo: AudioWaveform,
-    },
-    {
-      name: "Waveform",
-      logo: Command,
     },
   ],
   navMain: [

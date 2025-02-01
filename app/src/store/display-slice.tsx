@@ -39,7 +39,7 @@ const compressTree = (node: Node): Node => {
     };
   }
   return node;
-}
+};
 
 const treeEquals = (a: Node, b: Node): boolean => {
   if (a.id !== b.id) {
@@ -56,7 +56,7 @@ const treeEquals = (a: Node, b: Node): boolean => {
     }
   }
   return true;
-}
+};
 
 export const selectDisplay = (state: { display: DisplayState }) =>
   state.display;
@@ -74,6 +74,9 @@ const displaySlice = createSlice({
     setMinimapSource: (state: DisplayState, action: PayloadAction<string>) => {
       console.log("Setting minimap source", action.payload);
       state.minimapSource = action.payload;
+    },
+    setEditor: (state: DisplayState, action: PayloadAction<boolean>) => {
+      state.editor = action.payload;
     },
     setVideoEnabled: (state: DisplayState, action: PayloadAction<boolean>) => {
       state.videoEnabled = action.payload;
@@ -122,7 +125,9 @@ const displaySlice = createSlice({
         if (node.children) {
           return {
             ...node,
-            children: node.children.filter((child) => child.id !== action.payload).map((child) => removeNode(child)),
+            children: node.children
+              .filter((child) => child.id !== action.payload)
+              .map((child) => removeNode(child)),
           };
         }
         return node;
@@ -184,6 +189,7 @@ export const {
   setVideoEnabled,
   setRoot,
   setNode,
+  setEditor,
   removeNode,
   splitNode,
 } = displaySlice.actions;

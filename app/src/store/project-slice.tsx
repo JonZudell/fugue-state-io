@@ -30,6 +30,7 @@ export interface Project {
   name: string;
   mediaFiles: { [key: string]: MediaFile };
   abcs: { [key: string]: ABCAsset };
+  referenceFile?: string | null;
 }
 
 export interface ProjectsStateInterface {
@@ -214,6 +215,9 @@ const projectSlice = createSlice({
         console.log("Adding file", action.payload);
         state.projects[state.activeProject].mediaFiles[action.payload.id] =
           action.payload;
+        if (Object.keys(state.projects[state.activeProject].mediaFiles).length === 1) {
+          state.projects[state.activeProject].referenceFile = action.payload.id;
+        }
       }
     },
     addAbc: (state, action: PayloadAction<ABCAsset>) => {
@@ -256,6 +260,16 @@ const projectSlice = createSlice({
         state.projects[state.activeProject].mediaFiles[
           action.payload.id
         ].processing = action.payload.processing;
+      }
+    },
+    setReferenceFile: (
+      state,
+      action: PayloadAction<{ id: string; reference: string | null }>,
+    ) => {
+      if (state.activeProject === null) {
+        console.error("No active project");
+      } else {
+        state.projects[state.activeProject].referenceFile = action.payload.reference;
       }
     },
     setFileChannelProgress: (
@@ -317,5 +331,6 @@ export const {
   newProject,
   setProgress,
   setChannelSummary,
+  setReferenceFile,
 } = projectSlice.actions;
 export default projectSlice.reducer;

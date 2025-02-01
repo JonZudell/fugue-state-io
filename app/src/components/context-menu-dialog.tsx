@@ -35,6 +35,9 @@ import SpectrogramSettings from "./spectrogram-settings";
 import { channel } from "diagnostics_channel";
 import { removeNode, splitNode } from "@/store/display-slice";
 import { useDispatch } from "react-redux";
+import FourierSettings from "./fourier-settings";
+import NotationSettings from "./notation-settings";
+import VideoSettings from "./video-settings";
 const displays = [
   {
     value: "waveform",
@@ -65,13 +68,15 @@ interface ContextMenuDialogProps {
   parentNodeId: string | null;
   parentDirection: string | null;
   initialValue: string | null;
-  mediaKey: string | null;
-  initialChannel: string | null;
+  mediaKey?: string | null;
+  abcKey?: string | null;
+  initialChannel?: string | null;
   isNullDisplay?: boolean;
 }
 const ContextMenuDialog: React.FC<ContextMenuDialogProps> = ({
   width,
   height,
+  abcKey,
   children,
   nodeId,
   parentNodeId,
@@ -90,7 +95,7 @@ const ContextMenuDialog: React.FC<ContextMenuDialogProps> = ({
       <ContextMenu>
         <ContextMenuTrigger>{children}</ContextMenuTrigger>
         <ContextMenuContent>
-          { isNullDisplay ? (
+          {isNullDisplay ? (
             <ContextMenuItem onClick={() => setOpen(true)}>
               <span>Add Display</span>
             </ContextMenuItem>
@@ -214,11 +219,17 @@ const ContextMenuDialog: React.FC<ContextMenuDialogProps> = ({
                         />
                       );
                     case "notation":
-                      return <div>Notation settings...</div>;
+                      return <NotationSettings nodeId={nodeId} initalAbcKey={abcKey} />;
                     case "video":
-                      return <div>Video settings...</div>;
+                      return <VideoSettings nodeId={nodeId} initialMediaKey={mediaKey} />;
                     case "fourier":
-                      return <div>Fourier settings...</div>;
+                      return (
+                        <FourierSettings
+                          nodeId={nodeId}
+                          initialMediaKey={mediaKey}
+                          initialChannel={initialChannel}
+                        />
+                      );
                     case "spectrogram":
                       return (
                         <SpectrogramSettings

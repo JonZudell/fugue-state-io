@@ -34,7 +34,6 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import NotationEditor from "@/components/notation-editor";
 import {
   selectProject,
   selectAnyProcessing,
@@ -59,8 +58,8 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const processing = useSelector(selectAnyProcessing);
   const progress = useSelector(selectProgressState);
   const { isMobile } = useSidebar();
-
-  const { mediaFiles, abcs, ready } = useSelector(selectProject) as Project;
+  const [init, setInit] = useState(false);
+  const { mediaFiles } = useSelector(selectProject) as Project;
   const { editor, root } = useSelector(selectDisplay);
   const { mode } = useSelector(selectPlayback);
   const { state } = useSidebar();
@@ -121,7 +120,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
         workerRef.current.terminate();
       }
     };
-  }, [workerRef, dispatch, mode]);
+  }, [workerRef, dispatch, mode, init]);
 
   const handleResize = useCallback(() => {
     console.log("window.innerWidth", window.innerWidth);
@@ -145,7 +144,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
         height: window.innerHeight,
       });
     }
-  }, [state, isMobile]);
+  }, [state, isMobile, editor]);
 
   useLayoutEffect(() => {
     window.addEventListener("resize", handleResize);

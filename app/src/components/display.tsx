@@ -10,6 +10,8 @@ import SpectrogramDisplay from "@/components/spectrogram-display";
 import FourierDisplay from "@/components/fourier-display";
 import NotationDisplay from "@/components/notation-display";
 import NullDisplay from "./null-display";
+import { Video } from "lucide-react";
+import VideoDisplay from "./video-display";
 
 const renderMediaComponent = (
   type: string,
@@ -54,6 +56,8 @@ const renderMediaComponent = (
       );
     case "notation":
       return <NotationDisplay width={width} height={height} />;
+    case "video":
+      return <VideoDisplay media={media} width={width} height={height} />;
     default:
       return null;
   }
@@ -63,22 +67,38 @@ interface DisplayProps {
   node: Node | null;
   width: number;
   height: number;
-  parentNodeId?: string;
+  parentNodeId: string | null;
   parentDirection?: string;
 }
-const Display: React.FC<DisplayProps> = ({ node, width, height, parentNodeId, parentDirection }) => {
-  const { playing, timeElapsed, loopStart, loopEnd, looping, volume, speed } =
-    useSelector(selectPlayback);
-
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("");
-
+const Display: React.FC<DisplayProps> = ({
+  node,
+  width,
+  height,
+  parentNodeId,
+  parentDirection,
+}) => {
+  const { loopStart, loopEnd } = useSelector(selectPlayback);
   if (node === null) {
     return <NullDisplay width={width} height={height} />;
   }
   if (node.type === "waveform") {
     return (
       <WaveformDisplay
+        key={node.id}
+        nodeId={node.id}
+        sourceId={node.sourceId}
+        parentNodeId={parentNodeId}
+        channel={node.channel}
+        startPercentage={loopStart * 100}
+        endPercentage={loopEnd * 100}
+        width={width}
+        height={height}
+      />
+    );
+  }
+  if (node.type === "fourier") {
+    return (
+      <FourierDisplay
         key={node.id}
         nodeId={node.id}
         sourceId={node.sourceId}
@@ -105,6 +125,21 @@ const Display: React.FC<DisplayProps> = ({ node, width, height, parentNodeId, pa
         height={height}
       />
     );
+  }
+  if (node.type === "video") {
+    return (
+      <VideoDisplay
+        key={node.id}
+        nodeId={node.id}
+        sourceId={node.sourceId}
+        parentNodeId={parentNodeId}
+        width={width}
+        height={height}
+      />
+    );
+  }
+  if (node.type === "notation") {
+    return <NotationDisplay width={width} height={height} abcKey={node.sourceId} nodeId={node.id} sourceId={node.sourceId} parentNodeId={parentNodeId}  />;
   }
   // Render the node recursively
   if (node.children && node.children.length > 0) {
