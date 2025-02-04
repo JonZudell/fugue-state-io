@@ -14,7 +14,6 @@ interface NotationDisplayProps {
   sourceId: string;
   parentNodeId: string;
   parentDirection: string;
-
 }
 
 const NotationDisplay: React.FC<NotationDisplayProps> = ({
@@ -138,27 +137,27 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
   }, [translateX]);
   return (
     <ContextMenuDialog
-    width={0}
-    height={0}
-    nodeId={nodeId}
-    initialValue={"notation"}
-    parentNodeId={parentNodeId}
-    parentDirection={parentDirection}
-    abcKey={sourceId}
-  >
-    <div
-      ref={notationRef}
-      id="notation"
-      style={{ color: "#fbcfe8", height: height, width: width }}
+      width={0}
+      height={0}
+      nodeId={nodeId}
+      initialValue={"notation"}
+      parentNodeId={parentNodeId}
+      parentDirection={parentDirection}
+      abcKey={sourceId}
     >
-      <canvas
-        ref={canvasRef}
-        width={width}
-        height={height}
-        style={{ width: width + "px", height: height + "px" }}
-      />
-    </div>
-  </ContextMenuDialog>
+      <div
+        ref={notationRef}
+        id="notation"
+        style={{ color: "#fbcfe8", height: height, width: width }}
+      >
+        <canvas
+          ref={canvasRef}
+          width={width}
+          height={height}
+          style={{ width: width + "px", height: height + "px" }}
+        />
+      </div>
+    </ContextMenuDialog>
   );
 };
 export default NotationDisplay;

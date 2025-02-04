@@ -16,7 +16,7 @@ import {
   CommandList,
 } from "./ui/command";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { DialogFooter } from "./ui/dialog";
 
 const SpectrogramSettings: React.FC<{

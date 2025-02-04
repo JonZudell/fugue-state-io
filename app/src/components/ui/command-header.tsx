@@ -6,7 +6,7 @@ import { type DialogProps } from "@radix-ui/react-dialog";
 import { Command as CommandPrimitive } from "cmdk";
 import { Search } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const Command = React.forwardRef<
@@ -48,13 +48,15 @@ const Command = React.forwardRef<
         setOpen={setOpen}
         onChange={props.onChange}
         onFocus={() => setOpen(true)}
-        onBlur={() => {setOpen(false); inputRef.current.value = "";}}
-        
+        onBlur={() => {
+          setOpen(false);
+          inputRef.current.value = "";
+        }}
         placeholder="Type a command or search..."
       />
       <CommandList style={{ display: open ? "block" : "none" }}>
         <CommandEmpty>No results found.</CommandEmpty>
-          {props.children}
+        {props.children}
       </CommandList>
     </CommandPrimitive>
   );
@@ -167,7 +169,7 @@ const CommandItem = React.forwardRef<
     children?: React.ReactNode;
     disabled?: boolean;
     selected?: boolean;
-    onSelect: (value: string) => void
+    onSelect: (value: string) => void;
   }
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Item

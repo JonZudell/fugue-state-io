@@ -1,6 +1,6 @@
 import FFT from "fft.js";
 const SAMPLE_RATE = 44100;
-const SAMPLE_BIN_SIZE = 4096;
+const SAMPLE_BIN_SIZE = 2048;
 const HALF_SAMPLE_BIN_SIZE = Math.floor(SAMPLE_BIN_SIZE / 2);
 const fft = new FFT(SAMPLE_BIN_SIZE);
 const WINDOW_FUNCTION = "hamming";

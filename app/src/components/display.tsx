@@ -139,7 +139,16 @@ const Display: React.FC<DisplayProps> = ({
     );
   }
   if (node.type === "notation") {
-    return <NotationDisplay width={width} height={height} abcKey={node.sourceId} nodeId={node.id} sourceId={node.sourceId} parentNodeId={parentNodeId}  />;
+    return (
+      <NotationDisplay
+        width={width}
+        height={height}
+        abcKey={node.sourceId}
+        nodeId={node.id}
+        sourceId={node.sourceId}
+        parentNodeId={parentNodeId}
+      />
+    );
   }
   // Render the node recursively
   if (node.children && node.children.length > 0) {

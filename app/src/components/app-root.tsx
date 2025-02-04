@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import SummarizeWorker from "@/workers/summarize.worker.js"; // Adjust the import path as necessary
-import { selectPlayback } from "@/store/playback-slice";
+import { selectPlayback, setTimeElapsed } from "@/store/playback-slice";
 import {
   selectProgressState,
   setProgress,
@@ -59,9 +59,9 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const progress = useSelector(selectProgressState);
   const { isMobile } = useSidebar();
   const [init, setInit] = useState(false);
-  const { mediaFiles } = useSelector(selectProject) as Project;
+  const { mediaFiles, referenceFile } = useSelector(selectProject) as Project;
   const { editor, root } = useSelector(selectDisplay);
-  const { mode } = useSelector(selectPlayback);
+  const { mode, playing, timeElapsed } = useSelector(selectPlayback);
   const { state } = useSidebar();
   const [panelGroupDimensions, setPanelGroupDimensions] = useState({
     width: 0,
@@ -71,6 +71,8 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
     width: 0,
     height: 0,
   });
+  const media = referenceFile ? mediaFiles[referenceFile] : null;
+  const mediaRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     workerRef.current = new SummarizeWorker();
@@ -164,6 +166,31 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
     }
   }, [topPanelRef, panelGroupDimensions]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (mediaRef.current && playing) {
+        dispatch(setTimeElapsed(mediaRef.current.currentTime));
+      }
+    }, 30);
+
+    return () => clearInterval(interval);
+  }, [mediaRef, dispatch, playing]);
+
+  useEffect(() => {
+    if (mediaRef.current) {
+      if (playing) {
+        mediaRef.current.play();
+      } else {
+        mediaRef.current.pause();
+      }
+    }
+  }, [mediaRef, playing]);
+
+  useEffect(() => {
+    if (!playing && mediaRef.current) {
+      mediaRef.current.currentTime = timeElapsed;
+    }
+  }, [timeElapsed, mediaRef, playing]);
   return (
     <>
       {mediaFiles && processing ? (
@@ -195,6 +222,17 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
               ref={sidebarRef}
               hidden={Object.keys(mediaFiles).length == 0 || processing}
             />
+            {media && (
+              <video
+                ref={mediaRef}
+                src={media.url}
+                autoPlay={false}
+                controls={false}
+                muted={false}
+                loop={false}
+                style={{ display: "none" }}
+              />
+            )}
             {mediaFiles &&
               Object.keys(mediaFiles).length > 0 &&
               !processing && (

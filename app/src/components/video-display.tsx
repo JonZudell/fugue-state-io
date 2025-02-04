@@ -45,7 +45,6 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
       if (video) {
         video.currentTime = timeElapsed;
       }
-
     }
   }, [timeElapsed, playing]);
 
@@ -75,7 +74,6 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
             autoPlay={false}
             loop={false}
             muted={true}
-          
             style={{
               width: "100%",
               height: "100%",

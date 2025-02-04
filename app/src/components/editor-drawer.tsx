@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import NotationEditor from "@/components/notation-editor";
 import { ABCAsset, addAbc, selectProject } from "@/store/project-slice";
 import { useDispatch, useSelector } from "react-redux";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import { v4 as uuidv4 } from "uuid";
 import "@/components/editor-drawer.css";
 interface EditorDrawerProps {
@@ -31,7 +31,7 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ width, height }) => {
   };
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey) && event.key === "n") {
+      if (event.ctrlKey && event.key === "n") {
         event.preventDefault();
         handleNewFile();
       }

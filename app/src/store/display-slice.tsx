@@ -180,6 +180,9 @@ const displaySlice = createSlice({
       state.root = compressTree(splitNode(state.root));
       state.root.id = "root";
     },
+    toggleEditor: (state: DisplayState) => {
+      state.editor = !state.editor;
+    },
   },
 });
 
@@ -192,6 +195,7 @@ export const {
   setEditor,
   removeNode,
   splitNode,
+  toggleEditor,
 } = displaySlice.actions;
 
 export default displaySlice.reducer;

@@ -28,7 +28,7 @@ import {
   CommandList,
 } from "./ui/command";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/utils";
 import WaveformSettings from "./waveform-settings";
 import SpectrogramDisplay from "./spectrogram-display";
 import SpectrogramSettings from "./spectrogram-settings";

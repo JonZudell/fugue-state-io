@@ -44,6 +44,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const handleToggleLooping = () => {
     dispatch(setLooping(!looping));
   };
+  const media = referenceFile ? mediaFiles[referenceFile] : null;
 
   return (
     <>
@@ -90,7 +91,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <div className="flex items-center">
               <span style={{ userSelect: "none" }} className="my-2 mx-4">
                 {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} / -
-                {new Date((timelineDuration - timeElapsed) * 1000)
+                {new Date((media?.duration - timeElapsed) * 1000)
                   .toISOString()
                   .substr(12, 7)}
               </span>

@@ -1,6 +1,28 @@
-playback-controls rewrite
-  change style
-  handle spacing for loop spanner
+playback-controls style
   vertical audio and speed sliders
+  equalization
 
-multiple notation files
+integrations
+  waveform/minimap abc reference
+  fourier abc reference
+
+project
+  offsets
+
+sidebar
+  project management
+  audo levels
+  
+playback
+  abcOffsets
+  equalization
+  volume
+  speed
+
+1.0.0
+  save
+  load
+  login
+
+
+

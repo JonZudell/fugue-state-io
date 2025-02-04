@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Channels } from "@/lib/dsp";
+import { Channels } from "@/utils/dsp";
 import { v4 as uuidv4 } from "uuid";
 import { registerMedia } from "./playback-slice";
 import { setMinimapSource } from "./display-slice";
@@ -215,7 +215,10 @@ const projectSlice = createSlice({
         console.log("Adding file", action.payload);
         state.projects[state.activeProject].mediaFiles[action.payload.id] =
           action.payload;
-        if (Object.keys(state.projects[state.activeProject].mediaFiles).length === 1) {
+        if (
+          Object.keys(state.projects[state.activeProject].mediaFiles).length ===
+          1
+        ) {
           state.projects[state.activeProject].referenceFile = action.payload.id;
         }
       }
@@ -269,7 +272,8 @@ const projectSlice = createSlice({
       if (state.activeProject === null) {
         console.error("No active project");
       } else {
-        state.projects[state.activeProject].referenceFile = action.payload.reference;
+        state.projects[state.activeProject].referenceFile =
+          action.payload.reference;
       }
     },
     setFileChannelProgress: (

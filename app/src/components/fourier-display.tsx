@@ -8,7 +8,7 @@ import {
   SummarizedFrame,
   getFrequencyForBin,
   getNoteForFrequency,
-} from "@/lib/dsp";
+} from "@/utils/dsp";
 import ContextMenuDialog from "./context-menu-dialog";
 
 interface FourierDisplayProps {
@@ -119,37 +119,13 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
           ctx.lineTo(canvas.width, canvas.height / 2);
           ctx.stroke();
         } else if (channel === "mono" && summary.mono) {
-          drawFourier(
-            ctx,
-            canvas,
-            summary.mono,
-            timeElapsed,
-            canvas.height,
-          );
+          drawFourier(ctx, canvas, summary.mono, timeElapsed, canvas.height);
         } else if (channel === "side" && summary.side) {
-          drawFourier(
-            ctx,
-            canvas,
-            summary.side,
-            timeElapsed,
-            canvas.height,
-          );
+          drawFourier(ctx, canvas, summary.side, timeElapsed, canvas.height);
         } else if (channel === "left" && summary.left) {
-          drawFourier(
-            ctx,
-            canvas,
-            summary.left,
-            timeElapsed,
-            canvas.height,
-          );
+          drawFourier(ctx, canvas, summary.left, timeElapsed, canvas.height);
         } else if (channel === "right" && summary.right) {
-          drawFourier(
-            ctx,
-            canvas,
-            summary.right,
-            timeElapsed,
-            canvas.height,
-          );
+          drawFourier(ctx, canvas, summary.right, timeElapsed, canvas.height);
         }
       }
     };
@@ -291,7 +267,7 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         setTopInfoString(
           `Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
         );
-      }else if (channel === "left" && media.summary.left) {
+      } else if (channel === "left" && media.summary.left) {
         const { summary } = media;
         const summaryLength = summary.left ? summary.left.length : 0;
         const startSample = Math.floor((0 / 100) * summaryLength);
@@ -316,7 +292,7 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         setTopInfoString(
           `Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
         );
-      }else if (channel === "right" && media.summary.right) {
+      } else if (channel === "right" && media.summary.right) {
         const { summary } = media;
         const summaryLength = summary.right ? summary.side.length : 0;
         const startSample = Math.floor((0 / 100) * summaryLength);

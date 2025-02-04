@@ -7,7 +7,7 @@ import {
   colorForBin,
   getFrequencyForBin,
   getNoteForFrequency,
-} from "@/lib/dsp";
+} from "@/utils/dsp";
 import ContextMenuDialog from "./context-menu-dialog";
 interface SpectrogramDisplayProps {
   nodeId: string;

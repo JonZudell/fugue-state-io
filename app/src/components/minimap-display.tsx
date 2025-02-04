@@ -4,7 +4,7 @@ import { MediaFile, selectProject } from "@/store/project-slice";
 import { selectPlayback } from "@/store/playback-slice";
 import { selectDisplay } from "@/store/display-slice";
 import { useSelector } from "react-redux";
-import { SummarizedFrame } from "@/lib/dsp";
+import { SummarizedFrame } from "@/utils/dsp";
 interface MinimapProps {
   width: number;
   channel?: string;
