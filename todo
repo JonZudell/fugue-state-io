@@ -12,7 +12,7 @@ project
 sidebar
   project management
   audo levels
-  
+
 playback
   abcOffsets
   equalization
@@ -23,6 +23,3 @@ playback
   save
   load
   login
-
-
-
