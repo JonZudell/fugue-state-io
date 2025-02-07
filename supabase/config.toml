@@ -136,7 +136,7 @@ secret = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET)"
 redirect_uri = "env(SUPABASE_AUTH_EXTERNAL_GITHUB_REDIRECT_URI)"
 # Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
 # or any other third-party OIDC providers.
-url = ""
+url = "http://localhost:3000"
 
 [analytics]
 enabled = false

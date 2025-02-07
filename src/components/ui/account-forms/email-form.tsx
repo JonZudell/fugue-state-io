@@ -6,6 +6,7 @@ import { updateEmail } from '@/utils/auth-helpers/server';
 import { handleRequest } from '@/utils/auth-helpers/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Input } from '../input';
 
 export default function EmailForm({
   userEmail
@@ -29,15 +30,16 @@ export default function EmailForm({
 
   return (
     <Card
-      title="Your Email"
-      content="Please enter the email address you want to use to login."
+      className='p-6 text-black w-full'
     >
       <div className="mt-8 mb-4 text-xl font-semibold">
+        <h1 className="text-2xl font-semibold">Your Email</h1>
+        <p className="text-sm">Please enter the email address you want to use to login.</p>
         <form id="emailForm" onSubmit={(e) => handleSubmit(e)}>
-          <input
+          <Input
             type="text"
             name="newEmail"
-            className="w-1/2 p-3 rounded-md bg-zinc-800"
+            className="w-1/2"
             defaultValue={userEmail ?? ''}
             placeholder="Your email"
             maxLength={64}

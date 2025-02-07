@@ -1,6 +1,7 @@
-import CustomerPortalForm from '@/components/ui/AccountForms/CustomerPortalForm';
-import EmailForm from '@/components/ui/AccountForms/EmailForm';
-import NameForm from '@/components/ui/AccountForms/NameForm';
+
+import CustomerPortalForm from '@/components/ui/account-forms/customer-portal-form';
+import EmailForm from '@/components/ui/account-forms/email-form';
+import NameForm from '@/components/ui/account-forms/name-form';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import {
@@ -8,6 +9,7 @@ import {
   getSubscription,
   getUser
 } from '@/utils/supabase/queries';
+import SignOutButton from '@/components/ui/auth-forms/signout-button';
 
 export default async function Account() {
   const supabase = createClient();
@@ -33,10 +35,13 @@ export default async function Account() {
           </p>
         </div>
       </div>
-      <div className="p-4">
+      <div className="p-4 mx-auto max-w-lg sm:px-6 lg:px-8">
         <CustomerPortalForm subscription={subscription} />
         <NameForm userName={userDetails?.full_name ?? ''} />
         <EmailForm userEmail={user.email} />
+      </div>
+      <div className="flex justify-center mt-8">
+        <SignOutButton />
       </div>
     </section>
   );

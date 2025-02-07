@@ -7,6 +7,7 @@ import { signUp } from '@/utils/auth-helpers/server';
 import { handleRequest } from '@/utils/auth-helpers/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Input } from '../input';
 
 // Define prop type with allowEmail boolean
 interface SignUpProps {
@@ -31,10 +32,11 @@ export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
         className="mb-4"
         onSubmit={(e) => handleSubmit(e)}
       >
+        <h1 className="text-2xl font-semibold">Sign up</h1>
         <div className="grid gap-2">
           <div className="grid gap-1">
             <label htmlFor="email">Email</label>
-            <input
+            <Input
               id="email"
               placeholder="name@example.com"
               type="email"
@@ -42,16 +44,16 @@ export default function SignUp({ allowEmail, redirectMethod }: SignUpProps) {
               autoCapitalize="none"
               autoComplete="email"
               autoCorrect="off"
-              className="w-full p-3 rounded-md bg-zinc-800"
+              className="w-full"
             />
             <label htmlFor="password">Password</label>
-            <input
+            <Input
               id="password"
               placeholder="Password"
               type="password"
               name="password"
               autoComplete="current-password"
-              className="w-full p-3 rounded-md bg-zinc-800"
+              className="w-full"
             />
           </div>
           <Button

@@ -61,6 +61,7 @@ export default async function SignIn({
           <Logo width="64px" height="64px" />
         </div>
         <Card
+          className='p-6'
           title={
             viewProp === 'forgot_password'
               ? 'Reset Password'

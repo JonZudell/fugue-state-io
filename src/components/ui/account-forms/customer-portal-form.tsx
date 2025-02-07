@@ -47,29 +47,29 @@ export default function CustomerPortalForm({ subscription }: Props) {
   return (
     <Card
       title="Your Plan"
-      content={
-        subscription
-          ? `You are currently on the ${subscription?.prices?.products?.name} plan.`
-          : 'You are not currently subscribed to any plan.'
-      }
+      className='p-6 w-full'
     >
+      <h1 className="text-2xl font-semibold">Subscription</h1>
+      <p className='text-sm'>{subscription
+        ? `You are currently on the ${subscription?.prices?.products?.name} plan.`
+        : 'You are not currently subscribed to any plan.'}</p>
       <div className="mt-8 mb-4 text-xl font-semibold">
-        {subscription ? (
-          `${subscriptionPrice}/${subscription?.prices?.interval}`
-        ) : (
-          <Link href="/">Choose your plan</Link>
-        )}
+      {subscription ? (
+        `${subscriptionPrice}/${subscription?.prices?.interval}`
+      ) : (
+        <Link href="/">Choose your plan</Link>
+      )}
       </div>
       <div className="flex flex-col items-start justify-between sm:flex-row sm:items-center">
-          <p className="pb-4 sm:pb-0">Manage your subscription on Stripe.</p>
-          <Button
-            variant="default"
-            onClick={handleStripePortalRequest}
-            loading={isSubmitting}
-          >
-            Open customer portal
-          </Button>
-        </div>
+        <p className="pb-4 sm:pb-0">Manage your subscription on Stripe.</p>
+        <Button
+        variant="default"
+        onClick={handleStripePortalRequest}
+        loading={isSubmitting}
+        >
+        Open customer portal
+        </Button>
+      </div>
     </Card>
   );
 }

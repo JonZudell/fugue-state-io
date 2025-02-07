@@ -24,6 +24,7 @@ export default function UpdatePassword({
 
   return (
     <div className="my-8">
+      <h1 className="text-2xl font-semibold">Update Password</h1>
       <form
         noValidate={true}
         className="mb-4"

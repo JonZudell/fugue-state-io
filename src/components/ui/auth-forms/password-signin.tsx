@@ -6,6 +6,7 @@ import { signInWithPassword } from '@/utils/auth-helpers/server';
 import { handleRequest } from '@/utils/auth-helpers/client';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import { Input } from '../input';
 
 // Define prop type with allowEmail boolean
 interface PasswordSignInProps {
@@ -28,6 +29,7 @@ export default function PasswordSignIn({
 
   return (
     <div className="my-8">
+      <h1 className="text-2xl font-semibold">Sign in</h1>
       <form
         noValidate={true}
         className="mb-4"
@@ -36,7 +38,7 @@ export default function PasswordSignIn({
         <div className="grid gap-2">
           <div className="grid gap-1">
             <label htmlFor="email">Email</label>
-            <input
+            <Input
               id="email"
               placeholder="name@example.com"
               type="email"
@@ -44,16 +46,16 @@ export default function PasswordSignIn({
               autoCapitalize="none"
               autoComplete="email"
               autoCorrect="off"
-              className="w-full p-3 rounded-md bg-zinc-800"
+              className="w-full"
             />
             <label htmlFor="password">Password</label>
-            <input
+            <Input
               id="password"
               placeholder="Password"
               type="password"
               name="password"
               autoComplete="current-password"
-              className="w-full p-3 rounded-md bg-zinc-800"
+              className="w-full"
             />
           </div>
           <Button
