@@ -1,8 +1,8 @@
 // File: /Users/jonathonzudell/Workspace/fugue-state-io/src/app/signin/[id]/page.tsx
-import * as entry from '../../../../../src/app/signin/[id]/page.js'
+import * as entry from '../../../../../src/app/signin/update_password/page.jsx'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
-type TEntry = typeof import('../../../../../src/app/signin/[id]/page.js')
+type TEntry = typeof import('../../../../../src/app/signin/update_password/page.jsx')
 
 type SegmentParams<T extends Object = any> = T extends Record<string, any>
   ? { [K in keyof T]: T[K] extends string ? string | string[] | undefined : never }

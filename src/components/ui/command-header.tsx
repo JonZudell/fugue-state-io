@@ -21,6 +21,7 @@ const Command = React.forwardRef<
     setOpen?: (open: boolean) => void;
     setHovered?: (hovered: boolean) => void;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    value?: string;
   }
 >(({ className, open, setOpen, ...props }, ref) => {
   const inputRef =
@@ -181,9 +182,10 @@ const CommandItem = React.forwardRef<
     disabled={props.disabled}
     selected={props.selected}
     onSelect={props.onSelect}
-    children={props.children}
     onPointerDown={props.onSelect}
-  />
+  >
+    {props.children}
+  </CommandPrimitive.Item>
 ));
 
 CommandItem.displayName = CommandPrimitive.Item.displayName;

@@ -1,24 +1,25 @@
-'use client';
-
-import {Button} from '@/components/ui/button';
-import Link from 'next/link';
-import { signInWithPassword } from '@/utils/auth-helpers/server';
-import { handleRequest } from '@/utils/auth-helpers/client';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { Input } from '../input';
+"use client";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { signInWithPassword } from "@/utils/auth-helpers/server";
+import { handleRequest } from "@/utils/auth-helpers/client";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { Input } from "../input";
+import { CardContent, CardDescription, CardHeader, CardTitle } from "../card";
+import { Label } from "../label";
+import OauthSignIn from "./oauth-signin";
 
 // Define prop type with allowEmail boolean
 interface PasswordSignInProps {
-  allowEmail: boolean;
-  redirectMethod: string;
+  redirectMethod?: string | null;
 }
 
 export default function PasswordSignIn({
-  allowEmail,
-  redirectMethod
+  redirectMethod,
 }: PasswordSignInProps) {
-  const router = redirectMethod === 'client' ? useRouter() : null;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const router = redirectMethod === "client" ? useRouter() : null;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -28,63 +29,63 @@ export default function PasswordSignIn({
   };
 
   return (
-    <div className="my-8">
-      <h1 className="text-2xl font-semibold">Sign in</h1>
-      <form
-        noValidate={true}
-        className="mb-4"
-        onSubmit={(e) => handleSubmit(e)}
-      >
-        <div className="grid gap-2">
-          <div className="grid gap-1">
-            <label htmlFor="email">Email</label>
-            <Input
-              id="email"
-              placeholder="name@example.com"
-              type="email"
-              name="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect="off"
-              className="w-full"
-            />
-            <label htmlFor="password">Password</label>
-            <Input
-              id="password"
-              placeholder="Password"
-              type="password"
-              name="password"
-              autoComplete="current-password"
-              className="w-full"
-            />
+    <>
+      <CardHeader>
+        <CardTitle className="text-2xl text-center">fugue-state.io</CardTitle>
+        <CardDescription className="text-lg">Sign In</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form
+          noValidate={true}
+          className="mb-4"
+          onSubmit={(e) => handleSubmit(e)}
+        >
+          <div className="flex flex-col gap-6">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect="off"
+                required
+              />
+            </div>
+            <div className="grid gap-2">
+              <div className="flex items-center">
+                <Label htmlFor="password">Password</Label>
+                <Link
+                  href="/signin/forgot_password"
+                  className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                >
+                  Forgot your password?
+                </Link>
+              </div>
+              <Input id="password" type="password" required />
+            </div>
+            <Button type="submit" className="w-full" loading={isSubmitting}>
+              Sign In
+            </Button>
+            <div className="mt-4 text-center text-sm">
+              Don&apos;t have an account?{" "}
+              <Link
+                href="/signin/signup"
+                className="underline underline-offset-4"
+              >
+                Sign up
+              </Link>
+            </div>
+            <OauthSignIn />
           </div>
-          <Button
-            variant="default"
-            type="submit"
-            className="mt-1"
-            loading={isSubmitting}
-          >
-            Sign in
-          </Button>
-        </div>
-      </form>
-      <p>
-        <Link href="/signin/forgot_password" className="font-light text-sm">
-          Forgot your password?
-        </Link>
-      </p>
-      {allowEmail && (
-        <p>
+        </form>
+        <div className="mt-4 text-center text-sm">
           <Link href="/signin/email_signin" className="font-light text-sm">
             Sign in via magic link
           </Link>
-        </p>
-      )}
-      <p>
-        <Link href="/signin/signup" className="font-light text-sm">
-          Don't have an account? Sign up
-        </Link>
-      </p>
-    </div>
+        </div>
+      </CardContent>
+    </>
   );
 }

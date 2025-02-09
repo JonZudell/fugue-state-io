@@ -711,9 +711,6 @@ video {
 .m-auto {
   margin: auto;
 }
-.m-1 {
-  margin: 0.25rem;
-}
 .-mx-1 {
   margin-left: -0.25rem;
   margin-right: -0.25rem;
@@ -931,9 +928,6 @@ video {
 .w-8 {
   width: 2rem;
 }
-.w-80 {
-  width: 20rem;
-}
 .w-9 {
   width: 2.25rem;
 }
@@ -972,9 +966,6 @@ video {
 }
 .w-px {
   width: 1px;
-}
-.w-12 {
-  width: 3rem;
 }
 .min-w-0 {
   min-width: 0px;
@@ -1255,10 +1246,6 @@ video {
 .bg-transparent {
   background-color: transparent;
 }
-.bg-zinc-800 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(39 39 42 / var(--tw-bg-opacity, 1));
-}
 .fill-current {
   fill: currentColor;
 }
@@ -1332,12 +1319,6 @@ video {
   padding-top: 2rem;
   padding-bottom: 2rem;
 }
-.pb-12 {
-  padding-bottom: 3rem;
-}
-.pb-2 {
-  padding-bottom: 0.5rem;
-}
 .pb-4 {
   padding-bottom: 1rem;
 }
@@ -1350,14 +1331,14 @@ video {
 .pt-0 {
   padding-top: 0px;
 }
+.pb-12 {
+  padding-bottom: 3rem;
+}
 .text-left {
   text-align: left;
 }
 .text-center {
   text-align: center;
-}
-.align-middle {
-  vertical-align: middle;
 }
 .text-2xl {
   font-size: 1.5rem;
@@ -1421,6 +1402,10 @@ video {
 .tracking-widest {
   letter-spacing: 0.1em;
 }
+.text-black {
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
+}
 .text-blue-500 {
   --tw-text-opacity: 1;
   color: rgb(59 130 246 / var(--tw-text-opacity, 1));
@@ -1473,10 +1458,6 @@ video {
 .text-zinc-200 {
   --tw-text-opacity: 1;
   color: rgb(228 228 231 / var(--tw-text-opacity, 1));
-}
-.text-black {
-  --tw-text-opacity: 1;
-  color: rgb(0 0 0 / var(--tw-text-opacity, 1));
 }
 .underline {
   text-decoration-line: underline;
@@ -2109,10 +2090,6 @@ body {
     display: flex;
   }
 
-  .sm\:w-1\/2 {
-    width: 50%;
-  }
-
   .sm\:max-w-sm {
     max-width: 24rem;
   }
@@ -2188,10 +2165,6 @@ body {
     display: flex;
   }
 
-  .md\:w-1\/2 {
-    width: 50%;
-  }
-
   .md\:text-sm {
     font-size: 0.875rem;
     line-height: 1.25rem;
@@ -2229,10 +2202,6 @@ body {
   }
 }
 @media (min-width: 1024px) {
-
-  .lg\:w-1\/2 {
-    width: 50%;
-  }
 
   .lg\:px-8 {
     padding-left: 2rem;

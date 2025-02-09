@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import {Button} from '@/components/ui/button';
-import {Card} from '@/components/ui/card';
-import { updateEmail } from '@/utils/auth-helpers/server';
-import { handleRequest } from '@/utils/auth-helpers/client';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { Input } from '../input';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { updateEmail } from "@/utils/auth-helpers/server";
+import { handleRequest } from "@/utils/auth-helpers/client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Input } from "../input";
 
 export default function EmailForm({
-  userEmail
+  userEmail,
 }: {
   userEmail: string | undefined;
 }) {
@@ -29,18 +29,18 @@ export default function EmailForm({
   };
 
   return (
-    <Card
-      className='p-6 text-black w-full'
-    >
+    <Card className="p-6 text-black w-full">
       <div className="mt-8 mb-4 text-xl font-semibold">
         <h1 className="text-2xl font-semibold">Your Email</h1>
-        <p className="text-sm">Please enter the email address you want to use to login.</p>
+        <p className="text-sm">
+          Please enter the email address you want to use to login.
+        </p>
         <form id="emailForm" onSubmit={(e) => handleSubmit(e)}>
           <Input
             type="text"
             name="newEmail"
             className="w-1/2"
-            defaultValue={userEmail ?? ''}
+            defaultValue={userEmail ?? ""}
             placeholder="Your email"
             maxLength={64}
           />

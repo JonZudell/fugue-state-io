@@ -1,19 +1,20 @@
-'use client';
-
-import {Button} from '@/components/ui/button';
-import { updatePassword } from '@/utils/auth-helpers/server';
-import { handleRequest } from '@/utils/auth-helpers/client';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+"use client";
+import { Button } from "@/components/ui/button";
+import { updatePassword } from "@/utils/auth-helpers/server";
+import { handleRequest } from "@/utils/auth-helpers/client";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { Input } from "../input";
 
 interface UpdatePasswordProps {
   redirectMethod: string;
 }
 
 export default function UpdatePassword({
-  redirectMethod
+  redirectMethod,
 }: UpdatePasswordProps) {
-  const router = redirectMethod === 'client' ? useRouter() : null;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const router = redirectMethod === "client" ? useRouter() : null;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -27,28 +28,28 @@ export default function UpdatePassword({
       <h1 className="text-2xl font-semibold">Update Password</h1>
       <form
         noValidate={true}
-        className="mb-4"
+        className="mb-4 text-sm"
         onSubmit={(e) => handleSubmit(e)}
       >
         <div className="grid gap-2">
           <div className="grid gap-1">
             <label htmlFor="password">New Password</label>
-            <input
+            <Input
               id="password"
               placeholder="Password"
               type="password"
               name="password"
               autoComplete="current-password"
-              className="w-full p-3 rounded-md bg-zinc-800"
+              className="w-full"
             />
             <label htmlFor="passwordConfirm">Confirm New Password</label>
-            <input
+            <Input
               id="passwordConfirm"
               placeholder="Password"
               type="password"
               name="passwordConfirm"
               autoComplete="current-password"
-              className="w-full p-3 rounded-md bg-zinc-800"
+              className="w-full p-3"
             />
           </div>
           <Button

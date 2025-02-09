@@ -50,7 +50,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
         disabled={loading}
-            >
+      >
         {loading ? (
           <span className="flex items-center gap-2">
             <span className="loader" />
@@ -59,7 +59,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ) : (
           props.children
         )}
-        </Comp>
+      </Comp>
     );
   },
 );
