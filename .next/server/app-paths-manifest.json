@@ -1,7 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/signin/email_signin/page": "app/signin/email_signin/page.js",
-  "/signin/page": "app/signin/page.js",
-  "/signin/signup/page": "app/signin/signup/page.js",
-  "/signin/forgot_password/page": "app/signin/forgot_password/page.js"
-}
