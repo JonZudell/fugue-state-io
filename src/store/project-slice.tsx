@@ -49,7 +49,7 @@ const initialState: ProjectsStateInterface = {
 export const uploadFile = createAsyncThunk(
   "playback/uploadFile",
   async ({ file, worker }: { file: File; worker: Worker }, { dispatch }) => {
-    return new Promise<MediaFile>(async (_resolve, _reject) => {
+    return new Promise<MediaFile>(async () => {
       const id = uuidv4();
       const audioContext = new AudioContext();
       const audioBuffer = await audioContext.decodeAudioData(
@@ -99,7 +99,6 @@ export const uploadFile = createAsyncThunk(
         for (let i = 0; i < leftChannel.length; i++) {
           sideChannel[i] = leftChannel[i] - rightChannel[i] / 2;
         }
-        const framesNeeded = (leftChannel.length / 2048 - 1) * 8 * 4;
         worker.postMessage({
           type: "SUMMARIZE",
           arrayBuffer: monoChannel.buffer,
@@ -316,9 +315,10 @@ const projectSlice = createSlice({
       } else {
         const file =
           state.projects[state.activeProject].mediaFiles[action.payload.id];
+        // @ts-expect-error - TS doesn't understand that this is a valid key
         file.summary[action.payload.channel] = Array.from(
           action.payload.summary,
-        ).map((value) => value);
+        );
       }
     },
   },

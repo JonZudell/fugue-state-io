@@ -43,6 +43,7 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input> & {
     placeholder?: string;
+    className?: string;
   }
 >(({ className, placeholder, ...props }, ref) => (
   <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
@@ -130,6 +131,8 @@ const CommandItem = React.forwardRef<
     children?: React.ReactNode;
     disabled?: boolean;
     selected?: boolean;
+    value?: string;
+    onSelect?: (value: string) => void;
   }
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.Item

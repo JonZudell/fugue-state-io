@@ -5,7 +5,6 @@ import {
   AudioWaveform,
   BookOpen,
   Bot,
-  Command,
   Folder,
   Frame,
   GalleryVerticalEnd,
@@ -21,9 +20,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar";
-import { DisplayMenu } from "@/components/ui/display-menu";
 
 // This is sample data.
 const data = {
@@ -143,8 +140,6 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { state } = useSidebar();
-  const activeMenu = "display";
   return props.hidden ? null : (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

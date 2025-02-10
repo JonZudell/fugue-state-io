@@ -29,7 +29,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const dispatch = useDispatch();
   const { editor } = useSelector(selectDisplay);
   const { mediaFiles, referenceFile } = useSelector(selectProject);
-  const { playing, looping, timeElapsed, timelineDuration } =
+  const { playing, looping, timeElapsed } =
     useSelector(selectPlayback);
 
   const togglePlay = () => {
@@ -91,7 +91,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <div className="flex items-center">
               <span style={{ userSelect: "none" }} className="my-2 mx-4">
                 {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} / -
-                {new Date((media?.duration - timeElapsed) * 1000)
+                {media && new Date((media?.duration - timeElapsed) * 1000)
                   .toISOString()
                   .substr(12, 7)}
               </span>

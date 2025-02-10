@@ -42,7 +42,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   const [infoString, setInfoString] = useState<string | null>(null);
   const frequencyRef = useRef<number | null>(null);
   const project = useSelector(selectProject);
-  const media = project.mediaFiles[sourceId];
+  const media = sourceId ? project.mediaFiles[sourceId] : null;
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     setMouseY(event.clientY - rect.top);
@@ -135,8 +135,8 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   ]);
 
   useEffect(() => {
-    const length = media.summary.mono[0].magnitudes.length ?? 0;
-    const heightToLengthRatio = length / canvasRef.current?.height;
+    const length = media?.summary?.mono?.[0]?.magnitudes?.length ?? 0;
+    const heightToLengthRatio = length / (canvasRef.current?.height ?? 1);
     frequencyRef.current = getFrequencyForBin(
       Math.floor(
         canvasRef.current && mouseY !== null
@@ -145,7 +145,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
       ) + 1,
     );
     const note = getNoteForFrequency(frequencyRef.current);
-    setInfoString(`${frequencyRef.current.toFixed(2)}Hz - ${note}`);
+    setInfoString(`${frequencyRef.current?.toFixed(2)}Hz - ${note}`);
   }, [
     cursorPosition,
     endPercentage,
