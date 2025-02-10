@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import abcjs, { TuneObjectArray } from "abcjs";
+import abcjs, { EventCallbackReturn, TuneObjectArray } from "abcjs";
 import { selectPlayback } from "@/store/playback-slice";
 import { useSelector } from "react-redux";
 import { selectProject } from "@/store/project-slice";
@@ -9,11 +9,11 @@ interface NotationDisplayProps {
   className?: string;
   width: number;
   height: number;
-  abcKey?: string;
-  nodeId: string;
-  sourceId: string;
-  parentNodeId: string;
-  parentDirection: string;
+  abcKey?: string | null;
+  nodeId?: string | null;
+  sourceId?: string | null;
+  parentNodeId?: string | null;
+  parentDirection?: string | null;
 }
 
 const NotationDisplay: React.FC<NotationDisplayProps> = ({
@@ -115,10 +115,11 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
     if (tunes) {
       setTimingCallbacks(
         new abcjs.TimingCallbacks(tunes[0], {
-          // @ts-expect-error
-          eventCallback: (ev: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          eventCallback: (ev: any): EventCallbackReturn => {
             const x = ev.left;
             setTranslateX(x);
+            return; // Ensure the callback returns a value of type EventCallbackReturn
           },
         }),
       );

@@ -318,7 +318,7 @@ const projectSlice = createSlice({
           state.projects[state.activeProject].mediaFiles[action.payload.id];
         file.summary[action.payload.channel] = Array.from(
           action.payload.summary,
-        ).map((value) => ({ value }));
+        ).map((value) => value);
       }
     },
   },

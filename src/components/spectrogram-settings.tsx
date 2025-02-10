@@ -20,9 +20,9 @@ import { cn } from "@/utils/utils";
 import { DialogFooter } from "./ui/dialog";
 
 const SpectrogramSettings: React.FC<{
-  nodeId: string | null;
-  initialMediaKey: string | null;
-  initialChannel: string | null;
+  nodeId?: string | null;
+  initialMediaKey?: string | null;
+  initialChannel?: string | null;
 }> = ({ nodeId, initialMediaKey, initialChannel }) => {
   const dispatch = useDispatch();
   const { mediaFiles } = useSelector(selectProject);

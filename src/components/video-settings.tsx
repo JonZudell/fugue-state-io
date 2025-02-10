@@ -20,8 +20,8 @@ import { cn } from "@/utils/utils";
 import { DialogFooter } from "./ui/dialog";
 
 const VideoSettings: React.FC<{
-  nodeId: string | null;
-  initialMediaKey: string | null;
+  nodeId?: string | null;
+  initialMediaKey?: string | null;
 }> = ({ nodeId, initialMediaKey }) => {
   const dispatch = useDispatch();
   const { mediaFiles } = useSelector(selectProject);

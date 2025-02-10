@@ -20,8 +20,8 @@ import { cn } from "@/utils/utils";
 import { DialogFooter } from "./ui/dialog";
 
 const NotationSettings: React.FC<{
-  nodeId: string | null;
-  initalAbcKey: string | null;
+  nodeId?: string | null;
+  initalAbcKey?: string | null;
 }> = ({ nodeId, initalAbcKey }) => {
   const dispatch = useDispatch();
   const { abcs } = useSelector(selectProject);

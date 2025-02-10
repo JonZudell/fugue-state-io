@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
-import { MediaFile, selectProject } from "@/store/project-slice";
+import { selectProject } from "@/store/project-slice";
 import { selectPlayback } from "@/store/playback-slice";
 import {
   colorForBin,
@@ -13,15 +13,14 @@ import ContextMenuDialog from "./context-menu-dialog";
 
 interface FourierDisplayProps {
   width: number;
-  channel?: string;
+  channel?: string | null;
   height: number;
   crosshair?: boolean;
   displayRatioVertical?: number;
   displayRatioHorizontal?: number;
-  nodeId: string;
-  parentNodeId: string;
-  parentDirection: string;
-  sourceId: string;
+  nodeId?: string | null;
+  parentNodeId?: string | null;
+  sourceId?: string | null;
 }
 
 const FourierDisplay: React.FC<FourierDisplayProps> = ({
@@ -31,7 +30,6 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
   crosshair = true,
   nodeId,
   parentNodeId,
-  parentDirection,
   sourceId,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -42,7 +40,7 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
   const [mouseX, setMouseX] = useState<number | null>(null);
   const [topInfoString, setTopInfoString] = useState<string | null>(null);
   const [bottomInfoString, setBottomInfoString] = useState<string | null>(null);
-  const media = project.mediaFiles[sourceId];
+  const media = sourceId ? project.mediaFiles[sourceId] : null;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -73,11 +71,11 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         channel.length - 1,
       );
       const pixelsPerMagnitude =
-        canvas.width / channel[fourierIndex].value.magnitudes.length;
+        canvas.width / channel[fourierIndex].magnitudes.length;
       for (let i = 0; i < canvas.width; i++) {
         const magnitudeIndex = Math.floor(i / pixelsPerMagnitude);
         const magnitude = Math.log10(
-          channel[fourierIndex].value.magnitudes[magnitudeIndex] + 1,
+          channel[fourierIndex].magnitudes[magnitudeIndex] + 1,
         );
         const y = channelHeight - magnitude * channelHeight;
         const colors = colorForBin(magnitudeIndex);
@@ -185,14 +183,14 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         const topBin = summary.left
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.left[0].value.magnitudes.length) /
+                summary.left[0].magnitudes.length) /
                 8,
             )
           : 0;
         const topFrequency = getFrequencyForBin(topBin);
         const topNote = getNoteForFrequency(topFrequency);
         const topMagnitude = summary.left
-          ? summary.left[startSample + topSample].value.magnitudes[topBin]
+          ? summary.left[startSample + topSample].magnitudes[topBin]
           : 0;
         setTopInfoString(
           `Frequency: ${topFrequency.toFixed(2)}Hz, Note: ${topNote}, Magnitude: ${topMagnitude.toFixed(2)}`,
@@ -203,14 +201,14 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         const bottomBin = summary.right
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.right[0].value.magnitudes.length) /
+                summary.right[0].magnitudes.length) /
                 8,
             )
           : 0;
         const bottomFrequency = getFrequencyForBin(bottomBin);
         const bottomNote = getNoteForFrequency(bottomFrequency);
         const bottomMagnitude = summary.right
-          ? summary.right[startSample + bottomSample].value.magnitudes[
+          ? summary.right[startSample + bottomSample].magnitudes[
               bottomBin
             ]
           : 0;
@@ -229,15 +227,14 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         const bin = summary.mono
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.mono[0].value.magnitudes.length) /
+                summary.mono[0].magnitudes.length) /
                 8,
             )
           : 0;
         const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
-        const time = (xSample / media.sampleRate).toFixed(2);
         const magnitude = summary.mono
-          ? summary.mono[startSample + xSample].value.magnitudes[bin]
+          ? summary.mono[startSample + xSample].magnitudes[bin]
           : 0;
         setTopInfoString(
           `Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
@@ -254,15 +251,14 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         const bin = summary.side
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.side[0].value.magnitudes.length) /
+                summary.side[0].magnitudes.length) /
                 8,
             )
           : 0;
         const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
-        const time = (xSample / media.sampleRate).toFixed(2);
         const magnitude = summary.side
-          ? summary.side[startSample + xSample].value.magnitudes[bin]
+          ? summary.side[startSample + xSample].magnitudes[bin]
           : 0;
         setTopInfoString(
           `Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
@@ -279,22 +275,21 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         const bin = summary.left
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.left[0].value.magnitudes.length) /
+                summary.left[0].magnitudes.length) /
                 8,
             )
           : 0;
         const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
-        const time = (xSample / media.sampleRate).toFixed(2);
         const magnitude = summary.left
-          ? summary.left[startSample + xSample].value.magnitudes[bin]
+          ? summary.left[startSample + xSample].magnitudes[bin]
           : 0;
         setTopInfoString(
           `Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
         );
       } else if (channel === "right" && media.summary.right) {
         const { summary } = media;
-        const summaryLength = summary.right ? summary.side.length : 0;
+        const summaryLength = summary.right && summary.side ? summary.side.length : 0;
         const startSample = Math.floor((0 / 100) * summaryLength);
         const endSample = Math.floor((100 / 100) * summaryLength);
         const x = cursorPosition;
@@ -304,15 +299,14 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         const bin = summary.right
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.right[0].value.magnitudes.length) /
+                summary.right[0].magnitudes.length) /
                 8,
             )
           : 0;
         const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
-        const time = (xSample / media.sampleRate).toFixed(2);
         const magnitude = summary.right
-          ? summary.right[startSample + xSample].value.magnitudes[bin]
+          ? summary.right[startSample + xSample].magnitudes[bin]
           : 0;
         setTopInfoString(
           `Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
@@ -330,7 +324,6 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       nodeId={nodeId}
       initialValue={"fourier"}
       parentNodeId={parentNodeId}
-      parentDirection={parentDirection}
       mediaKey={sourceId}
       initialChannel={channel}
     >

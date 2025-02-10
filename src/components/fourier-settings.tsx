@@ -1,10 +1,8 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { selectPlayback } from "@/store/playback-slice";
+import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectProject } from "@/store/project-slice";
 import { setNode, setRoot } from "@/store/display-slice";
-import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import {
@@ -20,9 +18,9 @@ import { cn } from "@/utils/utils";
 import { DialogFooter } from "./ui/dialog";
 
 const FourierSettings: React.FC<{
-  nodeId: string | null;
-  initialMediaKey: string | null;
-  initialChannel: string | null;
+  nodeId?: string | null;
+  initialMediaKey?: string | null;
+  initialChannel?: string | null;
 }> = ({ nodeId, initialMediaKey, initialChannel }) => {
   const dispatch = useDispatch();
   const { mediaFiles } = useSelector(selectProject);
@@ -67,12 +65,17 @@ const FourierSettings: React.FC<{
         }),
       );
     }
-  }, [mediaKey, channel]);
+  }, [mediaKey, channel, nodeId, dispatch]);
 
   return (
     <>
       <div className="flex flex-col">
         <div className="flex space-x-4">
+          {errors.map((error) => (
+            <p key={error} className="text-sm text-red-500">
+              {error}
+            </p>
+          ))}
           <p className="text-sm text-muted-foreground my-2 space-xl-4">Media</p>
           <Popover open={mediaPopoverOpen} onOpenChange={setMediaPopoverOpen}>
             <PopoverTrigger asChild>

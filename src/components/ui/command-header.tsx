@@ -22,6 +22,7 @@ const Command = React.forwardRef<
     setHovered?: (hovered: boolean) => void;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     value?: string;
+    ref?: React.Ref<typeof CommandPrimitive>;
   }
 >(({ className, open, setOpen, ...props }, ref) => {
   const inputRef =

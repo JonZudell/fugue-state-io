@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -11,7 +11,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -30,9 +29,7 @@ import {
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/utils/utils";
 import WaveformSettings from "./waveform-settings";
-import SpectrogramDisplay from "./spectrogram-display";
 import SpectrogramSettings from "./spectrogram-settings";
-import { channel } from "diagnostics_channel";
 import { removeNode, splitNode } from "@/store/display-slice";
 import { useDispatch } from "react-redux";
 import FourierSettings from "./fourier-settings";
@@ -64,9 +61,9 @@ interface ContextMenuDialogProps {
   width: number;
   height: number;
   children: React.ReactNode;
-  nodeId: string | null;
-  parentNodeId: string | null;
-  parentDirection: string | null;
+  nodeId?: string | null;
+  parentNodeId?: string | null;
+  parentDirection?: string | null;
   initialValue: string | null;
   mediaKey?: string | null;
   abcKey?: string | null;
@@ -74,38 +71,40 @@ interface ContextMenuDialogProps {
   isNullDisplay?: boolean;
 }
 const ContextMenuDialog: React.FC<ContextMenuDialogProps> = ({
-  width,
-  height,
   abcKey,
   children,
   nodeId,
   parentNodeId,
   mediaKey,
   initialChannel,
-  parentDirection,
   initialValue,
   isNullDisplay,
 }) => {
   const dispatch = useDispatch();
-  const [open, setOpen] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [value, setValue] = useState(initialValue);
   return (
     <>
+      <Dialog defaultOpen={false} modal={false}>
       <ContextMenu>
         <ContextMenuTrigger>{children}</ContextMenuTrigger>
         <ContextMenuContent>
           {isNullDisplay ? (
-            <ContextMenuItem onClick={() => setOpen(true)}>
-              <span>Add Display</span>
-            </ContextMenuItem>
+            <DialogTrigger>
+              <ContextMenuItem>
+                <span>Add Display</span>
+              </ContextMenuItem>
+            </DialogTrigger>
           ) : (
             <>
-              <ContextMenuItem onClick={() => setOpen(true)}>
+            <DialogTrigger>
+              <ContextMenuItem>
                 <span>Edit Display Settings</span>
               </ContextMenuItem>
+              </DialogTrigger>
               <ContextMenuItem
                 onClick={() => {
+                  if (!nodeId) return;
                   dispatch(removeNode(nodeId));
                 }}
               >
@@ -113,6 +112,7 @@ const ContextMenuDialog: React.FC<ContextMenuDialogProps> = ({
               </ContextMenuItem>
               <ContextMenuItem
                 onClick={() => {
+                  if (!nodeId) return;
                   dispatch(
                     splitNode({
                       nodeId,
@@ -127,6 +127,7 @@ const ContextMenuDialog: React.FC<ContextMenuDialogProps> = ({
               </ContextMenuItem>
               <ContextMenuItem
                 onClick={() => {
+                  if (!nodeId || !parentNodeId) return;
                   dispatch(
                     splitNode({
                       nodeId,
@@ -142,7 +143,6 @@ const ContextMenuDialog: React.FC<ContextMenuDialogProps> = ({
           )}
         </ContextMenuContent>
       </ContextMenu>
-      <Dialog open={open} onOpenChange={setOpen} modal={false}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add a New Display</DialogTitle>

@@ -2,12 +2,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { v4 as uuidv4 } from "uuid";
 export type Node = {
-  id: string;
-  splitDirection?: "horizontal" | "vertical";
-  children?: Node[];
-  type?: string;
-  sourceId?: string;
-  channel?: string;
+  id?: string | null;
+  splitDirection?: "horizontal" | "vertical" | null;
+  children?: Node[] | null;
+  type?: string | null;
+  sourceId?: string | null;
+  channel?: string | null;
 };
 
 export interface DisplayState {
@@ -41,23 +41,6 @@ const compressTree = (node: Node): Node => {
   return node;
 };
 
-const treeEquals = (a: Node, b: Node): boolean => {
-  if (a.id !== b.id) {
-    return false;
-  }
-  if (a.children && b.children) {
-    if (a.children.length !== b.children.length) {
-      return false;
-    }
-    for (let i = 0; i < a.children.length; i++) {
-      if (!treeEquals(a.children[i], b.children[i])) {
-        return false;
-      }
-    }
-  }
-  return true;
-};
-
 export const selectDisplay = (state: { display: DisplayState }) =>
   state.display;
 
@@ -86,9 +69,19 @@ const displaySlice = createSlice({
     },
     setNode: (
       state: DisplayState,
-      action: PayloadAction<{ nodeId: string; node: Node }>,
+      action: PayloadAction<{ nodeId?: string | null; node?: Node | null }>,
     ) => {
       console.log("Setting node", action.payload);
+      if (!action.payload.node) {
+        return;
+      }
+      if (state.root === null) {
+        state.root = action.payload.node;
+        return;
+      }
+      if (!action.payload.nodeId) {
+        return;
+      }
       if (action.payload.nodeId === "root") {
         state.root = action.payload.node;
         return;
@@ -98,7 +91,7 @@ const displaySlice = createSlice({
       }
       const findNode = (node: Node, nodeId: string): Node => {
         console.log("Checking node", node.id, nodeId);
-        if (node.id === nodeId) {
+        if (node.id === nodeId && action.payload.node) {
           return action.payload.node;
         }
         if (node.children) {
@@ -140,7 +133,7 @@ const displaySlice = createSlice({
       action: PayloadAction<{
         nodeId: string;
         direction: "horizontal" | "vertical";
-        parentId: string;
+        parentId?: string | null;
       }>,
     ) => {
       console.log("Splitting node", action.payload);

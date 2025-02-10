@@ -1,19 +1,19 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { selectPlayback } from "@/store/playback-slice";
-import { useDispatch, useSelector } from "react-redux";
-import { MediaFile, selectProject } from "@/store/project-slice";
+import { useSelector } from "react-redux";
+import { selectProject } from "@/store/project-slice";
 import ContextMenuDialog from "./context-menu-dialog";
 interface WaveformDisplayProps {
-  nodeId: string;
-  sourceId: string;
-  channel?: string;
+  nodeId?: string | null;
+  sourceId?: string | null;
+  channel?: string | null;
   startPercentage?: number;
   endPercentage?: number;
   crosshair?: boolean;
   width: number;
   height: number;
-  parentNodeId?: string;
+  parentNodeId?: string | null;
   parentDirection?: string;
 }
 
@@ -32,7 +32,7 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { timeElapsed, loopStart, loopEnd } = useSelector(selectPlayback);
   const project = useSelector(selectProject);
-  const media = project.mediaFiles[sourceId];
+  const media = sourceId ? project.mediaFiles[sourceId] : null;
   const drawWaveform = useCallback(
     (canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => {
       console.log("drawWaveform");
@@ -60,17 +60,17 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
             const leftSlice = summary.left.slice(startIndex, endIndex);
             const rightSlice = summary.right.slice(startIndex, endIndex);
             const rightMin = Math.min(
-              ...rightSlice.map((frame) => frame.value.min),
+              ...rightSlice.map((frame) => frame.min),
             );
             const rightMax = Math.max(
-              ...rightSlice.map((frame) => frame.value.max),
+              ...rightSlice.map((frame) => frame.max),
             );
 
             const leftMin = Math.min(
-              ...leftSlice.map((frame) => frame.value.min),
+              ...leftSlice.map((frame) => frame.min),
             );
             const leftMax = Math.max(
-              ...leftSlice.map((frame) => frame.value.max),
+              ...leftSlice.map((frame) => frame.max),
             );
             ctx.fillStyle = "rgba(255, 255, 255, 1)";
             ctx.fillRect(
@@ -96,10 +96,10 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
               Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
             const leftSlice = summary.left.slice(startIndex, endIndex);
             const leftMin = Math.min(
-              ...leftSlice.map((frame) => frame.value.min),
+              ...leftSlice.map((frame) => frame.min),
             );
             const leftMax = Math.max(
-              ...leftSlice.map((frame) => frame.value.max),
+              ...leftSlice.map((frame) => frame.max),
             );
             ctx.fillStyle = "rgba(255, 255, 255, 1)";
             ctx.fillRect(
@@ -116,10 +116,10 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
               Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
             const rightSlice = summary.right.slice(startIndex, endIndex);
             const rightMin = Math.min(
-              ...rightSlice.map((frame) => frame.value.min),
+              ...rightSlice.map((frame) => frame.min),
             );
             const rightMax = Math.max(
-              ...rightSlice.map((frame) => frame.value.max),
+              ...rightSlice.map((frame) => frame.max),
             );
             ctx.fillStyle = "rgba(255, 255, 255, 1)";
             ctx.fillRect(
@@ -137,10 +137,10 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
               Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
             const monoSlice = summary.mono.slice(startIndex, endIndex);
             const monoMin = Math.min(
-              ...monoSlice.map((frame) => frame.value.min),
+              ...monoSlice.map((frame) => frame.min),
             );
             const monoMax = Math.max(
-              ...monoSlice.map((frame) => frame.value.max),
+              ...monoSlice.map((frame) => frame.max),
             );
             ctx.fillStyle = "rgba(255, 255, 255, 1)";
             console.log(monoMax, monoMin);
@@ -158,10 +158,10 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
               Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
             const sideSlice = summary.side.slice(startIndex, endIndex);
             const sideMin = Math.min(
-              ...sideSlice.map((frame) => frame.value.min),
+              ...sideSlice.map((frame) => frame.min),
             );
             const sideMax = Math.max(
-              ...sideSlice.map((frame) => frame.value.max),
+              ...sideSlice.map((frame) => frame.max),
             );
             ctx.fillStyle = "rgba(255, 255, 255, 1)";
             ctx.fillRect(

@@ -10,17 +10,17 @@ import {
 } from "@/utils/dsp";
 import ContextMenuDialog from "./context-menu-dialog";
 interface SpectrogramDisplayProps {
-  nodeId: string;
-  sourceId: string;
+  nodeId?: string | null;
+  sourceId?: string | null;
   width: number;
-  channel: string;
+  channel?: string | null;
   startPercentage: number;
   endPercentage: number;
   height: number;
   displayRatio?: number;
   crosshair?: boolean;
-  parentNodeId?: string;
-  parentDirection?: string;
+  parentNodeId?: string | null;
+  parentDirection?: string | null;
 }
 const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   nodeId,
@@ -66,7 +66,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
       const endSample = Math.floor((endPercentage / 100) * summaryLength);
       const samplesPerPixel = (endSample - startSample) / canvas.width;
       const binsPerPixel = summary.mono
-        ? summary.mono[0].value.magnitudes.length / canvas.height
+        ? summary.mono[0].magnitudes.length / canvas.height
         : 0;
 
       const imageData = ctx.createImageData(canvas.width, canvas.height);
@@ -80,11 +80,11 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
 
           if (
             summary.mono &&
-            summary.mono[sampleIndex].value &&
-            summary.mono[sampleIndex].value.magnitudes[binIndex] !== undefined
+            summary.mono[sampleIndex] &&
+            summary.mono[sampleIndex].magnitudes[binIndex] !== undefined
           ) {
             const magnitude =
-              summary.mono[sampleIndex].value.magnitudes[binIndex];
+              summary.mono[sampleIndex].magnitudes[binIndex];
             const index = (x + (canvas.height - y - 1) * canvas.width) * 4;
             data[index] = color[0];
             data[index + 1] = color[1];
@@ -135,7 +135,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   ]);
 
   useEffect(() => {
-    const length = media.summary.mono[0].value.magnitudes.length ?? 0;
+    const length = media.summary.mono[0].magnitudes.length ?? 0;
     const heightToLengthRatio = length / canvasRef.current?.height;
     frequencyRef.current = getFrequencyForBin(
       Math.floor(

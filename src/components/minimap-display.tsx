@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { MediaFile, selectProject } from "@/store/project-slice";
+import { useEffect, useRef } from "react";
+import { selectProject } from "@/store/project-slice";
 import { selectPlayback } from "@/store/playback-slice";
 import { selectDisplay } from "@/store/display-slice";
 import { useSelector } from "react-redux";
@@ -64,8 +64,8 @@ const Minimap: React.FC<MinimapProps> = ({
         const endIndex =
           Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
         const slice = summary.slice(startIndex, endIndex);
-        const min = Math.min(...slice.map((frame) => frame.value.min));
-        const max = Math.max(...slice.map((frame) => frame.value.max));
+        const min = Math.min(...slice.map((frame) => frame.min));
+        const max = Math.max(...slice.map((frame) => frame.max));
         ctx.fillStyle = "rgba(255, 255, 255, 1)";
         ctx.fillRect(
           i,

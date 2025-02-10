@@ -1,17 +1,16 @@
 "use client";
-import { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Command,
   CommandGroup,
   CommandItem,
   CommandShortcut,
 } from "@/components/ui/command-header";
-import { Command as CommandPrimitive } from "cmdk";
 import { ABCAsset, addAbc } from "@/store/project-slice";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
 import { SidebarTrigger, useSidebar } from "./ui/sidebar";
-import { selectDisplay, toggleEditor } from "@/store/display-slice";
+import { toggleEditor } from "@/store/display-slice";
 
 interface CommandDialogProps {
   sidebarWidth: number;
@@ -27,9 +26,8 @@ const CommandHeader: React.FC<CommandDialogProps> = ({
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const commandRef = useRef<typeof CommandPrimitive>(null);
+  const commandRef = useRef<HTMLDivElement>(null);
   const { open, toggleSidebar } = useSidebar();
-  const { editor } = useSelector(selectDisplay);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -46,7 +44,6 @@ const CommandHeader: React.FC<CommandDialogProps> = ({
     return () => document.removeEventListener("keydown", down);
   }, []);
   const handleNewFile = (name?: string) => {
-    commandRef.current.value = "";
     const abc: ABCAsset = {
       name: name || "untitled.abc",
       abc: "",
@@ -73,7 +70,7 @@ const CommandHeader: React.FC<CommandDialogProps> = ({
       >
         <CommandGroup heading={""}>
           <CommandItem
-            onSelect={(value) => {
+            onSelect={() => {
               handleNewFile();
               setIsOpen(false);
             }}
@@ -82,7 +79,7 @@ const CommandHeader: React.FC<CommandDialogProps> = ({
             <CommandShortcut>CTRL + N</CommandShortcut>
           </CommandItem>
           <CommandItem
-            onSelect={(value) => {
+            onSelect={() => {
               toggleSidebar();
               setIsOpen(false);
             }}
@@ -91,7 +88,7 @@ const CommandHeader: React.FC<CommandDialogProps> = ({
             <CommandShortcut>CTRL + B</CommandShortcut>
           </CommandItem>
           <CommandItem
-            onSelect={(value) => {
+            onSelect={() => {
               dispatch(toggleEditor());
               setIsOpen(false);
             }}

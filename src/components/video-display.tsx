@@ -1,15 +1,15 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { selectPlayback } from "@/store/playback-slice";
 import { useDispatch, useSelector } from "react-redux";
-import { MediaFile, selectProject } from "@/store/project-slice";
+import { selectProject } from "@/store/project-slice";
 import ContextMenuDialog from "./context-menu-dialog";
 interface VideoDisplayProps {
-  nodeId: string;
-  sourceId: string;
+  nodeId?: string | null;
+  sourceId?: string | null;
   width: number;
   height: number;
-  parentNodeId?: string;
+  parentNodeId?: string | null;
   parentDirection?: string;
 }
 const VideoDisplay: React.FC<VideoDisplayProps> = ({
@@ -21,9 +21,8 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
   height = 200,
 }) => {
   const { timeElapsed, playing } = useSelector(selectPlayback);
-  const dispatch = useDispatch();
   const project = useSelector(selectProject);
-  const media = project.mediaFiles[sourceId];
+  const media = sourceId ? project.mediaFiles[sourceId] : null;
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {

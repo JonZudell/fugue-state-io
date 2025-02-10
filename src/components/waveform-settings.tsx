@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { selectProject } from "@/store/project-slice";
 import { setNode, setRoot } from "@/store/display-slice";
@@ -17,9 +17,9 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/utils/utils";
 import { DialogFooter } from "./ui/dialog";
 const WaveformSettings: React.FC<{
-  nodeId: string | null;
-  initialMediaKey: string | null;
-  initialChannel: string | null;
+  nodeId?: string | null;
+  initialMediaKey?: string | null;
+  initialChannel?: string | null;
 }> = ({ nodeId, initialMediaKey, initialChannel }) => {
   const dispatch = useDispatch();
   const { mediaFiles } = useSelector(selectProject);

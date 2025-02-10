@@ -275,8 +275,7 @@ function summarizeInterleavedFrames(frames: Frame[]): SummarizedFrame[] {
 
   while (ndx < frames.length) {
     const summarizedFrame = summarizeFrame(frames[ndx]);
-    const thisFrame = { ...summarizedFrames[ndx] };
-
+    const thisFrame = summarizedFrames[ndx];
     thisFrame.max = (lastFrame.max + summarizedFrame.max) / 2;
     thisFrame.min = (lastFrame.min + summarizedFrame.min) / 2;
     thisFrame.avg = (lastFrame.avg + summarizedFrame.avg) / 2;
