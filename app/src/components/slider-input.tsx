@@ -5,7 +5,7 @@ import {
   setPlaying,
   setTimeElapsed,
   selectPlayback,
-} from "@/store/playback-slice";
+} from "@/store/project-slice";
 import { useDispatch, useSelector } from "react-redux";
 interface SpanSliderProps {
   className?: string;
@@ -27,6 +27,7 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
   }, [spanSliderRef.current?.clientWidth]);
 
   const handleThumb1Drag = (e: MouseEvent) => {
+    console.log("handleThumb1Drag");
     if (spanSliderRef.current) {
       const rect = spanSliderRef.current.getBoundingClientRect();
       let newValue =
@@ -82,17 +83,17 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
             left: `${(timeElapsed / timelineDuration) * (width - 10)}px`,
             cursor: "ew-resize",
           }}
-          // onMouseDown={(e) => {
-          //   e.preventDefault();
-          //   document.addEventListener("mousemove", handleThumb1Drag);
-          //   document.addEventListener(
-          //     "mouseup",
-          //     () => {
-          //       document.removeEventListener("mousemove", handleThumb1Drag);
-          //     },
-          //     { once: true },
-          //   );
-          // }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            document.addEventListener("mousemove", handleThumb1Drag);
+            document.addEventListener(
+              "mouseup",
+              () => {
+                document.removeEventListener("mousemove", handleThumb1Drag);
+              },
+              { once: true },
+            );
+          }}
         ></div>
       </div>
     </div>

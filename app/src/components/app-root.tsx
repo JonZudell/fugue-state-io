@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import SummarizeWorker from "@/workers/summarize.worker.js"; // Adjust the import path as necessary
-import { selectPlayback } from "@/store/playback-slice";
+import { selectPlayback } from "@/store/project-slice";
 import {
   selectProgressState,
   setProgress,

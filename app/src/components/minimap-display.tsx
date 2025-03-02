@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { MediaFile, selectProject } from "@/store/project-slice";
-import { selectPlayback } from "@/store/playback-slice";
+import { selectPlayback } from "@/store/project-slice";
 import { selectDisplay } from "@/store/display-slice";
 import { useSelector } from "react-redux";
 import { SummarizedFrame } from "@/lib/dsp";

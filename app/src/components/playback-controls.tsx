@@ -7,7 +7,9 @@ import {
   setLooping,
   setLoopStart,
   setLoopEnd,
-} from "@/store/playback-slice";
+  setTimeElapsed,
+  setVolume,
+} from "@/store/project-slice";
 import SpanSlider from "@/components/span-slider";
 import VolumeSelector from "@/components/volume-selector";
 import SpeedSelector from "@/components/speed-selector";
@@ -15,6 +17,7 @@ import Slider from "@/components/slider-input";
 import { Code, PauseCircle, PlayCircle, Repeat, Repeat1 } from "lucide-react";
 import { selectDisplay, setEditor } from "@/store/display-slice";
 import { selectProject } from "@/store/project-slice";
+import { use, useEffect, useRef } from "react";
 interface PlaybackControlsProps {
   enabled?: boolean;
   width: number;
@@ -28,9 +31,78 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 }) => {
   const dispatch = useDispatch();
   const { editor } = useSelector(selectDisplay);
-  const { mediaFiles, referenceFile } = useSelector(selectProject);
-  const { playing, looping, timeElapsed, timelineDuration } =
+  const { mediaFiles } = useSelector(selectProject);
+  const { playing, looping, timeElapsed, timelineDuration, volume, loopStart, loopEnd  } =
     useSelector(selectPlayback);
+  const audioContext = useRef(new (window.AudioContext || window.webkitAudioContext)());
+  const sources = useRef(new Map<string, AudioBufferSourceNode & { offset: number }>());
+  const gainNode = useRef(audioContext.current.createGain());
+  const destination = useRef(audioContext.current.destination);
+  const playingRef = useRef(playing);
+  const elapsedAtStart = useRef(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (playingRef.current) {
+        dispatch(setTimeElapsed(audioContext.current.currentTime - elapsedAtStart.current));
+      } else {
+        elapsedAtStart.current = audioContext.current.currentTime - timeElapsed;
+      }
+    }, 50);
+    return () => {
+      clearInterval(interval);
+    }
+  }, []);
+  useEffect(() => {
+    playingRef.current = playing;
+    if (playing) {
+      const startTime = audioContext.current.currentTime + 0.1;
+      elapsedAtStart.current = audioContext.current.currentTime - timeElapsed;
+      setUpMedia();
+      audioContext.current.resume().then(() => {
+        sources.current.forEach((source) => {
+          source.start(startTime, timeElapsed - source.offset);
+        });
+      });
+    } else {
+      audioContext.current.suspend();
+      setUpMedia();
+    }
+  }, [playing]);
+
+
+  useEffect(() => {
+    if (!playingRef.current) {
+
+    }
+
+  }, [timeElapsed]);
+
+  useEffect(() => {
+    gainNode.current.gain.value = volume;
+  }, [volume])
+
+
+  useEffect(() => {
+    setUpMedia();
+  }, [mediaFiles]);
+
+  const setUpMedia = () => {
+    sources.current.forEach((source) => {
+      source.disconnect();
+    });
+    gainNode.current.disconnect();
+    destination.current.disconnect();
+    sources.current.clear();
+    for (const mediaFile of Object.values(mediaFiles)) {
+      const source = audioContext.current.createBufferSource() as AudioBufferSourceNode & { offset: number };
+      source.buffer = mediaFile.audioBuffer;
+      source.offset = mediaFile.offset;
+      source.connect(gainNode.current);
+      sources.current.set(mediaFile.id, source);
+    }
+    gainNode.current.connect(destination.current);
+  }
 
   const togglePlay = () => {
     dispatch(setPlaying(!playing));

@@ -1,13 +1,13 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
 import { Channels } from "@/lib/dsp";
 import { v4 as uuidv4 } from "uuid";
-import { registerMedia } from "./playback-slice";
 import { setMinimapSource } from "./display-slice";
 export interface MediaFile {
   id: string;
   name: string;
   fileType: string;
   url: string;
+  audioBuffer: AudioBuffer;
   duration: number;
   offset: number;
   summary: Channels;
@@ -36,14 +36,48 @@ export interface Project {
 export interface ProjectsStateInterface {
   activeProject: string;
   projects: { [key: string]: Project };
+  playback: PlaybackState;
+}
+
+interface MediaSource {
+  id: string;
+}
+
+interface PlaybackState {
+  audioContext: AudioContext | null;
+  mediaSources: MediaSource[];
+  playing: boolean;
+  looping: boolean;
+  timeElapsed: number;
+  speed: number;
+  volume: number;
+  loopStart: number;
+  loopEnd: number;
+  mode: "mono" | "stereo";
+  timelineDuration: number;
 }
 
 const initialId = uuidv4();
+const initialPlaybackState: PlaybackState = {
+  audioContext: null,
+  mediaSources: [],
+  playing: false,
+  looping: false,
+  timeElapsed: 0,
+  speed: 1,
+  volume: 1,
+  loopStart: 0,
+  loopEnd: 1,
+  mode: "stereo",
+  timelineDuration: 0,
+};
+
 const initialState: ProjectsStateInterface = {
   activeProject: initialId,
   projects: {
     [initialId]: { id: initialId, name: "Untitled", mediaFiles: {}, abcs: {} },
   },
+  playback: initialPlaybackState,
 };
 
 export const uploadFile = createAsyncThunk(
@@ -62,6 +96,7 @@ export const uploadFile = createAsyncThunk(
         stereo: isStereo,
         fileType: file.type,
         offset: 0,
+        audioBuffer: audioBuffer,
         url: (() => {
           try {
             return URL.createObjectURL(new Blob([file], { type: file.type }));
@@ -139,7 +174,9 @@ export const uploadFile = createAsyncThunk(
 export const selectProject = (state: { project: ProjectsStateInterface }) => {
   return state.project.projects[state.project.activeProject];
 };
-
+export const selectPlayback = (state: { project: ProjectsStateInterface }) => {
+  return state.project.playback;
+}
 export const selectAnyProcessing = (state: {
   project: ProjectsStateInterface;
 }) => {
@@ -148,21 +185,22 @@ export const selectAnyProcessing = (state: {
   ).some((file) => file.processing);
 };
 
-export const selectProgressState = (state: {
-  project: ProjectsStateInterface;
-}) => {
-  return Object.values(state.project.projects).flatMap((project) =>
-    Object.values(project.mediaFiles).flatMap((file) =>
-      file.progress.map((progress) => ({
-        projectId: project.id,
-        id: file.id,
-        name: file.name,
-        channel: progress.channel,
-        progress: progress.progress,
-      })),
-    ),
-  );
-};
+export const selectProgressState = createSelector(
+  (state: { project: ProjectsStateInterface }) => state.project.projects,
+  (projects) => {
+    return Object.values(projects).flatMap((project) =>
+      Object.values(project.mediaFiles).flatMap((file) =>
+        file.progress.map((progress) => ({
+          projectId: project.id,
+          id: file.id,
+          name: file.name,
+          channel: progress.channel,
+          progress: progress.progress,
+        })),
+      ),
+    );
+  }
+);
 
 const projectSlice = createSlice({
   name: "files",
@@ -317,6 +355,70 @@ const projectSlice = createSlice({
         ).map((value) => ({ value }));
       }
     },
+    setAudioContext: (
+      state,
+      action: PayloadAction<AudioContext>,
+    ) => {
+      state.playback.audioContext = action.payload;
+    },
+    setVolume: (state, action: PayloadAction<number>) => {
+      state.playback.volume = Math.min(Math.max(0, action.payload), 1);
+    },
+    setSpeed: (state, action: PayloadAction<number>) => {
+      state.playback.speed = Math.min(Math.max(0.2, action.payload), 2);
+    },
+    setTimeElapsed: (state, action: PayloadAction<number>) => {
+      state.playback.timeElapsed = action.payload;
+    },
+    setPlaying: (state, action: PayloadAction<boolean>) => {
+      state.playback.playing = action.payload;
+    },
+    setLoopStart: (state, action: PayloadAction<number>) => {
+      state.playback.loopStart = action.payload;
+      if (state.playback.timeElapsed < state.playback.loopStart * state.playback.timelineDuration) {
+        state.playback.timeElapsed = state.playback.loopStart * state.playback.timelineDuration;
+      }
+    },
+    setLoopEnd: (state, action: PayloadAction<number>) => {
+      state.playback.loopEnd = action.payload;
+      if (
+        state.playback.looping &&
+        state.playback.timeElapsed > state.playback.loopEnd * state.playback.timelineDuration
+      ) {
+        state.playback.timeElapsed = state.playback.loopEnd * state.playback.timelineDuration;
+      }
+    },
+    setLooping: (state, action: PayloadAction<boolean>) => {
+      state.playback.looping = action.payload;
+      if (state.playback.looping) {
+        state.playback.loopStart = 0;
+        state.playback.loopEnd = 1;
+      }
+    },
+    setMode: (
+      state,
+      action: PayloadAction<"mono" | "stereo">,
+    ) => {
+      state.playback.mode = action.payload;
+    },
+    restartPlayback: (state) => {
+      state.playback.timeElapsed = state.playback.loopStart * state.playback.timelineDuration;
+      state.playback.playing = true;
+    },
+    registerMedia: (state, action: PayloadAction<MediaFile>) => {
+      if (
+        state.playback.mediaSources.find((source) => source.id === action.payload.id)
+      ) {
+        return;
+      } else {
+        state.playback.mediaSources.push({
+          id: action.payload.id,
+        });
+        if (action.payload.duration > state.playback.timelineDuration) {
+          state.playback.timelineDuration = action.payload.duration;
+        }
+      }
+    },
   },
 });
 
@@ -332,5 +434,16 @@ export const {
   setProgress,
   setChannelSummary,
   setReferenceFile,
+  setAudioContext,
+  setVolume,
+  setSpeed,
+  setPlaying,
+  setTimeElapsed,
+  setLoopStart,
+  setLoopEnd,
+  setLooping,
+  setMode,
+  restartPlayback,
+  registerMedia,
 } = projectSlice.actions;
 export default projectSlice.reducer;

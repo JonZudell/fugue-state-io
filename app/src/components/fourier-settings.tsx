@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { selectPlayback } from "@/store/playback-slice";
+import { selectPlayback } from "@/store/project-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { selectProject } from "@/store/project-slice";
 import { setNode, setRoot } from "@/store/display-slice";

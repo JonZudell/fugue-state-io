@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { selectPlayback, setVolume } from "@/store/playback-slice";
+import { selectPlayback, setVolume } from "@/store/project-slice";
 import { useSelector, useDispatch } from "react-redux";
 import {
   HoverCard,

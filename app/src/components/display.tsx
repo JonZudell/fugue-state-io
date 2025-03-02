@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectPlayback, setTimeElapsed } from "@/store/playback-slice";
+import { selectPlayback, setTimeElapsed } from "@/store/project-slice";
 import { Node } from "@/store/display-slice";
 import { Panel, PanelGroup } from "react-resizable-panels";
 import WaveformDisplay from "@/components/waveform-display";
@@ -12,57 +12,6 @@ import NotationDisplay from "@/components/notation-display";
 import NullDisplay from "./null-display";
 import { Video } from "lucide-react";
 import VideoDisplay from "./video-display";
-
-const renderMediaComponent = (
-  type: string,
-  media: any,
-  videoRef2: React.RefObject<HTMLVideoElement | null>,
-  loopStart: number,
-  loopEnd: number,
-  width: number,
-  height: number,
-  key: string,
-): JSX.Element | null => {
-  switch (type) {
-    case "none":
-      return (
-        <div style={{ width: width, height: height }} key={key}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            Display set to None
-          </div>
-        </div>
-      );
-    case "spectrogram":
-      return (
-        <SpectrogramDisplay
-          key={key}
-          media={media}
-          startPercentage={loopStart * 100}
-          endPercentage={loopEnd * 100}
-          width={width}
-          height={height}
-        />
-      );
-    case "fourier":
-      return (
-        <FourierDisplay key={key} media={media} width={width} height={height} />
-      );
-    case "notation":
-      return <NotationDisplay width={width} height={height} />;
-    case "video":
-      return <VideoDisplay media={media} width={width} height={height} />;
-    default:
-      return null;
-  }
-};
-
 interface DisplayProps {
   node: Node | null;
   width: number;

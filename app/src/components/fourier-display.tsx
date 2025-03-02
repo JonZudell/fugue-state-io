@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { MediaFile, selectProject } from "@/store/project-slice";
-import { selectPlayback } from "@/store/playback-slice";
+import { selectPlayback } from "@/store/project-slice";
 import {
   colorForBin,
   SummarizedFrame,

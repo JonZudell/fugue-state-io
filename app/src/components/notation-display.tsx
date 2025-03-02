@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import abcjs, { TuneObjectArray } from "abcjs";
-import { selectPlayback } from "@/store/playback-slice";
+import { selectPlayback } from "@/store/project-slice";
 import { useSelector } from "react-redux";
 import { selectProject } from "@/store/project-slice";
 import ContextMenuDialog from "./context-menu-dialog";
