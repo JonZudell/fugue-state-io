@@ -12,7 +12,7 @@ interface SpeedSelectorProps {
   enabled?: boolean;
 }
 
-const SpeedSelector: React.FC<SpeedSelectorProps> = ({ className }) => {
+const SpeedSelector: React.FC<SpeedSelectorProps> = ({ className, enabled }) => {
   const dispatch = useDispatch();
   const { speed } = useSelector(selectPlayback);
   const [thumbValue, setThumbValue] = useState(speed);
@@ -29,10 +29,11 @@ const SpeedSelector: React.FC<SpeedSelectorProps> = ({ className }) => {
           type="range"
           min="0.2"
           step={0.01}
-          max="2.0"
+          max="2"
           className="slider vertical ml-2"
           id="volume"
           value={thumbValue}
+          disabled={!enabled}
           onChange={(e) => {
             const newSpeed = Number(e.target.value);
             setThumbValue(newSpeed);

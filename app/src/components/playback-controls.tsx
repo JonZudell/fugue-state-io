@@ -18,6 +18,7 @@ import { Code, PauseCircle, PlayCircle, Repeat, Repeat1 } from "lucide-react";
 import { selectDisplay, setEditor } from "@/store/display-slice";
 import { selectProject } from "@/store/project-slice";
 import { use, useEffect, useRef } from "react";
+import { time } from "console";
 interface PlaybackControlsProps {
   enabled?: boolean;
   width: number;
@@ -32,51 +33,116 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const dispatch = useDispatch();
   const { editor } = useSelector(selectDisplay);
   const { mediaFiles } = useSelector(selectProject);
-  const { playing, looping, timeElapsed, timelineDuration, volume, loopStart, loopEnd  } =
+  const { playing, looping, timeElapsed, timelineDuration, volume, loopStart, loopEnd, speed, audioContext  } =
     useSelector(selectPlayback);
-  const audioContext = useRef(new (window.AudioContext || window.webkitAudioContext)());
   const sources = useRef(new Map<string, AudioBufferSourceNode & { offset: number }>());
-  const gainNode = useRef(audioContext.current.createGain());
-  const destination = useRef(audioContext.current.destination);
+  const gainNode = useRef(audioContext.createGain());
+  const workletNode = useRef<AudioWorkletNode | null>(null);
+  const destination = useRef(audioContext.destination);
   const playingRef = useRef(playing);
-  const elapsedAtStart = useRef(0);
-
+  const timeRef = useRef(0);
+  const speedRef = useRef(1);
+  const loopStartRef = useRef(loopStart);
+  const loopEndRef = useRef(loopEnd);
+  const restartTrigger = useRef<number | null>(null);
+  const pitchFactor = useRef(0);
   useEffect(() => {
+    const setUpAudioWorklet = async () => {
+      await audioContext.audioWorklet.addModule('phase-vocoder.js');
+      workletNode.current = new AudioWorkletNode(audioContext, 'phase-vocoder');
+    };
+    setUpAudioWorklet();
+
     const interval = setInterval(() => {
       if (playingRef.current) {
-        dispatch(setTimeElapsed(audioContext.current.currentTime - elapsedAtStart.current));
-      } else {
-        elapsedAtStart.current = audioContext.current.currentTime - timeElapsed;
+        timeRef.current = timeRef.current + (.05 * speedRef.current);
+        if (looping && timeRef.current >= loopEndRef.current * timelineDuration) {
+          timeRef.current = loopStartRef.current * timelineDuration;
+          setUpMedia();
+        } else if (!looping && timeRef.current >= timelineDuration) {
+          timeRef.current = 0;
+          setUpMedia();
+        }
+        dispatch(setTimeElapsed(timeRef.current));
       }
+
     }, 50);
     return () => {
       clearInterval(interval);
     }
   }, []);
   useEffect(() => {
+    if (loopStartRef.current !== loopStart) {
+      timeRef.current = loopStart * timelineDuration;
+      dispatch(setTimeElapsed(timeRef.current));
+    }
+  }, [loopStart])
+
+  useEffect(() => {
+    if (loopEndRef.current !== loopEnd) {
+      timeRef.current = loopStart * timelineDuration;
+      dispatch(setTimeElapsed(timeRef.current));
+    }
+  }, [loopEnd])
+
+  useEffect(() => {
+    speedRef.current = speed;
+    if (workletNode.current) {
+      let pitchFactor = workletNode.current.parameters.get('pitchFactor');
+      if (pitchFactor) {
+        pitchFactor.value = 1 / speed;
+      }
+    }
+    setUpMedia();
+  }, [speed]);
+
+
+  useEffect(() => {
+    if (!playing) {
+      timeRef.current = timeElapsed;
+    }
+  }, [timeElapsed, playing])
+
+  useEffect(() => {
+    if (restartTrigger.current) {
+      dispatch(setPlaying(true));
+    }
+  }, [restartTrigger.current]);
+
+  useEffect(() => {
     playingRef.current = playing;
     if (playing) {
-      const startTime = audioContext.current.currentTime + 0.1;
-      elapsedAtStart.current = audioContext.current.currentTime - timeElapsed;
+      const startTime = audioContext.currentTime + 0.1;
       setUpMedia();
-      audioContext.current.resume().then(() => {
+      audioContext.resume().then(() => {
         sources.current.forEach((source) => {
           source.start(startTime, timeElapsed - source.offset);
         });
       });
     } else {
-      audioContext.current.suspend();
+      audioContext.suspend();
       setUpMedia();
     }
   }, [playing]);
 
-
-  useEffect(() => {
-    if (!playingRef.current) {
-
-    }
-
-  }, [timeElapsed]);
+  // useEffect(() => {
+  //   if (looping && timeElapsed >= loopEnd * timelineDuration) {
+  //     dispatch(setTimeElapsed(loopStart * timelineDuration));
+  //     audioContext.suspend();
+  //     dispatch(setPlaying(false));
+  //     restartTrigger.current = audioContext.currentTime;
+  //   } else if (looping && timeElapsed < loopStart * timelineDuration) {
+  //     dispatch(setTimeElapsed(loopStart * timelineDuration));
+  //     audioContext.suspend();
+  //     setUpMedia();
+  //     dispatch(setPlaying(false));
+  //     restartTrigger.current = audioContext.currentTime;
+  //   } else if (!looping && timeElapsed >= timelineDuration) {
+  //     dispatch(setTimeElapsed(0));
+  //     audioContext.suspend();
+  //     dispatch(setPlaying(false));
+  //   }
+  // }, [timeElapsed, loopStart, loopEnd, looping]);
 
   useEffect(() => {
     gainNode.current.gain.value = volume;
@@ -85,22 +151,29 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
   useEffect(() => {
     setUpMedia();
-  }, [mediaFiles]);
+  }, [mediaFiles, speed, workletNode.current]);
 
   const setUpMedia = () => {
+    if (!workletNode.current) {
+      console.log("worklet node not ready");
+      return;
+    }
     sources.current.forEach((source) => {
       source.disconnect();
     });
     gainNode.current.disconnect();
+    workletNode.current.disconnect();
     destination.current.disconnect();
     sources.current.clear();
     for (const mediaFile of Object.values(mediaFiles)) {
-      const source = audioContext.current.createBufferSource() as AudioBufferSourceNode & { offset: number };
+      const source = audioContext.createBufferSource() as AudioBufferSourceNode & { offset: number };
       source.buffer = mediaFile.audioBuffer;
+      source.playbackRate.value = speed;
       source.offset = mediaFile.offset;
-      source.connect(gainNode.current);
+      source.connect(workletNode.current);
       sources.current.set(mediaFile.id, source);
     }
+    workletNode.current.connect(gainNode.current);
     gainNode.current.connect(destination.current);
   }
 
@@ -158,7 +231,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               )}
             </button>
             <VolumeSelector className="mx-1" enabled={enabled} />
-            <SpeedSelector className="mx-1" enabled={enabled} />
+            <SpeedSelector className="mx-1" enabled={!playing} />
             <div className="flex items-center">
               <span style={{ userSelect: "none" }} className="my-2 mx-4">
                 {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} / -

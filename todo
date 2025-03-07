@@ -1,6 +1,5 @@
-playback-controls rewrite
-  change style
-  handle spacing for loop spanner
-  vertical audio and speed sliders
+timeline editor for aligning notation files and or media files.
 
-multiple notation files
+minimap shows timeline.
+
+playback rate

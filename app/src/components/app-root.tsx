@@ -38,6 +38,7 @@ import {
   selectProject,
   selectAnyProcessing,
   Project,
+  setAudioContext,
 } from "@/store/project-slice";
 import EditorDrawer from "./editor-drawer";
 

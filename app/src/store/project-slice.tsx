@@ -46,6 +46,7 @@ interface MediaSource {
 interface PlaybackState {
   audioContext: AudioContext | null;
   mediaSources: MediaSource[];
+  primarySourceId: string | null;
   playing: boolean;
   looping: boolean;
   timeElapsed: number;
@@ -61,6 +62,7 @@ const initialId = uuidv4();
 const initialPlaybackState: PlaybackState = {
   audioContext: null,
   mediaSources: [],
+  primarySourceId: null,
   playing: false,
   looping: false,
   timeElapsed: 0,
@@ -84,9 +86,20 @@ export const uploadFile = createAsyncThunk(
   "playback/uploadFile",
   async ({ file, worker }: { file: File; worker: Worker }, { dispatch }) => {
     return new Promise<MediaFile>(async (_resolve, _reject) => {
+      let tempAudioContext = null;
+      if (initialPlaybackState.audioContext === null) {
+        tempAudioContext = new AudioContext();
+        dispatch(setAudioContext(tempAudioContext));
+      } else {
+        tempAudioContext = initialPlaybackState.audioContext;
+      }
+
+
       const id = uuidv4();
-      const audioContext = new AudioContext();
-      const audioBuffer = await audioContext.decodeAudioData(
+      if (initialPlaybackState.primarySourceId === null) {
+        dispatch(setPrimarySourceId(id));
+      }
+      const audioBuffer = await tempAudioContext.decodeAudioData(
         await file.arrayBuffer(),
       );
       const isStereo = audioBuffer.numberOfChannels > 1;
@@ -419,6 +432,9 @@ const projectSlice = createSlice({
         }
       }
     },
+    setPrimarySourceId: (state, action: PayloadAction<string>) => {
+      state.playback.primarySourceId = action.payload;
+    }
   },
 });
 
@@ -445,5 +461,6 @@ export const {
   setMode,
   restartPlayback,
   registerMedia,
+  setPrimarySourceId
 } = projectSlice.actions;
 export default projectSlice.reducer;
