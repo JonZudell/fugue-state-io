@@ -17,7 +17,7 @@ import Slider from "@/components/slider-input";
 import { Code, PauseCircle, PlayCircle, Repeat, Repeat1 } from "lucide-react";
 import { selectDisplay, setEditor } from "@/store/display-slice";
 import { selectProject } from "@/store/project-slice";
-import { use, useEffect, useRef } from "react";
+import { createRef, use, useEffect, useRef } from "react";
 import { time } from "console";
 interface PlaybackControlsProps {
   enabled?: boolean;
@@ -36,6 +36,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const { playing, looping, timeElapsed, timelineDuration, volume, loopStart, loopEnd, speed, audioContext  } =
     useSelector(selectPlayback);
   const sources = useRef(new Map<string, AudioBufferSourceNode & { offset: number }>());
+  const videoRefs = useRef(new Map<string, React.RefObject<HTMLVideoElement>>());
+  const primarySourceId = Object.keys(mediaFiles)[0];
   const gainNode = useRef(audioContext.createGain());
   const workletNode = useRef<AudioWorkletNode | null>(null);
   const destination = useRef(audioContext.destination);
@@ -53,9 +55,12 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     };
     setUpAudioWorklet();
 
+    for (const mediaFile of Object.values(mediaFiles)) {
+      videoRefs.current.set(mediaFile.id, createRef<HTMLVideoElement>());
+    }
     const interval = setInterval(() => {
       if (playingRef.current) {
-        timeRef.current = timeRef.current + (.05 * speedRef.current);
+        timeRef.current = videoRefs.current.get(primarySourceId).current.currentTime;
         if (looping && timeRef.current >= loopEndRef.current * timelineDuration) {
           timeRef.current = loopStartRef.current * timelineDuration;
           setUpMedia();
@@ -85,16 +90,16 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     }
   }, [loopEnd])
 
-  useEffect(() => {
-    speedRef.current = speed;
-    if (workletNode.current) {
-      let pitchFactor = workletNode.current.parameters.get('pitchFactor');
-      if (pitchFactor) {
-        pitchFactor.value = 1 / speed;
-      }
-    }
-    setUpMedia();
-  }, [speed]);
+  // useEffect(() => {
+  //   speedRef.current = speed;
+  //   if (workletNode.current) {
+  //     let pitchFactor = workletNode.current.parameters.get('pitchFactor');
+  //     if (pitchFactor) {
+  //       pitchFactor.value = 1 / speed;
+  //     }
+  //   }
+  //   setUpMedia();
+  // }, [speed]);
 
 
   useEffect(() => {
@@ -115,8 +120,12 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       const startTime = audioContext.currentTime + 0.1;
       setUpMedia();
       audioContext.resume().then(() => {
-        sources.current.forEach((source) => {
-          source.start(startTime, timeElapsed - source.offset);
+        videoRefs.current.forEach((videoRef) => {
+          if (videoRef.current) {
+            videoRef.current.currentTime = timeRef.current;
+            videoRef.current.playbackRate = speed;
+            videoRef.current.play();
+          }
         });
       });
     } else {
@@ -154,8 +163,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   }, [mediaFiles, speed, workletNode.current]);
 
   const setUpMedia = () => {
-    if (!workletNode.current) {
-      console.log("worklet node not ready");
+    if (!workletNode.current || videoRefs.current.size === 0) {
+      console.log("worklet node not ready or video refs are empty");
       return;
     }
     sources.current.forEach((source) => {
@@ -166,11 +175,12 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     destination.current.disconnect();
     sources.current.clear();
     for (const mediaFile of Object.values(mediaFiles)) {
-      const source = audioContext.createBufferSource() as AudioBufferSourceNode & { offset: number };
-      source.buffer = mediaFile.audioBuffer;
-      source.playbackRate.value = speed;
-      source.offset = mediaFile.offset;
-      source.connect(workletNode.current);
+      //const source = audioContext.createBufferSource() as AudioBufferSourceNode & { offset: number };
+      const source = audioContext?.createMediaElementSource(videoRefs.current.get(mediaFile.id).current);
+
+      if (source) {
+        source.connect(workletNode.current);
+      }
       sources.current.set(mediaFile.id, source);
     }
     workletNode.current.connect(gainNode.current);
@@ -258,6 +268,42 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           </button>
         </div>
       </div>
+      <video
+        ref={videoRefs.current.get(primarySourceId)}
+        style={{ display: "none" }}
+        onTimeUpdate={(e) => {
+          if (playing) {
+            if (looping && e.currentTarget.currentTime >= loopEnd * timelineDuration) {
+              dispatch(setTimeElapsed(loopStart * timelineDuration));
+              dispatch(setPlaying(false));
+              videoRefs.current.get(primarySourceId).current.currentTime = loopStart * timelineDuration;
+              restartTrigger.current = audioContext.currentTime;
+            } else if (looping && e.currentTarget.currentTime < loopStart * timelineDuration) {
+              dispatch(setTimeElapsed(loopStart * timelineDuration));
+              dispatch(setPlaying(false));
+              videoRefs.current.get(primarySourceId).current.currentTime = loopStart * timelineDuration;
+              restartTrigger.current = audioContext.currentTime;
+            } else if (!looping && e.currentTarget.currentTime >= timelineDuration) {
+              dispatch(setTimeElapsed(0));
+              dispatch(setPlaying(false));
+            }
+          }
+        }}
+        controls={false}
+      >
+        <source src={mediaFiles[primarySourceId].url} type={mediaFiles[primarySourceId].fileType}/>
+      </video>
+      {Object.values(mediaFiles).map((mediaFile) => 
+        {primarySourceId !== mediaFile.id &&
+        (<video
+          key={mediaFile.id}
+          ref={videoRefs.current.get(mediaFile.id)}
+          style={{ display: "none" }}
+        >
+          <source src={mediaFile.url} type={mediaFile.fileType}/>
+        </video>)
+        }
+      )}
     </>
   );
 };
