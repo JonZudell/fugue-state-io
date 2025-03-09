@@ -64,6 +64,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         if (looping && timeRef.current >= loopEndRef.current * timelineDuration) {
           timeRef.current = loopStartRef.current * timelineDuration;
           setUpMedia();
+          restartTrigger.current = audioContext.currentTime;
         } else if (!looping && timeRef.current >= timelineDuration) {
           timeRef.current = 0;
           setUpMedia();
@@ -90,16 +91,15 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     }
   }, [loopEnd])
 
-  // useEffect(() => {
-  //   speedRef.current = speed;
-  //   if (workletNode.current) {
-  //     let pitchFactor = workletNode.current.parameters.get('pitchFactor');
-  //     if (pitchFactor) {
-  //       pitchFactor.value = 1 / speed;
-  //     }
-  //   }
-  //   setUpMedia();
-  // }, [speed]);
+  useEffect(() => {
+    if (speedRef.current !== speed) {
+      videoRefs.current.forEach((videoRef) => {
+        if (videoRef.current) {
+          videoRef.current.playbackRate = speed;
+        }
+      });
+    }
+  }, [speed]);
 
 
   useEffect(() => {
@@ -160,7 +160,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
   useEffect(() => {
     setUpMedia();
-  }, [mediaFiles, speed, workletNode.current]);
+  }, [mediaFiles, workletNode.current]);
 
   const setUpMedia = () => {
     if (!workletNode.current || videoRefs.current.size === 0) {
@@ -204,7 +204,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     <>
       <Slider />
       {looping && (
-        <SpanSlider callback={handleSpanSliderChange} enabled={!playing} />
+        <SpanSlider callback={handleSpanSliderChange} />
       )}
       <div
         className="playback-controls bg-black text-white px-4"
@@ -241,7 +241,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               )}
             </button>
             <VolumeSelector className="mx-1" enabled={enabled} />
-            <SpeedSelector className="mx-1" enabled={!playing} />
+            <SpeedSelector className="mx-1" enabled={enabled} />
             <div className="flex items-center">
               <span style={{ userSelect: "none" }} className="my-2 mx-4">
                 {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} / -
