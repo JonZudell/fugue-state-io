@@ -41,6 +41,7 @@ import {
   setAudioContext,
 } from "@/store/project-slice";
 import EditorDrawer from "./editor-drawer";
+import TimelineDisplay from "./timeline-display";
 
 interface AppRootProps {
   setReady: (ready: boolean) => void;
@@ -61,7 +62,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const { isMobile } = useSidebar();
   const [init, setInit] = useState(false);
   const { mediaFiles } = useSelector(selectProject) as Project;
-  const { editor, root } = useSelector(selectDisplay);
+  const { editor, root, displayMode } = useSelector(selectDisplay);
   const { mode } = useSelector(selectPlayback);
   const { state } = useSidebar();
   const [panelGroupDimensions, setPanelGroupDimensions] = useState({
@@ -226,7 +227,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                         height={minimapHeight}
                         width={panelGroupDimensions.width}
                       />
-                      <Display
+                      {displayMode === 'display' &&<Display
                         width={panelGroupDimensions.width}
                         height={
                           (topPanelDimensions.height *
@@ -238,14 +239,21 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                         }
                         node={root}
                         parentNodeId={null}
-                      />
+                      />}
+                      {displayMode === 'timeline' && 
+                      <TimelineDisplay width={panelGroupDimensions.width} height={(topPanelDimensions.height *
+                        panelGroupDimensions.height) /
+                        100 -
+                        commandBarHeight -
+                        minimapHeight -
+                        playbackControlsHeight}/>}
                       <PlaybackControls
                         width={panelGroupDimensions.width}
                         height={playbackControlsHeight}
                         enabled={true}
                       />
                     </ResizablePanel>
-                    {editor && (
+                    {editor && displayMode === 'display' && (
                       <>
                         <ResizableHandle withHandle />
                         <ResizablePanel>

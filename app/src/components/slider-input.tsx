@@ -7,11 +7,11 @@ import {
   selectPlayback,
 } from "@/store/project-slice";
 import { useDispatch, useSelector } from "react-redux";
-interface SpanSliderProps {
+interface SliderInputProps {
   className?: string;
 }
 
-const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
+const SliderInput: React.FC<SliderInputProps> = ({ className }) => {
   const spanSliderRef = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const [width, setWidth] = useState(0);
@@ -100,4 +100,4 @@ const SpanSlider: React.FC<SpanSliderProps> = ({ className }) => {
   );
 };
 
-export default SpanSlider;
+export default SliderInput;

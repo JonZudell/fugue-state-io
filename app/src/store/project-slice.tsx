@@ -10,6 +10,8 @@ export interface MediaFile {
   audioBuffer: AudioBuffer;
   duration: number;
   offset: number;
+  volume: number;
+  mode: string;
   summary: Channels;
   sampleRate: number;
   stereo: boolean;
@@ -109,6 +111,8 @@ export const uploadFile = createAsyncThunk(
         stereo: isStereo,
         fileType: file.type,
         offset: 0,
+        mode: "stereo",
+        volume: 1,
         audioBuffer: audioBuffer,
         url: (() => {
           try {
@@ -434,6 +438,33 @@ const projectSlice = createSlice({
     },
     setPrimarySourceId: (state, action: PayloadAction<string>) => {
       state.playback.primarySourceId = action.payload;
+    },
+    setMediaVolume: (
+      state,
+      action: PayloadAction<{ id: string; volume: number }>,
+    ) => {
+      const media = state.projects[state.activeProject].mediaFiles[action.payload.id];
+      if (media) {
+        media.volume = action.payload.volume;
+      }
+    },
+    setMediaMode: (
+      state,
+      action: PayloadAction<{ id: string; mode: string }>,
+    ) => {
+      const media = state.projects[state.activeProject].mediaFiles[action.payload.id];
+      if (media) {
+        media.mode = action.payload.mode;
+      }
+    },
+    setMediaOffset: (
+      state,
+      action: PayloadAction<{ id: string; offset: number }>,
+    ) => {
+      const media = state.projects[state.activeProject].mediaFiles[action.payload.id];
+      if (media) {
+        media.offset = action.payload.offset
+      }
     }
   },
 });
@@ -461,6 +492,9 @@ export const {
   setMode,
   restartPlayback,
   registerMedia,
-  setPrimarySourceId
+  setPrimarySourceId,
+  setMediaVolume,
+  setMediaMode,
+  setMediaOffset,
 } = projectSlice.actions;
 export default projectSlice.reducer;

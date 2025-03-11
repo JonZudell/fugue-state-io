@@ -17,6 +17,7 @@ export interface DisplayState {
   editor: boolean;
   root: Node | null;
   videoEnabled: boolean;
+  displayMode: "display" | "timeline";
 }
 
 const initialState: DisplayState = {
@@ -26,6 +27,7 @@ const initialState: DisplayState = {
   editor: true,
   root: null,
   videoEnabled: false,
+  displayMode: "display",
 };
 
 const compressTree = (node: Node): Node => {
@@ -180,6 +182,12 @@ const displaySlice = createSlice({
       state.root = compressTree(splitNode(state.root));
       state.root.id = "root";
     },
+    setDisplayMode: (
+      state: DisplayState,
+      action: PayloadAction<"display" | "timeline">,
+    ) => {
+      state.displayMode = action.payload;
+    }
   },
 });
 
@@ -192,6 +200,7 @@ export const {
   setEditor,
   removeNode,
   splitNode,
+  setDisplayMode,
 } = displaySlice.actions;
 
 export default displaySlice.reducer;

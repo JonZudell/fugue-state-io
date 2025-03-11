@@ -37,7 +37,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     useSelector(selectPlayback);
   const sources = useRef(new Map<string, AudioBufferSourceNode & { offset: number }>());
   const videoRefs = useRef(new Map<string, React.RefObject<HTMLVideoElement>>());
-  const primarySourceId = Object.keys(mediaFiles)[0];
+  const {primarySourceId} = useSelector(selectPlayback);
   const gainNode = useRef(audioContext.createGain());
   const workletNode = useRef<AudioWorkletNode | null>(null);
   const destination = useRef(audioContext.destination);
@@ -79,15 +79,19 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   }, []);
   useEffect(() => {
     if (loopStartRef.current !== loopStart) {
-      timeRef.current = loopStart * timelineDuration;
-      dispatch(setTimeElapsed(timeRef.current));
+      if (timeRef.current < loopStart * timelineDuration) {
+        timeRef.current = loopStart * timelineDuration;
+        dispatch(setTimeElapsed(timeRef.current));
+      }
     }
   }, [loopStart])
 
   useEffect(() => {
     if (loopEndRef.current !== loopEnd) {
-      timeRef.current = loopStart * timelineDuration;
-      dispatch(setTimeElapsed(timeRef.current));
+      if (timeRef.current >= loopEnd * timelineDuration) {
+        timeRef.current = loopStart * timelineDuration;
+        dispatch(setTimeElapsed(timeRef.current));
+      }
     }
   }, [loopEnd])
 
@@ -117,14 +121,13 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   useEffect(() => {
     playingRef.current = playing;
     if (playing) {
-      const startTime = audioContext.currentTime + 0.1;
       setUpMedia();
       audioContext.resume().then(() => {
-        videoRefs.current.forEach((videoRef) => {
-          if (videoRef.current) {
-            videoRef.current.currentTime = timeRef.current;
-            videoRef.current.playbackRate = speed;
-            videoRef.current.play();
+        Object.keys(mediaFiles).forEach((id) => {
+          if (videoRefs.current.get(id).current) {
+            videoRefs.current.get(id).current.currentTime = mediaFiles[id].offset + timeElapsed;
+            videoRefs.current.get(id).current.playbackRate = speed;
+            videoRefs.current.get(id).current.play();
           }
         });
       });
@@ -133,25 +136,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       setUpMedia();
     }
   }, [playing]);
-
-  // useEffect(() => {
-  //   if (looping && timeElapsed >= loopEnd * timelineDuration) {
-  //     dispatch(setTimeElapsed(loopStart * timelineDuration));
-  //     audioContext.suspend();
-  //     dispatch(setPlaying(false));
-  //     restartTrigger.current = audioContext.currentTime;
-  //   } else if (looping && timeElapsed < loopStart * timelineDuration) {
-  //     dispatch(setTimeElapsed(loopStart * timelineDuration));
-  //     audioContext.suspend();
-  //     setUpMedia();
-  //     dispatch(setPlaying(false));
-  //     restartTrigger.current = audioContext.currentTime;
-  //   } else if (!looping && timeElapsed >= timelineDuration) {
-  //     dispatch(setTimeElapsed(0));
-  //     audioContext.suspend();
-  //     dispatch(setPlaying(false));
-  //   }
-  // }, [timeElapsed, loopStart, loopEnd, looping]);
 
   useEffect(() => {
     gainNode.current.gain.value = volume;
@@ -163,6 +147,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   }, [mediaFiles, workletNode.current]);
 
   const setUpMedia = () => {
+    
     if (!workletNode.current || videoRefs.current.size === 0) {
       console.log("worklet node not ready or video refs are empty");
       return;
@@ -176,12 +161,17 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     sources.current.clear();
     for (const mediaFile of Object.values(mediaFiles)) {
       //const source = audioContext.createBufferSource() as AudioBufferSourceNode & { offset: number };
-      const source = audioContext?.createMediaElementSource(videoRefs.current.get(mediaFile.id).current);
-
-      if (source) {
+      const videoElement = videoRefs.current.get(mediaFile.id)?.current;
+      console.log(videoElement);
+      if (videoElement) {
+        const source = audioContext.createMediaElementSource(videoElement);
+        sources.current.set(mediaFile.id, source);
         source.connect(workletNode.current);
+        if (source) {
+          source.connect(workletNode.current);
+        }
+        sources.current.set(mediaFile.id, source);
       }
-      sources.current.set(mediaFile.id, source);
     }
     workletNode.current.connect(gainNode.current);
     gainNode.current.connect(destination.current);
@@ -204,7 +194,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     <>
       <Slider />
       {looping && (
-        <SpanSlider callback={handleSpanSliderChange} />
+        <SpanSlider callback={handleSpanSliderChange} enabled={!playing} />
       )}
       <div
         className="playback-controls bg-black text-white px-4"
@@ -268,7 +258,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           </button>
         </div>
       </div>
-      <video
+      {/* <video
         ref={videoRefs.current.get(primarySourceId)}
         style={{ display: "none" }}
         onTimeUpdate={(e) => {
@@ -292,17 +282,16 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         controls={false}
       >
         <source src={mediaFiles[primarySourceId].url} type={mediaFiles[primarySourceId].fileType}/>
-      </video>
+      </video> */}
       {Object.values(mediaFiles).map((mediaFile) => 
-        {primarySourceId !== mediaFile.id &&
-        (<video
+        <video
           key={mediaFile.id}
           ref={videoRefs.current.get(mediaFile.id)}
           style={{ display: "none" }}
         >
           <source src={mediaFile.url} type={mediaFile.fileType}/>
-        </video>)
-        }
+        </video>
+        
       )}
     </>
   );

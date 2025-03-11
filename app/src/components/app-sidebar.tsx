@@ -24,6 +24,9 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { DisplayMenu } from "@/components/ui/display-menu";
+import { selectDisplay } from "@/store/display-slice";
+import { useSelector } from "react-redux";
+import { TimelineMenu } from "./timeline-menu";
 
 // This is sample data.
 const data = {
@@ -144,13 +147,15 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state } = useSidebar();
-  const activeMenu = "display";
+  const { displayMode } = useSelector(selectDisplay);
   return props.hidden ? null : (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <MenuSwitcher menus={data.menus} />
+        <MenuSwitcher />
       </SidebarHeader>
-      <SidebarContent></SidebarContent>
+      <SidebarContent>
+        {state === "expanded" && <TimelineMenu />}
+      </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>

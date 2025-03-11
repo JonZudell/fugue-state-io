@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ChevronsUpDown, Plus } from "lucide-react";
+import { ChevronsUpDown, Folder, GalleryVerticalEnd, Plus } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -18,18 +18,31 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { selectDisplay, setDisplayMode } from "@/store/display-slice";
+import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
-export function MenuSwitcher({
-  menus,
-}: {
-  menus: {
-    name: string;
-    logo: React.ElementType;
-  }[];
-}) {
+const menus = {
+  "timeline":{
+    id: "timeline",
+    name: "Timeline Settings",
+    logo: GalleryVerticalEnd,
+  },
+  "display":{
+    id: "display",
+    name: "Display Settings",
+    logo: GalleryVerticalEnd,
+  },
+}
+export function MenuSwitcher() {
+  const dispatch = useDispatch();
   const { isMobile } = useSidebar();
-  const [activeMenu, setActiveMenu] = React.useState(menus[0]);
-
+  const { displayMode } = useSelector(selectDisplay);
+  const [activeMenu, setActiveMenu] = useState(menus[displayMode]);
+  useEffect(() => {
+    setActiveMenu(menus[displayMode]);
+  }, [displayMode]);
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -59,10 +72,10 @@ export function MenuSwitcher({
             <DropdownMenuLabel className="text-xs text-muted-foreground">
               Switch Menu
             </DropdownMenuLabel>
-            {menus.map((menu, index) => (
+            {Object.values(menus).map((menu, index) => (
               <DropdownMenuItem
                 key={menu.name}
-                onClick={() => setActiveMenu(menu)}
+                onClick={() =>  dispatch(setDisplayMode(menu.id))}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
@@ -72,12 +85,6 @@ export function MenuSwitcher({
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2">
-              <div className="flex size-6 items-center justify-center rounded-md border bg-background">
-                <Plus className="size-4" />
-              </div>
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
