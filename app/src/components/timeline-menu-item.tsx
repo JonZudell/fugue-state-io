@@ -4,7 +4,6 @@ import { MediaFile, selectPlayback, selectProject, setMediaMode, setMediaOffset,
 import * as React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Card } from "./ui/card";
-import BindableSlider from "./bindable-slider";
 import { Slider } from "./ui/slider";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -18,10 +17,9 @@ interface TimelineMenuItemProps {
 
 export function TimelineMenuItem({ className, mediaFile }: TimelineMenuItemProps) {
   const [volume, setVolume] = useState(mediaFile.volume);
-  const [mode, setMode] = useState(mediaFile.mode);
+  const [mode, setMode] = useState(mediaFile.stereo ? 'L/R' : 'L+R');
   const { primarySourceId } = useSelector(selectPlayback);
   const [isPrimary, setIsPrimary] = useState(primarySourceId === mediaFile.id);
-  const [offset, setOffset] = useState(mediaFile.offset);
   const [offsetError, setOffsetError] = useState(false);
   const dispatch = useDispatch();
 
@@ -52,19 +50,19 @@ export function TimelineMenuItem({ className, mediaFile }: TimelineMenuItemProps
     <Card className={`flex flex-col flex-1 mx-auto text-white p-2 text-sm ${className}`} style={{ overflow: "hidden" }}>
       {mediaFile.name}
       {mediaFile.stereo ? (
-        <Tabs className="text-xs py-2" defaultValue="stereo">
+        <Tabs className="text-xs py-2" defaultValue="L/R" onValueChange={(value) => { setMode(value) }}>
           <TabsList>
-        <TabsTrigger value="stereo">L/R</TabsTrigger>
-        <TabsTrigger value="mid">L+R</TabsTrigger>
-        <TabsTrigger value="side">L-R</TabsTrigger>
-        <TabsTrigger value="left">L</TabsTrigger>
-        <TabsTrigger value="right">R</TabsTrigger>
+            <TabsTrigger value="L/R">L/R</TabsTrigger>
+            <TabsTrigger value="L+R">L+R</TabsTrigger>
+            <TabsTrigger value="L-R">L-R</TabsTrigger>
+            <TabsTrigger value="L">L</TabsTrigger>
+            <TabsTrigger value="R">R</TabsTrigger>
           </TabsList>
         </Tabs>
       ) : (
-        <Tabs className="text-xs py-2" defaultValue="mono">
+        <Tabs className="text-xs py-2" defaultValue="L+R" onValueChange={(value) => { setMode(value) }}>
           <TabsList>
-        <TabsTrigger value="mono">Mono</TabsTrigger>
+        <TabsTrigger value="L+R">Mono</TabsTrigger>
           </TabsList>
         </Tabs>
       )}

@@ -56,7 +56,6 @@ interface PlaybackState {
   volume: number;
   loopStart: number;
   loopEnd: number;
-  mode: "mono" | "stereo";
   timelineDuration: number;
 }
 
@@ -72,7 +71,6 @@ const initialPlaybackState: PlaybackState = {
   volume: 1,
   loopStart: 0,
   loopEnd: 1,
-  mode: "stereo",
   timelineDuration: 0,
 };
 
@@ -111,7 +109,7 @@ export const uploadFile = createAsyncThunk(
         stereo: isStereo,
         fileType: file.type,
         offset: 0,
-        mode: "stereo",
+        mode: isStereo ? "L/R" : "L+R",
         volume: 1,
         audioBuffer: audioBuffer,
         url: (() => {
@@ -125,16 +123,16 @@ export const uploadFile = createAsyncThunk(
         duration: audioBuffer.duration,
         sampleRate: audioBuffer.sampleRate,
         summary: isStereo
-          ? { mono: null }
-          : { left: null, right: null, mono: null, side: null },
+          ? { "L+R": null }
+          : { "L": null, "R": null, "L+R": null, "L-R": null },
         processing: true,
         progress: !isStereo
-          ? [{ channel: "mono", progress: 0 }]
+          ? [{ channel: "L+R", progress: 0 }]
           : [
-              { channel: "left", progress: 0 },
-              { channel: "right", progress: 0 },
-              { channel: "mono", progress: 0 },
-              { channel: "side", progress: 0 },
+              { channel: "L", progress: 0 },
+              { channel: "R", progress: 0 },
+              { channel: "L+R", progress: 0 },
+              { channel: "L-R", progress: 0 },
             ],
       };
       dispatch(addFile(media));
@@ -156,32 +154,32 @@ export const uploadFile = createAsyncThunk(
           type: "SUMMARIZE",
           arrayBuffer: monoChannel.buffer,
           mediaId: id,
-          channel: "mono",
+          channel: "L+R",
         });
         worker.postMessage({
           type: "SUMMARIZE",
           arrayBuffer: sideChannel.buffer,
           mediaId: id,
-          channel: "side",
+          channel: "L-R",
         });
         worker.postMessage({
           type: "SUMMARIZE",
           arrayBuffer: leftChannel.buffer,
           mediaId: id,
-          channel: "left",
+          channel: "L",
         });
         worker.postMessage({
           type: "SUMMARIZE",
           arrayBuffer: rightChannel.buffer,
           mediaId: id,
-          channel: "right",
+          channel: "R",
         });
       } else {
         worker.postMessage({
           type: "SUMMARIZE",
           arrayBuffer: audioBuffer.getChannelData(0).buffer,
           mediaId: id,
-          channel: "mono",
+          channel: "L+R",
         });
       }
     });
@@ -412,29 +410,19 @@ const projectSlice = createSlice({
         state.playback.loopEnd = 1;
       }
     },
-    setMode: (
-      state,
-      action: PayloadAction<"mono" | "stereo">,
-    ) => {
-      state.playback.mode = action.payload;
-    },
     restartPlayback: (state) => {
       state.playback.timeElapsed = state.playback.loopStart * state.playback.timelineDuration;
       state.playback.playing = true;
     },
     registerMedia: (state, action: PayloadAction<MediaFile>) => {
       if (
-        state.playback.mediaSources.find((source) => source.id === action.payload.id)
+        !state.playback.mediaSources.find((source) => source.id === action.payload.id)
       ) {
-        return;
-      } else {
         state.playback.mediaSources.push({
           id: action.payload.id,
         });
-        if (action.payload.duration > state.playback.timelineDuration) {
-          state.playback.timelineDuration = action.payload.duration;
-        }
       }
+      state.playback.timelineDuration = action.payload.duration + action.payload.offset;
     },
     setPrimarySourceId: (state, action: PayloadAction<string>) => {
       state.playback.primarySourceId = action.payload;
@@ -465,6 +453,11 @@ const projectSlice = createSlice({
       if (media) {
         media.offset = action.payload.offset
       }
+      state.playback.timelineDuration = Math.max(
+        ...Object.values(state.projects[state.activeProject].mediaFiles).map(
+          (media) => media.duration + media.offset,
+        ),
+      );
     }
   },
 });
@@ -489,7 +482,6 @@ export const {
   setLoopStart,
   setLoopEnd,
   setLooping,
-  setMode,
   restartPlayback,
   registerMedia,
   setPrimarySourceId,

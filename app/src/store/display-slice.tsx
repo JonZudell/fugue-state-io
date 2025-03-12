@@ -7,7 +7,6 @@ export type Node = {
   children?: Node[];
   type?: string;
   sourceId?: string;
-  channel?: string;
 };
 
 export interface DisplayState {
@@ -160,13 +159,11 @@ const displaySlice = createSlice({
                 id: uuidv4(),
                 type: node.type,
                 sourceId: node.sourceId,
-                channel: node.channel,
               },
               {
                 id: uuidv4(),
                 type: node.type,
                 sourceId: node.sourceId,
-                channel: node.channel,
               },
             ],
           };

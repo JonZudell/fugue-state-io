@@ -147,7 +147,6 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state } = useSidebar();
-  const { displayMode } = useSelector(selectDisplay);
   return props.hidden ? null : (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

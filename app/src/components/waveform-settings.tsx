@@ -178,8 +178,8 @@ const WaveformSettings: React.FC<{
                         },
                       )}
                       <CommandItem
-                        key="left + right"
-                        value="left + right"
+                        key="L+R"
+                        value="L+R"
                         onSelect={(currentValue) => {
                           setChannel(
                             currentValue === channel ? "" : currentValue,
@@ -187,11 +187,11 @@ const WaveformSettings: React.FC<{
                           setChannelPopoverOpen(false);
                         }}
                       >
-                        {"left + right"}
+                        {"L+R"}
                         <Check
                           className={cn(
                             "ml-auto",
-                            "left + right" === channel
+                            "L+R" === channel
                               ? "opacity-100"
                               : "opacity-0",
                           )}

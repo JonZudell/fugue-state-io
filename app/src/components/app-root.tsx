@@ -60,11 +60,10 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const processing = useSelector(selectAnyProcessing);
   const progress = useSelector(selectProgressState);
   const { isMobile } = useSidebar();
-  const [init, setInit] = useState(false);
   const { mediaFiles } = useSelector(selectProject) as Project;
   const { editor, root, displayMode } = useSelector(selectDisplay);
-  const { mode } = useSelector(selectPlayback);
   const { state } = useSidebar();
+  
   const [panelGroupDimensions, setPanelGroupDimensions] = useState({
     width: 0,
     height: 0,
@@ -73,6 +72,10 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
     width: 0,
     height: 0,
   });
+
+  useEffect(() => {
+    handleResize();
+  }, [panelRef.current, workerRef.current, topPanelRef.current, displayMode, sidebarRef.current, editor]);
 
   useEffect(() => {
     workerRef.current = new SummarizeWorker();
@@ -84,7 +87,6 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
           console.log("Received message", event.data);
         } else if (event.data.type === "CHANNEL_PROGRESS") {
           console.log("Received progress", event.data);
-
           if (
             event.data.id &&
             event.data.channel &&
@@ -103,15 +105,13 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
           }
         } else if (event.data.type === "SUMMARIZED") {
           console.log("Received summary", event.data);
-          if (mode === "stereo") {
-            dispatch(
-              setChannelSummary({
-                id: event.data.id,
-                summary: event.data.summary,
-                channel: event.data.channel,
-              }),
-            );
-          }
+          dispatch(
+            setChannelSummary({
+              id: event.data.id,
+              summary: event.data.summary,
+              channel: event.data.channel,
+            }),
+          );
         }
       };
       workerRef.current.postMessage({ type: "CHECK_READY" });
@@ -122,7 +122,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
         workerRef.current.terminate();
       }
     };
-  }, [workerRef, dispatch, mode, init]);
+  }, [workerRef, dispatch]);
 
   const handleResize = useCallback(() => {
     console.log("window.innerWidth", window.innerWidth);

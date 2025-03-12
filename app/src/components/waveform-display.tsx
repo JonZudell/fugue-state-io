@@ -20,7 +20,7 @@ interface WaveformDisplayProps {
 const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   nodeId,
   sourceId,
-  channel = "mono",
+  channel = "L+R",
   startPercentage = 0,
   endPercentage = 100,
   crosshair = true,
@@ -44,21 +44,21 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
         ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas before drawing
 
         const { summary } = media;
-        if (!summary.mono) {
+        if (!summary["L+R"]) {
           return;
         }
-        const summaryLength = summary.mono.length;
+        const summaryLength = summary["L+R"].length;
         const startSample = Math.floor((startPercentage / 100) * summaryLength);
         const endSample = Math.floor((endPercentage / 100) * summaryLength);
         const samplesPerPixel = (endSample - startSample) / canvas.width;
-        if (channel === "left + right" && summary.left && summary.right) {
+        if (channel === "L/R" && summary["L"] && summary["R"]) {
           console.log("drawing left + right");
           for (let i = 0; i < canvas.width; i++) {
             const startIndex = Math.floor(i * samplesPerPixel + startSample);
             const endIndex =
               Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
-            const leftSlice = summary.left.slice(startIndex, endIndex);
-            const rightSlice = summary.right.slice(startIndex, endIndex);
+            const leftSlice = summary["L"].slice(startIndex, endIndex);
+            const rightSlice = summary["R"].slice(startIndex, endIndex);
             const rightMin = Math.min(
               ...rightSlice.map((frame) => frame.value.min),
             );
@@ -89,12 +89,12 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
               ((rightMax - rightMin) * canvas.height) / 4,
             );
           }
-        } else if (channel === "left" && summary.left) {
+        } else if (channel === "L" && summary["L"]) {
           for (let i = 0; i < canvas.width; i++) {
             const startIndex = Math.floor(i * samplesPerPixel + startSample);
             const endIndex =
               Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
-            const leftSlice = summary.left.slice(startIndex, endIndex);
+            const leftSlice = summary["L"].slice(startIndex, endIndex);
             const leftMin = Math.min(
               ...leftSlice.map((frame) => frame.value.min),
             );
@@ -109,12 +109,12 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
               (leftMax - leftMin) * canvas.height,
             );
           }
-        } else if (channel === "right" && summary.right) {
+        } else if (channel === "R" && summary["R"]) {
           for (let i = 0; i < canvas.width; i++) {
             const startIndex = Math.floor(i * samplesPerPixel + startSample);
             const endIndex =
               Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
-            const rightSlice = summary.right.slice(startIndex, endIndex);
+            const rightSlice = summary["R"].slice(startIndex, endIndex);
             const rightMin = Math.min(
               ...rightSlice.map((frame) => frame.value.min),
             );
@@ -129,13 +129,13 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
               (rightMax - rightMin) * canvas.height,
             );
           }
-        } else if (channel === "mono" && summary.mono) {
+        } else if (channel === "L+R" && summary["L+R"]) {
           console.log("drawing mono");
           for (let i = 0; i < canvas.width; i++) {
             const startIndex = Math.floor(i * samplesPerPixel + startSample);
             const endIndex =
               Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
-            const monoSlice = summary.mono.slice(startIndex, endIndex);
+            const monoSlice = summary['L+R'].slice(startIndex, endIndex);
             const monoMin = Math.min(
               ...monoSlice.map((frame) => frame.value.min),
             );
@@ -151,12 +151,12 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
               (monoMax - monoMin) * canvas.height,
             );
           }
-        } else if (channel === "side" && summary.side) {
+        } else if (channel === "L-R" && summary["L-R"]) {
           for (let i = 0; i < canvas.width; i++) {
             const startIndex = Math.floor(i * samplesPerPixel + startSample);
             const endIndex =
               Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
-            const sideSlice = summary.side.slice(startIndex, endIndex);
+            const sideSlice = summary["L-R"].slice(startIndex, endIndex);
             const sideMin = Math.min(
               ...sideSlice.map((frame) => frame.value.min),
             );

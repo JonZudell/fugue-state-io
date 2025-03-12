@@ -109,6 +109,14 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   useEffect(() => {
     if (!playing) {
       timeRef.current = timeElapsed;
+      audioContext.resume().then(() => {
+        Object.keys(mediaFiles).forEach((id) => {
+          if (videoRefs.current.get(id).current) {
+            videoRefs.current.get(id).current.currentTime = timeElapsed - mediaFiles[id].offset;
+            videoRefs.current.get(id).current.playbackRate = speed;
+          }
+        });
+      });
     }
   }, [timeElapsed, playing])
 
@@ -125,7 +133,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       audioContext.resume().then(() => {
         Object.keys(mediaFiles).forEach((id) => {
           if (videoRefs.current.get(id).current) {
-            videoRefs.current.get(id).current.currentTime = mediaFiles[id].offset + timeElapsed;
+            videoRefs.current.get(id).current.currentTime = timeElapsed - mediaFiles[id].offset;
             videoRefs.current.get(id).current.playbackRate = speed;
             videoRefs.current.get(id).current.play();
           }
@@ -163,6 +171,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       //const source = audioContext.createBufferSource() as AudioBufferSourceNode & { offset: number };
       const videoElement = videoRefs.current.get(mediaFile.id)?.current;
       console.log(videoElement);
+      videoElement.currentTime = timeElapsed - mediaFile.offset;
+      videoElement.playbackRate = speed;
       if (videoElement) {
         const source = audioContext.createMediaElementSource(videoElement);
         sources.current.set(mediaFile.id, source);
@@ -258,31 +268,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           </button>
         </div>
       </div>
-      {/* <video
-        ref={videoRefs.current.get(primarySourceId)}
-        style={{ display: "none" }}
-        onTimeUpdate={(e) => {
-          if (playing) {
-            if (looping && e.currentTarget.currentTime >= loopEnd * timelineDuration) {
-              dispatch(setTimeElapsed(loopStart * timelineDuration));
-              dispatch(setPlaying(false));
-              videoRefs.current.get(primarySourceId).current.currentTime = loopStart * timelineDuration;
-              restartTrigger.current = audioContext.currentTime;
-            } else if (looping && e.currentTarget.currentTime < loopStart * timelineDuration) {
-              dispatch(setTimeElapsed(loopStart * timelineDuration));
-              dispatch(setPlaying(false));
-              videoRefs.current.get(primarySourceId).current.currentTime = loopStart * timelineDuration;
-              restartTrigger.current = audioContext.currentTime;
-            } else if (!looping && e.currentTarget.currentTime >= timelineDuration) {
-              dispatch(setTimeElapsed(0));
-              dispatch(setPlaying(false));
-            }
-          }
-        }}
-        controls={false}
-      >
-        <source src={mediaFiles[primarySourceId].url} type={mediaFiles[primarySourceId].fileType}/>
-      </video> */}
       {Object.values(mediaFiles).map((mediaFile) => 
         <video
           key={mediaFile.id}

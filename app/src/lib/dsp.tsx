@@ -19,10 +19,10 @@ export type SummarizedFrame = {
 };
 
 export type Channels = {
-  mono?: SummarizedFrame[] | null;
-  left?: SummarizedFrame[] | null;
-  right?: SummarizedFrame[] | null;
-  side?: SummarizedFrame[] | null;
+  "L+R"?: SummarizedFrame[] | null;
+  "L"?: SummarizedFrame[] | null;
+  "R"?: SummarizedFrame[] | null;
+  "L-R"?: SummarizedFrame[] | null;
 };
 function applyWindowFunction(data: number[], windowType: string): number[] {
   const N = data.length;

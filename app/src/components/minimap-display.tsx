@@ -16,7 +16,6 @@ interface MinimapProps {
 }
 
 const Minimap: React.FC<MinimapProps> = ({
-  channel = "mono",
   startPercentage = 0,
   endPercentage = 100,
   width,
@@ -27,9 +26,12 @@ const Minimap: React.FC<MinimapProps> = ({
   const { timeElapsed, loopStart, loopEnd, looping } =
     useSelector(selectPlayback);
   const { mediaFiles } = useSelector(selectProject);
-  const { minimapSource } = useSelector(selectDisplay);
-  const media = mediaFiles[minimapSource];
+  const { primarySourceId } = useSelector(selectPlayback);
+  const [media, setMedia] = useState(mediaFiles[primarySourceId]);
 
+  useEffect(() => {
+    setMedia(mediaFiles[primarySourceId]);
+  }, [mediaFiles, primarySourceId]);
   useEffect(() => {
     console.log("Minimap useEffect");
     const canvas = canvasRef.current;
@@ -58,7 +60,9 @@ const Minimap: React.FC<MinimapProps> = ({
       samplesPerPixel: number,
       startSample: number,
       channelHeight: number,
+      offset: number = 0,
     ) => {
+
       for (let i = 0; i < canvas.width; i++) {
         const startIndex = Math.floor(i * samplesPerPixel + startSample);
         const endIndex =
@@ -69,7 +73,7 @@ const Minimap: React.FC<MinimapProps> = ({
         ctx.fillStyle = "rgba(255, 255, 255, 1)";
         ctx.fillRect(
           i,
-          channelHeight - max * channelHeight,
+          channelHeight - max * channelHeight + offset,
           1,
           (max - min) * channelHeight,
         );
@@ -78,21 +82,22 @@ const Minimap: React.FC<MinimapProps> = ({
 
     const drawWaveform = () => {
       console.log("drawWaveform for minimap");
+      console.log("media", media);
       if (media && media.summary && canvas) {
         if (!ctx) {
           return;
         }
 
         const { summary } = media;
-        const summaryLength = summary.mono ? summary.mono.length : 0;
+        const summaryLength = summary["L+R"] ? summary["L+R"].length : 0;
         const startSample = 0;
         const endSample = summaryLength;
         const samplesPerPixel = (endSample - startSample) / canvas.width;
-        if (channel === "left + right" && summary.left && summary.right) {
+        if (media.mode === "L/R" && summary["L"] && summary["R"]) {
           drawChannel(
             ctx,
             canvas,
-            summary.left,
+            summary["L"],
             samplesPerPixel,
             startSample,
             canvas.height / 4,
@@ -100,43 +105,44 @@ const Minimap: React.FC<MinimapProps> = ({
           drawChannel(
             ctx,
             canvas,
-            summary.right,
+            summary["R"],
             samplesPerPixel,
             startSample,
             canvas.height / 4,
+            canvas.height / 2,
           );
-        } else if (channel === "mono" && summary.mono) {
+        } else if (media.mode === "L+R" && summary["L+R"]) {
           drawChannel(
             ctx,
             canvas,
-            summary.mono,
+            summary["L+R"],
             samplesPerPixel,
             startSample,
             canvas.height / 2,
           );
-        } else if (channel === "side" && summary.side) {
+        } else if (media.mode === "L-R" && summary["L-R"]) {
           drawChannel(
             ctx,
             canvas,
-            summary.side,
+            summary["L-R"],
             samplesPerPixel,
             startSample,
             canvas.height / 2,
           );
-        } else if (channel === "left" && summary.left) {
+        } else if (media.mode === "L" && summary["L"]) {
           drawChannel(
             ctx,
             canvas,
-            summary.left,
+            summary["L"],
             samplesPerPixel,
             startSample,
             canvas.height / 2,
           );
-        } else if (channel === "right" && summary.right) {
+        } else if (media.mode === "R" && summary["R"]) {
           drawChannel(
             ctx,
             canvas,
-            summary.right,
+            summary["R"],
             samplesPerPixel,
             startSample,
             canvas.height / 2,
@@ -148,7 +154,6 @@ const Minimap: React.FC<MinimapProps> = ({
     drawWaveform();
   }, [
     timeElapsed,
-    channel,
     startPercentage,
     endPercentage,
     media,
