@@ -30,7 +30,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
     console.log("VideoDisplay useEffect");
     const video = videoRef.current;
     if (video) {
-      video.currentTime = timeElapsed;
+      video.currentTime = timeElapsed -  media.offset;
       if (playing) {
         video.play();
       } else {
@@ -43,7 +43,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
     if (!playing) {
       const video = videoRef.current;
       if (video) {
-        video.currentTime = timeElapsed;
+        video.currentTime = timeElapsed - media.offset;
       }
 
     }

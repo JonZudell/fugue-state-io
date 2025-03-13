@@ -44,7 +44,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const destination = useRef(audioContext.destination);
   const playingRef = useRef(playing);
   const timeRef = useRef(0);
-  const speedRef = useRef(1);
+  const speedRef = useRef(speed);
   const restartTrigger = useRef<number | null>(null);
   const pitchFactor = useRef(0);
   const timeouts = useRef<number[]>([]);
@@ -64,8 +64,18 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     const interval = setInterval(() => {
       if (initialized.current) {
         if (playingRef.current) {
-          timeRef.current = timeRef.current + 0.05;
+          timeRef.current = timeRef.current + (0.05 * speedRef.current);
+          if (looping && timeRef.current >= loopEnd) {
+            stopAllVideos();
+            timeRef.current = loopStart * timelineDuration;
+            startAllVideos();
+          } else if (timeRef.current >= timelineDuration) {
+            dispatch(setPlaying(false));
+            stopAllVideos();
+            timeRef.current = loopStart * timelineDuration;
+          }
           dispatch(setTimeElapsed(timeRef.current));
+
         }
       } else {
         if (workletNode.current) {
@@ -81,6 +91,12 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   }, []);
 
   useEffect(() => {
+    gainNode.current.gain.value = volume;
+  }, [volume]);
+  useEffect(() => {
+    speedRef.current = speed;
+  }, [speed]);
+  useEffect(() => {
     if (!playing) {
       timeRef.current = timeElapsed;
     } 
@@ -89,6 +105,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     playingRef.current = playing;
   }, [playing]);
   useEffect(() => {
+    console.log("setting time elapsed", timeRef.current);
     dispatch(setTimeElapsed(timeRef.current));
   }, [timeRef]);
 
@@ -108,7 +125,12 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   useEffect(() => {
     setUpMedia();
   }, [mediaFiles, workletNode.current]);
-
+  useEffect(() => {
+    console.log("media files changed", mediaFiles);
+    for (const mediaFile of Object.values(mediaFiles)) {
+      mediaGainRefs.current.get(mediaFile.id).gain.value = mediaFile.volume;
+    }
+  }, [mediaFiles]);
   const setUpMedia = () => {
     console.log("setting up media");
     if (!workletNode.current || videoRefs.current.size === 0) {
@@ -124,15 +146,17 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     sources.current.clear();
     for (const mediaFile of Object.values(mediaFiles)) {
       const videoElement = videoRefs.current.get(mediaFile.id)?.current;
-      videoElement.currentTime = timeElapsed - mediaFile.offset;
+      console.log("setting up media", mediaFile, videoElement);
+      videoElement.currentTime = timeRef.current - mediaFile.offset;
       videoElement.playbackRate = speed;
       if (videoElement) {
         const source = audioContext.createMediaElementSource(videoElement);
         sources.current.set(mediaFile.id, source);
-        source.connect(workletNode.current);
-        if (source) {
-          source.connect(workletNode.current);
-        }
+        const mediaGain = mediaGainRefs.current.get(mediaFile.id)
+        mediaGain.gain.value = mediaFile.volume;
+        mediaGain.disconnect();
+        source.connect(mediaGain);
+        mediaGain.connect(workletNode.current);
         sources.current.set(mediaFile.id, source);
       }
     }
@@ -242,10 +266,10 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <SpeedSelector className="mx-1" enabled={enabled} />
             <div className="flex items-center">
               <span style={{ userSelect: "none" }} className="my-2 mx-4">
-                {new Date(timeElapsed * 1000).toISOString().substr(12, 7)} / -
-                {new Date((timelineDuration - timeElapsed) * 1000)
+                {timeElapsed >= 0 ? new Date(timeElapsed * 1000).toISOString().substr(12, 7) : "invalid"} / -
+                {timelineDuration - timeElapsed >= 0 ? new Date((timelineDuration - timeElapsed) * 1000)
                   .toISOString()
-                  .substr(12, 7)}
+                  .substr(12, 7) : "invalid"}
               </span>
             </div>
           </div>
