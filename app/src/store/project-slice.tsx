@@ -57,6 +57,7 @@ interface PlaybackState {
   loopStart: number;
   loopEnd: number;
   timelineDuration: number;
+  gainTrigger: number;
 }
 
 const initialId = uuidv4();
@@ -72,6 +73,7 @@ const initialPlaybackState: PlaybackState = {
   loopStart: 0,
   loopEnd: 1,
   timelineDuration: 0,
+  gainTrigger: 0,
 };
 
 const initialState: ProjectsStateInterface = {
@@ -191,6 +193,15 @@ export const selectProject = (state: { project: ProjectsStateInterface }) => {
 };
 export const selectPlayback = (state: { project: ProjectsStateInterface }) => {
   return state.project.playback;
+}
+export const selectMediaGainMap = (state: { map: { [key: string]: number } }) => {
+  const mediaFiles = state.project.projects[state.project.activeProject].mediaFiles;
+  const result: { [key: string]: number } = {};
+  Object.keys(mediaFiles).forEach((key) => {
+    console.log("media file", key, mediaFiles[key]);
+    result[key] = mediaFiles[key].volume;
+  });
+  return result
 }
 export const selectAnyProcessing = (state: {
   project: ProjectsStateInterface;
@@ -432,7 +443,9 @@ const projectSlice = createSlice({
       action: PayloadAction<{ id: string; volume: number }>,
     ) => {
       const media = state.projects[state.activeProject].mediaFiles[action.payload.id];
+      console.log("Setting media volume", action.payload);
       if (media) {
+        console.log("Setting volume", action.payload.volume);
         media.volume = action.payload.volume;
       }
     },

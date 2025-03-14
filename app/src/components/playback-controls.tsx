@@ -9,6 +9,7 @@ import {
   setLoopEnd,
   setTimeElapsed,
   setVolume,
+  selectMediaGainMap,
 } from "@/store/project-slice";
 import SpanSlider from "@/components/span-slider";
 import VolumeSelector from "@/components/volume-selector";
@@ -33,11 +34,12 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const dispatch = useDispatch();
   const { editor } = useSelector(selectDisplay);
   const { mediaFiles } = useSelector(selectProject);
-  const { playing, looping, timeElapsed, timelineDuration, volume, loopStart, loopEnd, speed, audioContext  } =
+  const { playing, looping, timeElapsed, timelineDuration, volume, loopStart, loopEnd, speed, audioContext, gainTrigger  } =
     useSelector(selectPlayback);
+  const gains = useSelector(selectMediaGainMap)
+  console.log("gains", gains);
   const sources = useRef(new Map<string, AudioBufferSourceNode & { offset: number }>());
   const videoRefs = useRef(new Map<string, React.RefObject<HTMLVideoElement>>());
-  const mediaGainRefs = useRef(new Map<string, GainNode>());
   const {primarySourceId} = useSelector(selectPlayback);
   const gainNode = useRef(audioContext.createGain());
   const workletNode = useRef<AudioWorkletNode | null>(null);
@@ -50,6 +52,15 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const timeouts = useRef<number[]>([]);
   const initialized = useRef(false);
   useEffect(() => {
+    console.log("setting gains", gains);
+    for (const [id, gain] of Object.entries(gains)) {
+      const video = videoRefs.current.get(id)?.current;
+      if (video) {
+        video.volume = gain;
+      }
+    }
+  }, [gains]);
+  useEffect(() => {
     const setUpAudioWorklet = async () => {
       await audioContext.audioWorklet.addModule('phase-vocoder.js');
       workletNode.current = new AudioWorkletNode(audioContext, 'phase-vocoder');
@@ -58,10 +69,10 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
     for (const mediaFile of Object.values(mediaFiles)) {
       videoRefs.current.set(mediaFile.id, createRef<HTMLVideoElement>());
-      mediaGainRefs.current.set(mediaFile.id, audioContext.createGain());
     }
 
     const interval = setInterval(() => {
+
       if (initialized.current) {
         if (playingRef.current) {
           timeRef.current = timeRef.current + (0.05 * speedRef.current);
@@ -125,12 +136,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   useEffect(() => {
     setUpMedia();
   }, [mediaFiles, workletNode.current]);
-  useEffect(() => {
-    console.log("media files changed", mediaFiles);
-    for (const mediaFile of Object.values(mediaFiles)) {
-      mediaGainRefs.current.get(mediaFile.id).gain.value = mediaFile.volume;
-    }
-  }, [mediaFiles]);
   const setUpMedia = () => {
     console.log("setting up media");
     if (!workletNode.current || videoRefs.current.size === 0) {
@@ -152,11 +157,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       if (videoElement) {
         const source = audioContext.createMediaElementSource(videoElement);
         sources.current.set(mediaFile.id, source);
-        const mediaGain = mediaGainRefs.current.get(mediaFile.id)
-        mediaGain.gain.value = mediaFile.volume;
-        mediaGain.disconnect();
-        source.connect(mediaGain);
-        mediaGain.connect(workletNode.current);
+        source.connect(workletNode.current);
         sources.current.set(mediaFile.id, source);
       }
     }

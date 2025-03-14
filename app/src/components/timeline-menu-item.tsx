@@ -24,14 +24,17 @@ export function TimelineMenuItem({ className, mediaFile }: TimelineMenuItemProps
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(setMediaVolume({ id: mediaFile.id, volume }));
+    dispatch(setMediaVolume({ id: mediaFile.id, volume: volume }));
   }, [volume]);
+
   useEffect(() => {
     setIsPrimary(primarySourceId === mediaFile.id);
   }, [primarySourceId]);
+
   useEffect(() => {
     dispatch(setMediaMode({ id: mediaFile.id, mode }));
   }, [mode]);
+
   const updatePrimary = (value: boolean) => {
     console.log("updatePrimary", value);
     if (primarySourceId !== mediaFile.id) {
@@ -77,7 +80,7 @@ export function TimelineMenuItem({ className, mediaFile }: TimelineMenuItemProps
       <Label className="py-2">Offset</Label>
       <Input step="0.1" className={`py-2 ${offsetError ? "border-red-500" : "border-white"}`} type="number" defaultValue={mediaFile.offset} onChange={(event: any) => { updateOffset(event.target.value)}} />
       <Label className="py-2">Volume</Label>
-      <Slider style={{overflow: "visible"}} className="" defaultValue={[mediaFile.volume]} max={1} min={0} step={0.01} onValueChange={(volume: any) => {console.log(volume); setMediaVolume({id: mediaFile.id, volume: volume[0]})}} />
+      <Slider style={{overflow: "visible"}} className="" defaultValue={[mediaFile.volume]} max={1} min={0} step={0.01} onValueChange={(volume: any) => {setVolume(volume[0])}} />
     </Card>
   );
 }

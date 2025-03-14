@@ -213,7 +213,6 @@ class PhaseVocoderProcessor extends OverlapAddProcessor {
   processOLA(inputs, outputs, parameters) {
     // no automation, take last value
     const pitchFactor = parameters.pitchFactor[parameters.pitchFactor.length - 1];
-    console.log(pitchFactor);
     for (var i = 0; i < this.nbInputs; i++) {
       for (var j = 0; j < inputs[i].length; j++) {
         // big assumption here: output is symetric to input
