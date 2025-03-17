@@ -37,7 +37,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const { playing, looping, timeElapsed, timelineDuration, volume, loopStart, loopEnd, speed, audioContext, gainTrigger  } =
     useSelector(selectPlayback);
   const gains = useSelector(selectMediaGainMap)
-  console.log("gains", gains);
   const sources = useRef(new Map<string, AudioBufferSourceNode & { offset: number }>());
   const videoRefs = useRef(new Map<string, React.RefObject<HTMLVideoElement>>());
   const {primarySourceId} = useSelector(selectPlayback);

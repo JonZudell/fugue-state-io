@@ -23,6 +23,7 @@ export interface ABCAsset {
   id: string;
   name: string;
   abc: string;
+  offset: number;
   timingCallback: any;
   characterSelection: any;
 }
@@ -32,7 +33,7 @@ export interface Project {
   name: string;
   mediaFiles: { [key: string]: MediaFile };
   abcs: { [key: string]: ABCAsset };
-  referenceFile?: string | null;
+  referenceFile: string | null;
 }
 
 export interface ProjectsStateInterface {
@@ -203,6 +204,15 @@ export const selectMediaGainMap = (state: { map: { [key: string]: number } }) =>
   });
   return result
 }
+export const selectMediaOffsetMap = (state: { map: { [key: string]: number } }) => {
+  const mediaFiles = state.project.projects[state.project.activeProject].mediaFiles;
+  const result: { [key: string]: number } = {};
+  Object.keys(mediaFiles).forEach((key) => {
+    console.log("media file", key, mediaFiles[key]);
+    result[key] = mediaFiles[key].offset;
+  });
+  return result
+}
 export const selectAnyProcessing = (state: {
   project: ProjectsStateInterface;
 }) => {
@@ -328,12 +338,12 @@ const projectSlice = createSlice({
     },
     setReferenceFile: (
       state,
-      action: PayloadAction<{ id: string; reference: string | null }>,
+      action: PayloadAction<{ id: string;}>,
     ) => {
       if (state.activeProject === null) {
         console.error("No active project");
       } else {
-        state.projects[state.activeProject].referenceFile = action.payload.reference;
+        state.projects[state.activeProject].referenceFile = action.payload.id;
       }
     },
     setFileChannelProgress: (
@@ -471,6 +481,15 @@ const projectSlice = createSlice({
           (media) => media.duration + media.offset,
         ),
       );
+    },
+    setNotationOffset: (
+      state,
+      action: PayloadAction<{ id: string; offset: number }>,
+    ) => {
+      const abc = state.projects[state.activeProject].abcs[action.payload.id];
+      if (abc) {
+        abc.offset = action.payload.offset;
+      }
     }
   },
 });
@@ -501,5 +520,6 @@ export const {
   setMediaVolume,
   setMediaMode,
   setMediaOffset,
+  setNotationOffset,
 } = projectSlice.actions;
 export default projectSlice.reducer;

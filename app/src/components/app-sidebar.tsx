@@ -26,7 +26,7 @@ import {
 import { DisplayMenu } from "@/components/ui/display-menu";
 import { selectDisplay } from "@/store/display-slice";
 import { useSelector } from "react-redux";
-import { TimelineMenu } from "./timeline-menu";
+import { SidebarMenu } from "./sidebar-menu";
 
 // This is sample data.
 const data = {
@@ -153,7 +153,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <MenuSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        {state === "expanded" && <TimelineMenu />}
+        {state === "expanded" && <SidebarMenu />}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

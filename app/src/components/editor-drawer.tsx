@@ -22,6 +22,7 @@ const EditorDrawer: React.FC<EditorDrawerProps> = ({ width, height }) => {
     const abc: ABCAsset = {
       name: name || "untitled.abc",
       abc: "",
+      offset: 0,
       id: uuidv4(),
       timingCallback: null,
       characterSelection: null,

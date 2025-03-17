@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import { useEffect, useRef } from "react";
 import { ABCAsset, setAbc } from "@/store/project-slice";
 import { Editor } from "@monaco-editor/react";
-import * as monaco from "monaco-editor";
 interface NotationEditorProps {
   className?: string;
   width: number;
@@ -16,8 +15,8 @@ const NotationEditor: React.FC<NotationEditorProps> = ({
   height,
   abc,
 }) => {
-  const monacoRef = useRef<typeof monaco | null>(null);
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const monacoRef = useRef<any | null>(null);
+  const editorRef = useRef<any | null>(null);
   const dispatch = useDispatch();
   useEffect(() => {
     if (editorRef.current) {

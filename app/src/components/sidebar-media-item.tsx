@@ -10,12 +10,12 @@ import { Label } from "./ui/label";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Switch } from "./ui/switch";
-interface TimelineMenuItemProps {
+interface SidebarMediaItemProps {
   className?: string;
   mediaFile: MediaFile;
 }
 
-export function TimelineMenuItem({ className, mediaFile }: TimelineMenuItemProps) {
+export function SidebarMediaItem({ className, mediaFile }: SidebarMediaItemProps) {
   const [volume, setVolume] = useState(mediaFile.volume);
   const [mode, setMode] = useState(mediaFile.stereo ? 'L/R' : 'L+R');
   const { primarySourceId } = useSelector(selectPlayback);
@@ -84,4 +84,4 @@ export function TimelineMenuItem({ className, mediaFile }: TimelineMenuItemProps
     </Card>
   );
 }
-export default TimelineMenuItem;
+export default SidebarMediaItem;
