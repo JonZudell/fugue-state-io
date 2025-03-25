@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import abcjs, { TuneObjectArray } from "abcjs";
-import { selectPlayback } from "@/store/project-slice";
-import { useSelector } from "react-redux";
+import { selectPlayback, setChangedSelection } from "@/store/project-slice";
+import { useDispatch, useSelector } from "react-redux";
 import { selectProject } from "@/store/project-slice";
 import ContextMenuDialog from "./context-menu-dialog";
 interface NotationDisplayProps {
@@ -14,7 +14,7 @@ interface NotationDisplayProps {
   sourceId: string;
   parentNodeId: string;
   parentDirection: string;
-
+  
 }
 
 const NotationDisplay: React.FC<NotationDisplayProps> = ({
@@ -26,6 +26,7 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
   parentNodeId,
   parentDirection,
 }) => {
+  const dispatch = useDispatch();
   const notationRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const divRef = useRef<HTMLDivElement | null>(null);
@@ -46,7 +47,6 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
     const ctx = canvas.getContext("2d");
     const img = new Image();
     img.onload = () => {
-      console.log("drawing image");
       if (ctx) {
         ctx.clearRect(0, 0, img.width, canvas.height);
         const centerX = canvas.width / 2;
@@ -80,13 +80,12 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
             },
             staffwidth: 40000,
             clickListener: (abcElem: any) => {
-              console.log(abcElem);
-              if (abcElem.startChar && abcElem.endChar) {
-                // props.setChangedSelection({
-                //   start: abcElem.startChar,
-                //   end: abcElem.endChar,
-                // });
-              }
+              // if (abcElem.startChar && abcElem.endChar) {
+              //   dispatch(setChangedSelection({
+              //     start: abcElem.startChar,
+              //     end: abcElem.endChar,
+              //   }));
+              // }
               // if (abcElem.midiPitches) {
               //   console.log(abcElem.midiPitches);
               //   dispatch(setNoteTimings(abcElem.midiPitches));
@@ -96,7 +95,6 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
         );
         svgRef.current = divRef.current.querySelector("svg");
         if (svgRef.current && canvasRef.current) {
-          console.log("rendering to canvas");
           renderSvgToCanvas(svgRef.current, canvasRef.current);
         }
         if (notationRef.current) {
@@ -121,6 +119,7 @@ const NotationDisplay: React.FC<NotationDisplayProps> = ({
             const x = ev.left;
             setTranslateX(x);
           },
+          
         }),
       );
     }

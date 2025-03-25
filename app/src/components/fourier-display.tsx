@@ -88,14 +88,12 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
 
     const drawSpectrum = () => {
       if (media && media.summary && canvas) {
-        console.log(channel);
         if (!ctx) {
           return;
         }
 
         const { summary } = media;
         if (channel === "left + right" && summary.left && summary.right) {
-          console.log("draw fourier");
           drawFourier(
             ctx,
             canvas,
@@ -153,7 +151,6 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         }
       }
     };
-    console.log("draw spectrum");
     drawSpectrum();
   }, [
     timeElapsed,

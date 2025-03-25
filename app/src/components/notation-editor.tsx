@@ -25,8 +25,7 @@ const NotationEditor: React.FC<NotationEditorProps> = ({
   }, [abc]);
 
   function handleEditorChange(value: any, event: any) {
-    console.log("here is the current model value:", value);
-    dispatch(setAbc({ ...abc, abc: value }));
+    dispatch(setAbc({ id: abc.id, abc: value }));
   }
   function handleEditorDidMount(editor: any, monaco: any) {
     editorRef.current = editor;

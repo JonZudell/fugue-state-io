@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction, createSelector } from "@r
 import { Channels } from "@/lib/dsp";
 import { v4 as uuidv4 } from "uuid";
 import { setMinimapSource } from "./display-slice";
+import { renderAbc } from "abcjs";
 export interface MediaFile {
   id: string;
   name: string;
@@ -26,6 +27,8 @@ export interface ABCAsset {
   offset: number;
   timingCallback: any;
   characterSelection: any;
+  tuneObject: any;
+  duration: any;
 }
 
 export interface Project {
@@ -80,7 +83,7 @@ const initialPlaybackState: PlaybackState = {
 const initialState: ProjectsStateInterface = {
   activeProject: initialId,
   projects: {
-    [initialId]: { id: initialId, name: "Untitled", mediaFiles: {}, abcs: {} },
+    [initialId]: { id: initialId, name: "Untitled", mediaFiles: {}, abcs: {}, referenceFile: null },
   },
   playback: initialPlaybackState,
 };
@@ -199,7 +202,6 @@ export const selectMediaGainMap = (state: { map: { [key: string]: number } }) =>
   const mediaFiles = state.project.projects[state.project.activeProject].mediaFiles;
   const result: { [key: string]: number } = {};
   Object.keys(mediaFiles).forEach((key) => {
-    console.log("media file", key, mediaFiles[key]);
     result[key] = mediaFiles[key].volume;
   });
   return result
@@ -208,7 +210,6 @@ export const selectMediaOffsetMap = (state: { map: { [key: string]: number } }) 
   const mediaFiles = state.project.projects[state.project.activeProject].mediaFiles;
   const result: { [key: string]: number } = {};
   Object.keys(mediaFiles).forEach((key) => {
-    console.log("media file", key, mediaFiles[key]);
     result[key] = mediaFiles[key].offset;
   });
   return result
@@ -256,19 +257,14 @@ const projectSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; channel: string; progress: number }>,
     ) => {
-      console.log("Setting progress", action.payload);
-
       const file =
         state.projects[state.activeProject].mediaFiles[action.payload.id];
-      console.log("File", file);
       if (!file.progress) {
         console.error("No progress found for file", file);
       } else {
-        console.log("File progress", file.progress);
         const progressItem = file.progress.find(
           (p) => p.channel === action.payload.channel,
         );
-        console.log("Progress item", progressItem);
         if (progressItem) {
           progressItem.progress = action.payload.progress;
         } else {
@@ -316,12 +312,30 @@ const projectSlice = createSlice({
         delete state.projects[state.activeProject].abcs[action.payload];
       }
     },
-    setAbc: (state, action: PayloadAction<ABCAsset>) => {
+    setAbc: (state, action: PayloadAction<{id: string, abc: string}>) => {
       if (state.activeProject === null) {
         console.error("No active project");
       } else {
-        state.projects[state.activeProject].abcs[action.payload.id] =
-          action.payload;
+        const abc = state.projects[state.activeProject].abcs[action.payload.id];
+        abc.abc = action.payload.abc;
+        abc.tuneObject = renderAbc("*", abc.abc);
+        let duration = 0;
+        let tempo = abc.tuneObject[0].getBpm()
+        let meter = abc.tuneObject[0].meter
+        let staveDuration = abc.tuneObject[0].lines.map(() => 0);
+        let voices: any[][] = [];
+        for (let i = 0; i < abc.tuneObject[0].lines.length; i++) {
+          const line = abc.tuneObject[0].lines[i];
+          if (i >= voices.length) {
+            voices.push([]);
+          }
+          for(const staff in line.staff) {
+            console.log(staff)
+          }
+          console.log(line)
+        }
+        
+        console.log(voices);
       }
     },
     setFileProcessing: (
@@ -490,6 +504,15 @@ const projectSlice = createSlice({
       if (abc) {
         abc.offset = action.payload.offset;
       }
+    },
+    setChangedSelection: (
+      state,
+      action: PayloadAction<{ id: string; selection: any }>,
+    ) => {
+      const abc = state.projects[state.activeProject].abcs[action.payload.id];
+      if (abc) {
+        abc.characterSelection = action.payload.selection;
+      }
     }
   },
 });
@@ -521,5 +544,6 @@ export const {
   setMediaMode,
   setMediaOffset,
   setNotationOffset,
+  setChangedSelection
 } = projectSlice.actions;
 export default projectSlice.reducer;

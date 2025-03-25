@@ -83,16 +83,12 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
       workerRef.current.onmessage = (event) => {
         if (event.data.type === "READY") {
           setReady(true);
-        } else if (event.data.type === "MESSAGE_RECIEVED") {
-          console.log("Received message", event.data);
         } else if (event.data.type === "CHANNEL_PROGRESS") {
-          console.log("Received progress", event.data);
           if (
             event.data.id &&
             event.data.channel &&
             typeof event.data.progress === "number"
           ) {
-            console.log("Setting progress", event.data);
             dispatch(
               setProgress({
                 id: event.data.id,
@@ -104,7 +100,6 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
             console.error("Invalid data shape for setProgress", event.data);
           }
         } else if (event.data.type === "SUMMARIZED") {
-          console.log("Received summary", event.data);
           dispatch(
             setChannelSummary({
               id: event.data.id,
@@ -125,7 +120,6 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   }, [workerRef, dispatch]);
 
   const handleResize = useCallback(() => {
-    console.log("window.innerWidth", window.innerWidth);
     if (state === "collapsed") {
       const sidebarWidth = 48;
       if (isMobile) {
@@ -253,7 +247,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                         enabled={true}
                       />
                     </ResizablePanel>
-                    {editor && displayMode === 'display' && (
+                    {editor && (
                       <>
                         <ResizableHandle withHandle />
                         <ResizablePanel>

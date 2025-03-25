@@ -11,7 +11,7 @@ export function SidebarMenu() {
     <div className="flex flex-col flex-1 m-2">
       <label>Media</label>
       {Object.keys(mediaFiles).map((key) => (
-        <SidebarMediaItem key={key} className={"h-56 max-h-56 bg-black"} mediaFile={mediaFiles[key]}/>
+        <SidebarMediaItem key={key} className={"min-h-56 max-h-56 bg-black"} mediaFile={mediaFiles[key]}/>
       ))}
       <label>Notation</label>
       {Object.keys(abcs).map((key) => (

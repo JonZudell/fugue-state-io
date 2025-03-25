@@ -1,8 +1,5 @@
-timeline editor for aligning notation files and or media files.
-
-VideoDisplay
-  playback rate for videos
-  handle offset
+timeline
+  render notations
 
 SpectrogramDisplay
   handle channel switched
@@ -14,12 +11,7 @@ DisplaySettings
   reference sources
 
 Playback
-  Individual track gain
   pitch shift
-  use offsets
-  when primary is changed set new duration
-  loop
-  duration is longest of offset + file length
   global eq
 
 Sidebar

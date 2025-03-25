@@ -45,13 +45,25 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const destination = useRef(audioContext.destination);
   const playingRef = useRef(playing);
   const timeRef = useRef(0);
+  const timelineDurationRef = useRef(timelineDuration);
+  const loopEndRef = useRef(loopEnd);
+  const loopStartRef = useRef(loopStart);
   const speedRef = useRef(speed);
   const restartTrigger = useRef<number | null>(null);
   const pitchFactor = useRef(0);
   const timeouts = useRef<number[]>([]);
   const initialized = useRef(false);
+
   useEffect(() => {
-    console.log("setting gains", gains);
+    timelineDurationRef.current = timelineDuration;
+  }, [timelineDuration]);
+  useEffect(() => {
+    loopStartRef.current = loopStart;
+  }, [loopStart]);
+  useEffect(() => {
+    loopEndRef.current = loopEnd;
+  }, [loopEnd]);
+  useEffect(() => {
     for (const [id, gain] of Object.entries(gains)) {
       const video = videoRefs.current.get(id)?.current;
       if (video) {
@@ -73,16 +85,22 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     const interval = setInterval(() => {
 
       if (initialized.current) {
+        videoRefs.current.forEach((videoRef) => {
+          const video = videoRef.current;
+          if (video) {
+            video.playbackRate = speedRef.current;
+          }
+        });
         if (playingRef.current) {
           timeRef.current = timeRef.current + (0.05 * speedRef.current);
-          if (looping && timeRef.current >= loopEnd) {
+          if (looping && timeRef.current >= loopEnd * timelineDurationRef.current) {
             stopAllVideos();
-            timeRef.current = loopStart * timelineDuration;
+            timeRef.current = loopStart * timelineDurationRef.current;
             startAllVideos();
-          } else if (timeRef.current >= timelineDuration) {
+          } else if (timeRef.current >= timelineDurationRef.current) {
             dispatch(setPlaying(false));
             stopAllVideos();
-            timeRef.current = loopStart * timelineDuration;
+            timeRef.current = loopStart * timelineDurationRef.current;
           }
           dispatch(setTimeElapsed(timeRef.current));
 
@@ -100,6 +118,15 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     }
   }, []);
 
+  // useEffect(() => {
+  //   videoRefs.current.forEach((videoRef) => {
+  //     const video = videoRef.current;
+  //     if (video) {
+  //       video.playbackRate = speedRef.current;
+  //     }
+  //   });
+  // }, [speedRef.current, videoRefs.current])
+
   useEffect(() => {
     gainNode.current.gain.value = volume;
   }, [volume]);
@@ -115,13 +142,11 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     playingRef.current = playing;
   }, [playing]);
   useEffect(() => {
-    console.log("setting time elapsed", timeRef.current);
     dispatch(setTimeElapsed(timeRef.current));
   }, [timeRef]);
 
   useEffect(() => {
     if (playing) {
-      console.log("starting all videos");
       startAllVideos();
     } else {
       stopAllVideos();
@@ -136,9 +161,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     setUpMedia();
   }, [mediaFiles, workletNode.current]);
   const setUpMedia = () => {
-    console.log("setting up media");
     if (!workletNode.current || videoRefs.current.size === 0) {
-      console.log("worklet node not ready or video refs are empty");
       return;
     }
     sources.current.forEach((source) => {
@@ -150,7 +173,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     sources.current.clear();
     for (const mediaFile of Object.values(mediaFiles)) {
       const videoElement = videoRefs.current.get(mediaFile.id)?.current;
-      console.log("setting up media", mediaFile, videoElement);
       videoElement.currentTime = timeRef.current - mediaFile.offset;
       videoElement.playbackRate = speed;
       if (videoElement) {
@@ -197,7 +219,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         video.currentTime = timeRef.current - media.offset;
         video.playbackRate = speed;
         timeouts.current.push(setTimeout(() => {
-          console.log("starting video immediately", media.id);
           if (video.currentTime !== media.duration) {
             video.play();
           }
@@ -206,9 +227,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         video.currentTime = 0;
         video.playbackRate = speed;
         timeouts.current.push(setTimeout(() => {
-          console.log("starting video on delay", media.id);
           video.play();
-        }, (Date.now() - startTime) + ((media.offset - timeRef.current) * 1000)));
+        }, (Date.now() - startTime) + (((media.offset - timeRef.current) * 1000)) / speed));
       }
     }
   }

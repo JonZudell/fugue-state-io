@@ -4,8 +4,7 @@ import { selectPlayback } from "@/store/project-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { MediaFile, selectProject } from "@/store/project-slice";
 import ContextMenuDialog from "./context-menu-dialog";
-interface WaveformDisplayProps {
-  nodeId: string;
+interface TimelineWaveformDisplayProps {
   sourceId: string;
   channel?: string;
   startPercentage?: number;
@@ -13,12 +12,9 @@ interface WaveformDisplayProps {
   crosshair?: boolean;
   width: number;
   height: number;
-  parentNodeId?: string;
-  parentDirection?: string;
 }
 
-const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
-  nodeId,
+const TimelineWaveformDisplay: React.FC<TimelineWaveformDisplayProps> = ({
   sourceId,
   channel = "L+R",
   startPercentage = 0,
@@ -26,8 +22,6 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   crosshair = true,
   width,
   height,
-  parentNodeId,
-  parentDirection,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { timeElapsed, loopStart, loopEnd } = useSelector(selectPlayback);
@@ -201,53 +195,14 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   ]);
 
   return (
-    <>
-      <ContextMenuDialog
-        width={0}
-        height={0}
-        nodeId={nodeId}
-        initialValue={"waveform"}
-        parentNodeId={parentNodeId}
-        parentDirection={parentDirection}
-        mediaKey={sourceId}
-        initialChannel={channel}
-      >
-        <div style={{ position: "relative" }}>
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              pointerEvents: "none",
-              backgroundColor: "rgba(0, 0, 0, 0)",
-              overflow: "hidden",
-            }}
-          >
-            {crosshair && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: `${(((timeElapsed / media!.duration) * 100 - startPercentage) / (endPercentage - startPercentage)) * 100}%`,
-                  width: "2px",
-                  height: "100%",
-                  backgroundColor: "blue",
-                  opacity: 1,
-                }}
-              />
-            )}
-          </div>
-          <canvas
-            ref={canvasRef}
-            width={width}
-            height={height}
-            style={{ width: width + "px", height: height + "px" }}
-          />
-        </div>
-      </ContextMenuDialog>
-    </>
+    <div style={{ position: "relative" }}>
+      <canvas
+        ref={canvasRef}
+        width={width}
+        height={height}
+        style={{ width: width + "px", height: height + "px" }}
+      />
+    </div>
   );
 };
-export default WaveformDisplay;
+export default TimelineWaveformDisplay;

@@ -33,7 +33,6 @@ const Minimap: React.FC<MinimapProps> = ({
     setMedia(mediaFiles[primarySourceId]);
   }, [mediaFiles, primarySourceId]);
   useEffect(() => {
-    console.log("Minimap useEffect");
     const canvas = canvasRef.current;
     if (!canvas) {
       return;
@@ -81,8 +80,6 @@ const Minimap: React.FC<MinimapProps> = ({
     };
 
     const drawWaveform = () => {
-      console.log("drawWaveform for minimap");
-      console.log("media", media);
       if (media && media.summary && canvas) {
         if (!ctx) {
           return;

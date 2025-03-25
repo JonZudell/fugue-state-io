@@ -120,7 +120,6 @@ const ContextMenuDialog: React.FC<ContextMenuDialogProps> = ({
                       parentId: parentNodeId,
                     }),
                   );
-                  console.log("removeNode", nodeId);
                 }}
               >
                 <span>Split Display Vertical</span>
