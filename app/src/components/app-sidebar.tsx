@@ -152,9 +152,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <MenuSwitcher />
       </SidebarHeader>
-      <SidebarContent>
-        {state === "expanded" && <SidebarMenu />}
-      </SidebarContent>
+      <SidebarContent>{state === "expanded" && <SidebarMenu />}</SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>

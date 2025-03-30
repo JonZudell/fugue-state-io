@@ -1,4 +1,9 @@
-import { createAsyncThunk, createSlice, PayloadAction, createSelector } from "@reduxjs/toolkit";
+import {
+  createAsyncThunk,
+  createSlice,
+  PayloadAction,
+  createSelector,
+} from "@reduxjs/toolkit";
 import { Channels } from "@/lib/dsp";
 import { v4 as uuidv4 } from "uuid";
 import { setMinimapSource } from "./display-slice";
@@ -83,7 +88,13 @@ const initialPlaybackState: PlaybackState = {
 const initialState: ProjectsStateInterface = {
   activeProject: initialId,
   projects: {
-    [initialId]: { id: initialId, name: "Untitled", mediaFiles: {}, abcs: {}, referenceFile: null },
+    [initialId]: {
+      id: initialId,
+      name: "Untitled",
+      mediaFiles: {},
+      abcs: {},
+      referenceFile: null,
+    },
   },
   playback: initialPlaybackState,
 };
@@ -99,7 +110,6 @@ export const uploadFile = createAsyncThunk(
       } else {
         tempAudioContext = initialPlaybackState.audioContext;
       }
-
 
       const id = uuidv4();
       if (initialPlaybackState.primarySourceId === null) {
@@ -130,7 +140,7 @@ export const uploadFile = createAsyncThunk(
         sampleRate: audioBuffer.sampleRate,
         summary: isStereo
           ? { "L+R": null }
-          : { "L": null, "R": null, "L+R": null, "L-R": null },
+          : { L: null, R: null, "L+R": null, "L-R": null },
         processing: true,
         progress: !isStereo
           ? [{ channel: "L+R", progress: 0 }]
@@ -197,23 +207,29 @@ export const selectProject = (state: { project: ProjectsStateInterface }) => {
 };
 export const selectPlayback = (state: { project: ProjectsStateInterface }) => {
   return state.project.playback;
-}
-export const selectMediaGainMap = (state: { map: { [key: string]: number } }) => {
-  const mediaFiles = state.project.projects[state.project.activeProject].mediaFiles;
+};
+export const selectMediaGainMap = (state: {
+  map: { [key: string]: number };
+}) => {
+  const mediaFiles =
+    state.project.projects[state.project.activeProject].mediaFiles;
   const result: { [key: string]: number } = {};
   Object.keys(mediaFiles).forEach((key) => {
     result[key] = mediaFiles[key].volume;
   });
-  return result
-}
-export const selectMediaOffsetMap = (state: { map: { [key: string]: number } }) => {
-  const mediaFiles = state.project.projects[state.project.activeProject].mediaFiles;
+  return result;
+};
+export const selectMediaOffsetMap = (state: {
+  map: { [key: string]: number };
+}) => {
+  const mediaFiles =
+    state.project.projects[state.project.activeProject].mediaFiles;
   const result: { [key: string]: number } = {};
   Object.keys(mediaFiles).forEach((key) => {
     result[key] = mediaFiles[key].offset;
   });
-  return result
-}
+  return result;
+};
 export const selectAnyProcessing = (state: {
   project: ProjectsStateInterface;
 }) => {
@@ -236,7 +252,7 @@ export const selectProgressState = createSelector(
         })),
       ),
     );
-  }
+  },
 );
 
 const projectSlice = createSlice({
@@ -285,7 +301,10 @@ const projectSlice = createSlice({
         console.log("Adding file", action.payload);
         state.projects[state.activeProject].mediaFiles[action.payload.id] =
           action.payload;
-        if (Object.keys(state.projects[state.activeProject].mediaFiles).length === 1) {
+        if (
+          Object.keys(state.projects[state.activeProject].mediaFiles).length ===
+          1
+        ) {
           state.projects[state.activeProject].referenceFile = action.payload.id;
         }
       }
@@ -312,7 +331,7 @@ const projectSlice = createSlice({
         delete state.projects[state.activeProject].abcs[action.payload];
       }
     },
-    setAbc: (state, action: PayloadAction<{id: string, abc: string}>) => {
+    setAbc: (state, action: PayloadAction<{ id: string; abc: string }>) => {
       if (state.activeProject === null) {
         console.error("No active project");
       } else {
@@ -320,21 +339,29 @@ const projectSlice = createSlice({
         abc.abc = action.payload.abc;
         abc.tuneObject = renderAbc("*", abc.abc);
         let duration = 0;
-        let tempo = abc.tuneObject[0].getBpm()
-        let meter = abc.tuneObject[0].meter
+        let tempo = abc.tuneObject[0].getBpm();
+        let meter = abc.tuneObject[0].meter;
         let staveDuration = abc.tuneObject[0].lines.map(() => 0);
         let voices: any[][] = [];
         for (let i = 0; i < abc.tuneObject[0].lines.length; i++) {
           const line = abc.tuneObject[0].lines[i];
-          if (i >= voices.length) {
-            voices.push([]);
+          console.log("Line", line);
+          for (let j = 0; j < line.staff.length; j++) {
+            if (j >= voices.length) {
+              voices.push([]);
+            }
+            const staff = line.staff[j];
+            console.log("Staff", staff);
+            for (const voice of staff.voices) {
+              console.log("Voice", voice);
+              for (const event of voice) {
+                console.log(event);
+                voices[j].push(event);
+              }
+            }
           }
-          for(const staff in line.staff) {
-            console.log(staff)
-          }
-          console.log(line)
         }
-        
+
         console.log(voices);
       }
     },
@@ -350,10 +377,7 @@ const projectSlice = createSlice({
         ].processing = action.payload.processing;
       }
     },
-    setReferenceFile: (
-      state,
-      action: PayloadAction<{ id: string;}>,
-    ) => {
+    setReferenceFile: (state, action: PayloadAction<{ id: string }>) => {
       if (state.activeProject === null) {
         console.error("No active project");
       } else {
@@ -405,10 +429,7 @@ const projectSlice = createSlice({
         ).map((value) => ({ value }));
       }
     },
-    setAudioContext: (
-      state,
-      action: PayloadAction<AudioContext>,
-    ) => {
+    setAudioContext: (state, action: PayloadAction<AudioContext>) => {
       state.playback.audioContext = action.payload;
     },
     setVolume: (state, action: PayloadAction<number>) => {
@@ -425,17 +446,23 @@ const projectSlice = createSlice({
     },
     setLoopStart: (state, action: PayloadAction<number>) => {
       state.playback.loopStart = action.payload;
-      if (state.playback.timeElapsed < state.playback.loopStart * state.playback.timelineDuration) {
-        state.playback.timeElapsed = state.playback.loopStart * state.playback.timelineDuration;
+      if (
+        state.playback.timeElapsed <
+        state.playback.loopStart * state.playback.timelineDuration
+      ) {
+        state.playback.timeElapsed =
+          state.playback.loopStart * state.playback.timelineDuration;
       }
     },
     setLoopEnd: (state, action: PayloadAction<number>) => {
       state.playback.loopEnd = action.payload;
       if (
         state.playback.looping &&
-        state.playback.timeElapsed > state.playback.loopEnd * state.playback.timelineDuration
+        state.playback.timeElapsed >
+          state.playback.loopEnd * state.playback.timelineDuration
       ) {
-        state.playback.timeElapsed = state.playback.loopEnd * state.playback.timelineDuration;
+        state.playback.timeElapsed =
+          state.playback.loopEnd * state.playback.timelineDuration;
       }
     },
     setLooping: (state, action: PayloadAction<boolean>) => {
@@ -446,18 +473,22 @@ const projectSlice = createSlice({
       }
     },
     restartPlayback: (state) => {
-      state.playback.timeElapsed = state.playback.loopStart * state.playback.timelineDuration;
+      state.playback.timeElapsed =
+        state.playback.loopStart * state.playback.timelineDuration;
       state.playback.playing = true;
     },
     registerMedia: (state, action: PayloadAction<MediaFile>) => {
       if (
-        !state.playback.mediaSources.find((source) => source.id === action.payload.id)
+        !state.playback.mediaSources.find(
+          (source) => source.id === action.payload.id,
+        )
       ) {
         state.playback.mediaSources.push({
           id: action.payload.id,
         });
       }
-      state.playback.timelineDuration = action.payload.duration + action.payload.offset;
+      state.playback.timelineDuration =
+        action.payload.duration + action.payload.offset;
     },
     setPrimarySourceId: (state, action: PayloadAction<string>) => {
       state.playback.primarySourceId = action.payload;
@@ -466,7 +497,8 @@ const projectSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; volume: number }>,
     ) => {
-      const media = state.projects[state.activeProject].mediaFiles[action.payload.id];
+      const media =
+        state.projects[state.activeProject].mediaFiles[action.payload.id];
       console.log("Setting media volume", action.payload);
       if (media) {
         console.log("Setting volume", action.payload.volume);
@@ -477,7 +509,8 @@ const projectSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; mode: string }>,
     ) => {
-      const media = state.projects[state.activeProject].mediaFiles[action.payload.id];
+      const media =
+        state.projects[state.activeProject].mediaFiles[action.payload.id];
       if (media) {
         media.mode = action.payload.mode;
       }
@@ -486,9 +519,10 @@ const projectSlice = createSlice({
       state,
       action: PayloadAction<{ id: string; offset: number }>,
     ) => {
-      const media = state.projects[state.activeProject].mediaFiles[action.payload.id];
+      const media =
+        state.projects[state.activeProject].mediaFiles[action.payload.id];
       if (media) {
-        media.offset = action.payload.offset
+        media.offset = action.payload.offset;
       }
       state.playback.timelineDuration = Math.max(
         ...Object.values(state.projects[state.activeProject].mediaFiles).map(
@@ -513,7 +547,7 @@ const projectSlice = createSlice({
       if (abc) {
         abc.characterSelection = action.payload.selection;
       }
-    }
+    },
   },
 });
 
@@ -544,6 +578,6 @@ export const {
   setMediaMode,
   setMediaOffset,
   setNotationOffset,
-  setChangedSelection
+  setChangedSelection,
 } = projectSlice.actions;
 export default projectSlice.reducer;

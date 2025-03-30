@@ -12,7 +12,10 @@ interface SpeedSelectorProps {
   enabled?: boolean;
 }
 
-const SpeedSelector: React.FC<SpeedSelectorProps> = ({ className, enabled }) => {
+const SpeedSelector: React.FC<SpeedSelectorProps> = ({
+  className,
+  enabled,
+}) => {
   const dispatch = useDispatch();
   const { speed } = useSelector(selectPlayback);
   const [thumbValue, setThumbValue] = useState(speed);

@@ -1,6 +1,14 @@
 "use client";
 
-import { MediaFile, selectPlayback, selectProject, setMediaMode, setMediaOffset, setMediaVolume, setPrimarySourceId } from "@/store/project-slice";
+import {
+  MediaFile,
+  selectPlayback,
+  selectProject,
+  setMediaMode,
+  setMediaOffset,
+  setMediaVolume,
+  setPrimarySourceId,
+} from "@/store/project-slice";
 import * as React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Card } from "./ui/card";
@@ -15,9 +23,12 @@ interface SidebarMediaItemProps {
   mediaFile: MediaFile;
 }
 
-export function SidebarMediaItem({ className, mediaFile }: SidebarMediaItemProps) {
+export function SidebarMediaItem({
+  className,
+  mediaFile,
+}: SidebarMediaItemProps) {
   const [volume, setVolume] = useState(mediaFile.volume);
-  const [mode, setMode] = useState(mediaFile.stereo ? 'L/R' : 'L+R');
+  const [mode, setMode] = useState(mediaFile.stereo ? "L/R" : "L+R");
   const { primarySourceId } = useSelector(selectPlayback);
   const [isPrimary, setIsPrimary] = useState(primarySourceId === mediaFile.id);
   const [offsetError, setOffsetError] = useState(false);
@@ -50,10 +61,19 @@ export function SidebarMediaItem({ className, mediaFile }: SidebarMediaItemProps
     }
   };
   return (
-    <Card className={`flex flex-col flex-1 mx-auto text-white p-2 text-sm ${className}`} style={{ overflow: "hidden" }}>
+    <Card
+      className={`flex flex-col flex-1 mx-auto text-white p-2 text-sm ${className}`}
+      style={{ overflow: "hidden" }}
+    >
       {mediaFile.name}
       {mediaFile.stereo ? (
-        <Tabs className="text-xs py-2" defaultValue="L/R" onValueChange={(value) => { setMode(value) }}>
+        <Tabs
+          className="text-xs py-2"
+          defaultValue="L/R"
+          onValueChange={(value) => {
+            setMode(value);
+          }}
+        >
           <TabsList>
             <TabsTrigger value="L/R">L/R</TabsTrigger>
             <TabsTrigger value="L+R">L+R</TabsTrigger>
@@ -63,24 +83,52 @@ export function SidebarMediaItem({ className, mediaFile }: SidebarMediaItemProps
           </TabsList>
         </Tabs>
       ) : (
-        <Tabs className="text-xs py-2" defaultValue="L+R" onValueChange={(value) => { setMode(value) }}>
+        <Tabs
+          className="text-xs py-2"
+          defaultValue="L+R"
+          onValueChange={(value) => {
+            setMode(value);
+          }}
+        >
           <TabsList>
-        <TabsTrigger value="L+R">Mono</TabsTrigger>
+            <TabsTrigger value="L+R">Mono</TabsTrigger>
           </TabsList>
         </Tabs>
       )}
-            <div className="flex items-center space-x-2">
-      <Switch id="set-primary" checked={isPrimary}      onCheckedChange={(event) => {
-        console.log(event);
-        updatePrimary(event);
-      }} />
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="set-primary"
+          checked={isPrimary}
+          onCheckedChange={(event) => {
+            console.log(event);
+            updatePrimary(event);
+          }}
+        />
 
-      <Label htmlFor="set-primary">Set Primary Media</Label>
-    </div>
+        <Label htmlFor="set-primary">Set Primary Media</Label>
+      </div>
       <Label className="py-2">Offset</Label>
-      <Input step="0.1" className={`py-2 ${offsetError ? "border-red-500" : "border-white"}`} type="number" defaultValue={mediaFile.offset} onChange={(event: any) => { updateOffset(event.target.value)}} />
+      <Input
+        step="0.1"
+        className={`py-2 ${offsetError ? "border-red-500" : "border-white"}`}
+        type="number"
+        defaultValue={mediaFile.offset}
+        onChange={(event: any) => {
+          updateOffset(event.target.value);
+        }}
+      />
       <Label className="py-2">Volume</Label>
-      <Slider style={{overflow: "visible"}} className="" defaultValue={[mediaFile.volume]} max={1} min={0} step={0.01} onValueChange={(volume: any) => {setVolume(volume[0])}} />
+      <Slider
+        style={{ overflow: "visible" }}
+        className=""
+        defaultValue={[mediaFile.volume]}
+        max={1}
+        min={0}
+        step={0.01}
+        onValueChange={(volume: any) => {
+          setVolume(volume[0]);
+        }}
+      />
     </Card>
   );
 }

@@ -177,7 +177,7 @@ const WaveformSettings: React.FC<{
                           );
                         },
                       )}
-                      <CommandItem
+                      {/* <CommandItem
                         key="L+R"
                         value="L+R"
                         onSelect={(currentValue) => {
@@ -194,6 +194,24 @@ const WaveformSettings: React.FC<{
                             "L+R" === channel
                               ? "opacity-100"
                               : "opacity-0",
+                          )}
+                        />
+                      </CommandItem> */}
+                      <CommandItem
+                        key="L/R"
+                        value="L/R"
+                        onSelect={(currentValue) => {
+                          setChannel(
+                            currentValue === channel ? "" : currentValue,
+                          );
+                          setChannelPopoverOpen(false);
+                        }}
+                      >
+                        {"L/R"}
+                        <Check
+                          className={cn(
+                            "ml-auto",
+                            "L/R" === channel ? "opacity-100" : "opacity-0",
                           )}
                         />
                       </CommandItem>

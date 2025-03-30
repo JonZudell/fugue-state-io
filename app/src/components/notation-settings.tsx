@@ -62,7 +62,9 @@ const NotationSettings: React.FC<{
     <>
       <div className="flex flex-col">
         <div className="flex space-x-4">
-          <p className="text-sm text-muted-foreground my-2 space-xl-4">ABC Notation</p>
+          <p className="text-sm text-muted-foreground my-2 space-xl-4">
+            ABC Notation
+          </p>
           <Popover open={mediaPopoverOpen} onOpenChange={setMediaPopoverOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -101,9 +103,7 @@ const NotationSettings: React.FC<{
                           <Check
                             className={cn(
                               "ml-auto",
-                              abcKey === abc.id
-                                ? "opacity-100"
-                                : "opacity-0",
+                              abcKey === abc.id ? "opacity-100" : "opacity-0",
                             )}
                           />
                         </CommandItem>

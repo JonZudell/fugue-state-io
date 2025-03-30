@@ -30,7 +30,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
     console.log("VideoDisplay useEffect");
     const video = videoRef.current;
     if (video) {
-      video.currentTime = timeElapsed -  media.offset;
+      video.currentTime = timeElapsed - media.offset;
       if (playing) {
         video.play();
       } else {
@@ -45,7 +45,6 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
       if (video) {
         video.currentTime = timeElapsed - media.offset;
       }
-
     }
   }, [timeElapsed, playing]);
 
@@ -75,7 +74,6 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
             autoPlay={false}
             loop={false}
             muted={true}
-          
             style={{
               width: "100%",
               height: "100%",

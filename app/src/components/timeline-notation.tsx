@@ -31,8 +31,7 @@ const TimelineNotationDisplay: React.FC<TimelineNotationDisplayProps> = ({
     if (!ctx) {
       return;
     }
-  }, [
-  ]);
+  }, []);
 
   return (
     <div style={{ position: "relative" }}>

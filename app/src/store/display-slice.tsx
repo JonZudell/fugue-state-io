@@ -184,7 +184,7 @@ const displaySlice = createSlice({
       action: PayloadAction<"display" | "timeline">,
     ) => {
       state.displayMode = action.payload;
-    }
+    },
   },
 });
 

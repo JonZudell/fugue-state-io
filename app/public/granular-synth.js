@@ -16,4 +16,4 @@ class MyProcessor extends AudioWorkletProcessor {
   }
 }
 
-registerProcessor('granular-synth', MyProcessor);
+registerProcessor("granular-synth", MyProcessor);

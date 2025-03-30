@@ -63,7 +63,7 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
   const { mediaFiles } = useSelector(selectProject) as Project;
   const { editor, root, displayMode } = useSelector(selectDisplay);
   const { state } = useSidebar();
-  
+
   const [panelGroupDimensions, setPanelGroupDimensions] = useState({
     width: 0,
     height: 0,
@@ -75,7 +75,14 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
 
   useEffect(() => {
     handleResize();
-  }, [panelRef.current, workerRef.current, topPanelRef.current, displayMode, sidebarRef.current, editor]);
+  }, [
+    panelRef.current,
+    workerRef.current,
+    topPanelRef.current,
+    displayMode,
+    sidebarRef.current,
+    editor,
+  ]);
 
   useEffect(() => {
     workerRef.current = new SummarizeWorker();
@@ -221,26 +228,34 @@ const AppRoot: React.FC<AppRootProps> = ({ setReady, hidden }) => {
                         height={minimapHeight}
                         width={panelGroupDimensions.width}
                       />
-                      {displayMode === 'display' &&<Display
-                        width={panelGroupDimensions.width}
-                        height={
-                          (topPanelDimensions.height *
-                            panelGroupDimensions.height) /
-                            100 -
-                          commandBarHeight -
-                          minimapHeight -
-                          playbackControlsHeight
-                        }
-                        node={root}
-                        parentNodeId={null}
-                      />}
-                      {displayMode === 'timeline' && 
-                      <TimelineDisplay width={panelGroupDimensions.width} height={(topPanelDimensions.height *
-                        panelGroupDimensions.height) /
-                        100 -
-                        commandBarHeight -
-                        minimapHeight -
-                        playbackControlsHeight}/>}
+                      {displayMode === "display" && (
+                        <Display
+                          width={panelGroupDimensions.width}
+                          height={
+                            (topPanelDimensions.height *
+                              panelGroupDimensions.height) /
+                              100 -
+                            commandBarHeight -
+                            minimapHeight -
+                            playbackControlsHeight
+                          }
+                          node={root}
+                          parentNodeId={null}
+                        />
+                      )}
+                      {displayMode === "timeline" && (
+                        <TimelineDisplay
+                          width={panelGroupDimensions.width}
+                          height={
+                            (topPanelDimensions.height *
+                              panelGroupDimensions.height) /
+                              100 -
+                            commandBarHeight -
+                            minimapHeight -
+                            playbackControlsHeight
+                          }
+                        />
+                      )}
                       <PlaybackControls
                         width={panelGroupDimensions.width}
                         height={playbackControlsHeight}

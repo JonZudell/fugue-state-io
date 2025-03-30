@@ -61,12 +61,12 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
       }
 
       const { summary } = media;
-      const summaryLength = summary.mono ? summary.mono.length : 0;
+      const summaryLength = summary["L+R"] ? summary["L+R"].length : 0;
       const startSample = Math.floor((startPercentage / 100) * summaryLength);
       const endSample = Math.floor((endPercentage / 100) * summaryLength);
       const samplesPerPixel = (endSample - startSample) / canvas.width;
-      const binsPerPixel = summary.mono
-        ? summary.mono[0].value.magnitudes.length / canvas.height
+      const binsPerPixel = summary["L+R"]
+        ? summary["L+R"][0].value.magnitudes.length / canvas.height
         : 0;
 
       const imageData = ctx.createImageData(canvas.width, canvas.height);
@@ -79,12 +79,12 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
           const binIndex = Math.floor((y * binsPerPixel) / 8);
 
           if (
-            summary.mono &&
-            summary.mono[sampleIndex].value &&
-            summary.mono[sampleIndex].value.magnitudes[binIndex] !== undefined
+            summary["L+R"] &&
+            summary["L+R"][sampleIndex].value &&
+            summary["L+R"][sampleIndex].value.magnitudes[binIndex] !== undefined
           ) {
             const magnitude =
-              summary.mono[sampleIndex].value.magnitudes[binIndex];
+              summary["L+R"][sampleIndex].value.magnitudes[binIndex];
             const index = (x + (canvas.height - y - 1) * canvas.width) * 4;
             data[index] = color[0];
             data[index + 1] = color[1];
@@ -135,7 +135,7 @@ const SpectrogramDisplay: React.FC<SpectrogramDisplayProps> = ({
   ]);
 
   useEffect(() => {
-    const length = media.summary.mono[0].value.magnitudes.length ?? 0;
+    const length = media.summary["L+R"][0].value.magnitudes.length ?? 0;
     const heightToLengthRatio = length / canvasRef.current?.height;
     frequencyRef.current = getFrequencyForBin(
       Math.floor(

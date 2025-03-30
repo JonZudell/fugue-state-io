@@ -180,26 +180,6 @@ const SpectrogramSettings: React.FC<{
                           );
                         },
                       )}
-                      <CommandItem
-                        key="left + right"
-                        value="left + right"
-                        onSelect={(currentValue) => {
-                          setChannel(
-                            currentValue === channel ? "" : currentValue,
-                          );
-                          setChannelPopoverOpen(false);
-                        }}
-                      >
-                        {"left + right"}
-                        <Check
-                          className={cn(
-                            "ml-auto",
-                            "left + right" === channel
-                              ? "opacity-100"
-                              : "opacity-0",
-                          )}
-                        />
-                      </CommandItem>
                     </CommandGroup>
                   </CommandList>
                 </Command>

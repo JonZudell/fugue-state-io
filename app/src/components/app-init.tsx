@@ -69,7 +69,7 @@ const AppInit: React.FC<AppInitProps> = ({ worker, className }) => {
           <CardTitle className="text-2xl text-center">fugue-state.io</CardTitle>
         </CardHeader>
         <CardContent>
-        <div className="flex items-center justify-center gap-2 text-xl">
+          <div className="flex items-center justify-center gap-2 text-xl">
             <p>Demo</p>
           </div>
           <div className="flex items-center justify-center gap-2 mt-6">

@@ -218,9 +218,19 @@ const ContextMenuDialog: React.FC<ContextMenuDialogProps> = ({
                         />
                       );
                     case "notation":
-                      return <NotationSettings nodeId={nodeId} initalAbcKey={abcKey} />;
+                      return (
+                        <NotationSettings
+                          nodeId={nodeId}
+                          initalAbcKey={abcKey}
+                        />
+                      );
                     case "video":
-                      return <VideoSettings nodeId={nodeId} initialMediaKey={mediaKey} />;
+                      return (
+                        <VideoSettings
+                          nodeId={nodeId}
+                          initialMediaKey={mediaKey}
+                        />
+                      );
                     case "fourier":
                       return (
                         <FourierSettings

@@ -61,7 +61,6 @@ const Minimap: React.FC<MinimapProps> = ({
       channelHeight: number,
       offset: number = 0,
     ) => {
-
       for (let i = 0; i < canvas.width; i++) {
         const startIndex = Math.floor(i * samplesPerPixel + startSample);
         const endIndex =

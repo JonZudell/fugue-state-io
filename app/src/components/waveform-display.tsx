@@ -135,7 +135,7 @@ const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
             const startIndex = Math.floor(i * samplesPerPixel + startSample);
             const endIndex =
               Math.floor((i + 1) * samplesPerPixel) + startSample + 1;
-            const monoSlice = summary['L+R'].slice(startIndex, endIndex);
+            const monoSlice = summary["L+R"].slice(startIndex, endIndex);
             const monoMin = Math.min(
               ...monoSlice.map((frame) => frame.value.min),
             );

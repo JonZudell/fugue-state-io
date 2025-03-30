@@ -34,12 +34,26 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const dispatch = useDispatch();
   const { editor } = useSelector(selectDisplay);
   const { mediaFiles } = useSelector(selectProject);
-  const { playing, looping, timeElapsed, timelineDuration, volume, loopStart, loopEnd, speed, audioContext, gainTrigger  } =
-    useSelector(selectPlayback);
-  const gains = useSelector(selectMediaGainMap)
-  const sources = useRef(new Map<string, AudioBufferSourceNode & { offset: number }>());
-  const videoRefs = useRef(new Map<string, React.RefObject<HTMLVideoElement>>());
-  const {primarySourceId} = useSelector(selectPlayback);
+  const {
+    playing,
+    looping,
+    timeElapsed,
+    timelineDuration,
+    volume,
+    loopStart,
+    loopEnd,
+    speed,
+    audioContext,
+    gainTrigger,
+  } = useSelector(selectPlayback);
+  const gains = useSelector(selectMediaGainMap);
+  const sources = useRef(
+    new Map<string, AudioBufferSourceNode & { offset: number }>(),
+  );
+  const videoRefs = useRef(
+    new Map<string, React.RefObject<HTMLVideoElement>>(),
+  );
+  const { primarySourceId } = useSelector(selectPlayback);
   const gainNode = useRef(audioContext.createGain());
   const workletNode = useRef<AudioWorkletNode | null>(null);
   const destination = useRef(audioContext.destination);
@@ -73,8 +87,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   }, [gains]);
   useEffect(() => {
     const setUpAudioWorklet = async () => {
-      await audioContext.audioWorklet.addModule('phase-vocoder.js');
-      workletNode.current = new AudioWorkletNode(audioContext, 'phase-vocoder');
+      await audioContext.audioWorklet.addModule("phase-vocoder.js");
+      workletNode.current = new AudioWorkletNode(audioContext, "phase-vocoder");
     };
     setUpAudioWorklet();
 
@@ -83,7 +97,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     }
 
     const interval = setInterval(() => {
-
       if (initialized.current) {
         videoRefs.current.forEach((videoRef) => {
           const video = videoRef.current;
@@ -92,8 +105,11 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           }
         });
         if (playingRef.current) {
-          timeRef.current = timeRef.current + (0.05 * speedRef.current);
-          if (looping && timeRef.current >= loopEnd * timelineDurationRef.current) {
+          timeRef.current = timeRef.current + 0.05 * speedRef.current;
+          if (
+            looping &&
+            timeRef.current >= loopEnd * timelineDurationRef.current
+          ) {
             stopAllVideos();
             timeRef.current = loopStart * timelineDurationRef.current;
             startAllVideos();
@@ -103,7 +119,6 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             timeRef.current = loopStart * timelineDurationRef.current;
           }
           dispatch(setTimeElapsed(timeRef.current));
-
         }
       } else {
         if (workletNode.current) {
@@ -115,7 +130,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     }, 50);
     return () => {
       clearInterval(interval);
-    }
+    };
   }, []);
 
   // useEffect(() => {
@@ -136,8 +151,8 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   useEffect(() => {
     if (!playing) {
       timeRef.current = timeElapsed;
-    } 
-  }, [playing, timeElapsed])
+    }
+  }, [playing, timeElapsed]);
   useEffect(() => {
     playingRef.current = playing;
   }, [playing]);
@@ -185,7 +200,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     workletNode.current.connect(gainNode.current);
     gainNode.current.connect(destination.current);
     initialized.current = true;
-  }
+  };
   const stopAllVideos = () => {
     for (const video of videoRefs.current.values()) {
       video.current?.pause();
@@ -193,7 +208,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     for (const timeout of timeouts.current) {
       clearTimeout(timeout);
     }
-  }
+  };
   const startAllVideos = () => {
     // scenario 1:
     //  time = 0
@@ -208,7 +223,7 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     //  video1 offset = 0 duration 60 -- start 50ms from function call at time 10
     //  video2 offset = -15 duration 30 -- start 50ms from function call at time 25
     //  video3 offset = 10 duration 20 -- start 50ms from function call at time 0
-    
+
     const startTime = Date.now() + 50;
     for (const media of Object.values(mediaFiles)) {
       const video = videoRefs.current.get(media.id)?.current;
@@ -218,20 +233,29 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       if (timeRef.current >= media.offset) {
         video.currentTime = timeRef.current - media.offset;
         video.playbackRate = speed;
-        timeouts.current.push(setTimeout(() => {
-          if (video.currentTime !== media.duration) {
-            video.play();
-          }
-        }, Date.now() - startTime));
+        timeouts.current.push(
+          setTimeout(() => {
+            if (video.currentTime !== media.duration) {
+              video.play();
+            }
+          }, Date.now() - startTime),
+        );
       } else {
         video.currentTime = 0;
         video.playbackRate = speed;
-        timeouts.current.push(setTimeout(() => {
-          video.play();
-        }, (Date.now() - startTime) + (((media.offset - timeRef.current) * 1000)) / speed));
+        timeouts.current.push(
+          setTimeout(
+            () => {
+              video.play();
+            },
+            Date.now() -
+              startTime +
+              ((media.offset - timeRef.current) * 1000) / speed,
+          ),
+        );
       }
     }
-  }
+  };
 
   const handleSpanSliderChange = (start: number, finish: number) => {
     dispatch(setLoopStart(start));
@@ -260,7 +284,9 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           <div className="flex">
             <button
               className="mx-1"
-              onClick={() => {dispatch(setPlaying(!playing));}}
+              onClick={() => {
+                dispatch(setPlaying(!playing));
+              }}
               disabled={!enabled}
               draggable="false"
             >
@@ -286,10 +312,15 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <SpeedSelector className="mx-1" enabled={enabled} />
             <div className="flex items-center">
               <span style={{ userSelect: "none" }} className="my-2 mx-4">
-                {timeElapsed >= 0 ? new Date(timeElapsed * 1000).toISOString().substr(12, 7) : "invalid"} / -
-                {timelineDuration - timeElapsed >= 0 ? new Date((timelineDuration - timeElapsed) * 1000)
-                  .toISOString()
-                  .substr(12, 7) : "invalid"}
+                {timeElapsed >= 0
+                  ? new Date(timeElapsed * 1000).toISOString().substr(12, 7)
+                  : "invalid"}{" "}
+                / -
+                {timelineDuration - timeElapsed >= 0
+                  ? new Date((timelineDuration - timeElapsed) * 1000)
+                      .toISOString()
+                      .substr(12, 7)
+                  : "invalid"}
               </span>
             </div>
           </div>
@@ -310,16 +341,15 @@ const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           </button>
         </div>
       </div>
-      {Object.values(mediaFiles).map((mediaFile) => 
+      {Object.values(mediaFiles).map((mediaFile) => (
         <video
           key={mediaFile.id}
           ref={videoRefs.current.get(mediaFile.id)}
           style={{ display: "none" }}
         >
-          <source src={mediaFile.url} type={mediaFile.fileType}/>
+          <source src={mediaFile.url} type={mediaFile.fileType} />
         </video>
-        
-      )}
+      ))}
     </>
   );
 };

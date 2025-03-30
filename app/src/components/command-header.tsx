@@ -1,6 +1,11 @@
 "use client";
 import { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { Command, CommandGroup, CommandItem, CommandShortcut } from "@/components/ui/command-header";
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandShortcut,
+} from "@/components/ui/command-header";
 import { Command as CommandPrimitive } from "cmdk";
 import { ABCAsset, addAbc } from "@/store/project-slice";
 import { useDispatch } from "react-redux";
@@ -32,17 +37,17 @@ const CommandHeader: React.FC<CommandDialogProps> = ({
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
-    const handleNewFile = (name?: string) => {
-      commandRef.current.value = "";
-      const abc: ABCAsset = {
-        name: name || "untitled.abc",
-        abc: "",
-        id: uuidv4(),
-        timingCallback: null,
-        characterSelection: null,
-      };
-      dispatch(addAbc(abc));
+  const handleNewFile = (name?: string) => {
+    commandRef.current.value = "";
+    const abc: ABCAsset = {
+      name: name || "untitled.abc",
+      abc: "",
+      id: uuidv4(),
+      timingCallback: null,
+      characterSelection: null,
     };
+    dispatch(addAbc(abc));
+  };
   return (
     <>
       <Command
@@ -56,12 +61,17 @@ const CommandHeader: React.FC<CommandDialogProps> = ({
         setHovered={setHovered}
       >
         <CommandGroup heading={""}>
-          <CommandItem onSelect={(value) => {handleNewFile(); setOpen(false);}}>
+          <CommandItem
+            onSelect={(value) => {
+              handleNewFile();
+              setOpen(false);
+            }}
+          >
             New File
             <CommandShortcut>CTRL + N</CommandShortcut>
           </CommandItem>
         </CommandGroup>
-        </Command>
+      </Command>
       <div style={{ height, width }}></div>
     </>
   );

@@ -25,7 +25,7 @@ interface FourierDisplayProps {
 }
 
 const FourierDisplay: React.FC<FourierDisplayProps> = ({
-  channel = "LR",
+  channel = "L/R",
   width,
   height,
   crosshair = true,
@@ -93,11 +93,11 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         }
 
         const { summary } = media;
-        if (channel === "left + right" && summary.left && summary.right) {
+        if (channel === "L/R" && summary["L"] && summary["R"]) {
           drawFourier(
             ctx,
             canvas,
-            summary.left,
+            summary["L"],
             timeElapsed,
             canvas.height / 2,
           );
@@ -105,7 +105,7 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
           drawFourier(
             ctx,
             canvas,
-            summary.right,
+            summary["L"],
             timeElapsed,
             canvas.height / 2,
             canvas.height / 2,
@@ -116,38 +116,14 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
           ctx.moveTo(0, canvas.height / 2);
           ctx.lineTo(canvas.width, canvas.height / 2);
           ctx.stroke();
-        } else if (channel === "mono" && summary.mono) {
-          drawFourier(
-            ctx,
-            canvas,
-            summary.mono,
-            timeElapsed,
-            canvas.height,
-          );
-        } else if (channel === "side" && summary.side) {
-          drawFourier(
-            ctx,
-            canvas,
-            summary.side,
-            timeElapsed,
-            canvas.height,
-          );
-        } else if (channel === "left" && summary.left) {
-          drawFourier(
-            ctx,
-            canvas,
-            summary.left,
-            timeElapsed,
-            canvas.height,
-          );
-        } else if (channel === "right" && summary.right) {
-          drawFourier(
-            ctx,
-            canvas,
-            summary.right,
-            timeElapsed,
-            canvas.height,
-          );
+        } else if (channel === "L+R" && summary["L+R"]) {
+          drawFourier(ctx, canvas, summary["L+R"], timeElapsed, canvas.height);
+        } else if (channel === "L-R" && summary["L-R"]) {
+          drawFourier(ctx, canvas, summary["L-R"], timeElapsed, canvas.height);
+        } else if (channel === "left" && summary["L"]) {
+          drawFourier(ctx, canvas, summary["L"], timeElapsed, canvas.height);
+        } else if (channel === "right" && summary["R"]) {
+          drawFourier(ctx, canvas, summary["R"], timeElapsed, canvas.height);
         }
       }
     };
@@ -191,29 +167,25 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
       if (!ctx) {
         return;
       }
-      if (
-        channel === "left + right" &&
-        media.summary.left &&
-        media.summary.right
-      ) {
+      if (channel === "L/R" && media.summary["L"] && media.summary["R"]) {
         const { summary } = media;
-        const summaryLength = summary.mono ? summary.mono.length : 0;
+        const summaryLength = summary["L+R"] ? summary["L+R"].length : 0;
         const startSample = 0;
         const endSample = summaryLength;
         const topSample = Math.floor(
           (cursorPosition / canvas.width) * (endSample - startSample),
         );
-        const topBin = summary.left
+        const topBin = summary["L"]
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.left[0].value.magnitudes.length) /
+                summary["L"][0].value.magnitudes.length) /
                 8,
             )
           : 0;
         const topFrequency = getFrequencyForBin(topBin);
         const topNote = getNoteForFrequency(topFrequency);
-        const topMagnitude = summary.left
-          ? summary.left[startSample + topSample].value.magnitudes[topBin]
+        const topMagnitude = summary["L"]
+          ? summary["L"][startSample + topSample].value.magnitudes[topBin]
           : 0;
         setTopInfoString(
           `Frequency: ${topFrequency.toFixed(2)}Hz, Note: ${topNote}, Magnitude: ${topMagnitude.toFixed(2)}`,
@@ -221,119 +193,117 @@ const FourierDisplay: React.FC<FourierDisplayProps> = ({
         const bottomSample = Math.floor(
           (cursorPosition / canvas.width) * (endSample - startSample),
         );
-        const bottomBin = summary.right
+        const bottomBin = summary["R"]
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.right[0].value.magnitudes.length) /
+                summary["R"][0].value.magnitudes.length) /
                 8,
             )
           : 0;
         const bottomFrequency = getFrequencyForBin(bottomBin);
         const bottomNote = getNoteForFrequency(bottomFrequency);
-        const bottomMagnitude = summary.right
-          ? summary.right[startSample + bottomSample].value.magnitudes[
-              bottomBin
-            ]
+        const bottomMagnitude = summary["R"]
+          ? summary["R"][startSample + bottomSample].value.magnitudes[bottomBin]
           : 0;
         setBottomInfoString(
           `Frequency: ${bottomFrequency.toFixed(2)}Hz, Note: ${bottomNote}, Magnitude: ${bottomMagnitude.toFixed(2)}`,
         );
-      } else if (channel === "mono" && media.summary.mono) {
+      } else if (channel === "mono" && media.summary["L+R"]) {
         const { summary } = media;
-        const summaryLength = summary.mono ? summary.mono.length : 0;
+        const summaryLength = summary["L+R"] ? summary["L+R"].length : 0;
         const startSample = Math.floor((0 / 100) * summaryLength);
         const endSample = Math.floor((100 / 100) * summaryLength);
         const x = cursorPosition;
         const xSample = Math.floor(
           (x / canvas.width) * (endSample - startSample),
         );
-        const bin = summary.mono
+        const bin = summary["L+R"]
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.mono[0].value.magnitudes.length) /
+                summary["L+R"][0].value.magnitudes.length) /
                 8,
             )
           : 0;
         const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
         const time = (xSample / media.sampleRate).toFixed(2);
-        const magnitude = summary.mono
-          ? summary.mono[startSample + xSample].value.magnitudes[bin]
+        const magnitude = summary["L+R"]
+          ? summary["L+R"][startSample + xSample].value.magnitudes[bin]
           : 0;
         setTopInfoString(
           `Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
         );
-      } else if (channel === "side" && media.summary.side) {
+      } else if (channel === "side" && media.summary["L-R"]) {
         const { summary } = media;
-        const summaryLength = summary.side ? summary.side.length : 0;
+        const summaryLength = summary["L-R"] ? summary["L-R"].length : 0;
         const startSample = Math.floor((0 / 100) * summaryLength);
         const endSample = Math.floor((100 / 100) * summaryLength);
         const x = cursorPosition;
         const xSample = Math.floor(
           (x / canvas.width) * (endSample - startSample),
         );
-        const bin = summary.side
+        const bin = summary["L-R"]
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.side[0].value.magnitudes.length) /
+                summary["L-R"][0].value.magnitudes.length) /
                 8,
             )
           : 0;
         const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
         const time = (xSample / media.sampleRate).toFixed(2);
-        const magnitude = summary.side
-          ? summary.side[startSample + xSample].value.magnitudes[bin]
+        const magnitude = summary["L-R"]
+          ? summary["L-R"][startSample + xSample].value.magnitudes[bin]
           : 0;
         setTopInfoString(
           `Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
         );
-      }else if (channel === "left" && media.summary.left) {
+      } else if (channel === "left" && media.summary["L"]) {
         const { summary } = media;
-        const summaryLength = summary.left ? summary.left.length : 0;
+        const summaryLength = summary["L"] ? summary["L"].length : 0;
         const startSample = Math.floor((0 / 100) * summaryLength);
         const endSample = Math.floor((100 / 100) * summaryLength);
         const x = cursorPosition;
         const xSample = Math.floor(
           (x / canvas.width) * (endSample - startSample),
         );
-        const bin = summary.left
+        const bin = summary["L"]
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.left[0].value.magnitudes.length) /
+                summary["L"][0].value.magnitudes.length) /
                 8,
             )
           : 0;
         const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
         const time = (xSample / media.sampleRate).toFixed(2);
-        const magnitude = summary.left
-          ? summary.left[startSample + xSample].value.magnitudes[bin]
+        const magnitude = summary["L"]
+          ? summary["L"][startSample + xSample].value.magnitudes[bin]
           : 0;
         setTopInfoString(
           `Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,
         );
-      }else if (channel === "right" && media.summary.right) {
+      } else if (channel === "right" && media.summary["R"]) {
         const { summary } = media;
-        const summaryLength = summary.right ? summary.side.length : 0;
+        const summaryLength = summary["R"] ? summary["L-R"].length : 0;
         const startSample = Math.floor((0 / 100) * summaryLength);
         const endSample = Math.floor((100 / 100) * summaryLength);
         const x = cursorPosition;
         const xSample = Math.floor(
           (x / canvas.width) * (endSample - startSample),
         );
-        const bin = summary.right
+        const bin = summary["R"]
           ? Math.floor(
               ((cursorPosition / canvas.width) *
-                summary.right[0].value.magnitudes.length) /
+                summary["R"][0].value.magnitudes.length) /
                 8,
             )
           : 0;
         const frequency = getFrequencyForBin(bin);
         const note = getNoteForFrequency(frequency);
         const time = (xSample / media.sampleRate).toFixed(2);
-        const magnitude = summary.right
-          ? summary.right[startSample + xSample].value.magnitudes[bin]
+        const magnitude = summary["R"]
+          ? summary["R"][startSample + xSample].value.magnitudes[bin]
           : 0;
         setTopInfoString(
           `Frequency: ${frequency.toFixed(2)}Hz, Note: ${note}, Magnitude: ${magnitude.toFixed(2)}`,

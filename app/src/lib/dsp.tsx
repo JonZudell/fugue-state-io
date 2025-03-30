@@ -20,8 +20,8 @@ export type SummarizedFrame = {
 
 export type Channels = {
   "L+R"?: SummarizedFrame[] | null;
-  "L"?: SummarizedFrame[] | null;
-  "R"?: SummarizedFrame[] | null;
+  L?: SummarizedFrame[] | null;
+  R?: SummarizedFrame[] | null;
   "L-R"?: SummarizedFrame[] | null;
 };
 function applyWindowFunction(data: number[], windowType: string): number[] {

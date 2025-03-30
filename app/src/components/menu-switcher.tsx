@@ -24,17 +24,17 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
 const menus = {
-  "timeline":{
+  timeline: {
     id: "timeline",
     name: "Timeline Settings",
     logo: GalleryVerticalEnd,
   },
-  "display":{
+  display: {
     id: "display",
     name: "Display Settings",
     logo: GalleryVerticalEnd,
   },
-}
+};
 export function MenuSwitcher() {
   const dispatch = useDispatch();
   const { isMobile } = useSidebar();
@@ -75,7 +75,7 @@ export function MenuSwitcher() {
             {Object.values(menus).map((menu, index) => (
               <DropdownMenuItem
                 key={menu.name}
-                onClick={() =>  dispatch(setDisplayMode(menu.id))}
+                onClick={() => dispatch(setDisplayMode(menu.id))}
                 className="gap-2 p-2"
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border">
